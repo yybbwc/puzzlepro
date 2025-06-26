@@ -1,0 +1,23 @@
+
+--~ local target_name = "irr-playground-micha"
+--~ local dir_path = os.scriptdir() .. "/" .. target_name .. "/"
+--~ target(target_name)
+--~ do
+  --~ set_kind("binary")
+  --~ do
+    --~ local k1 = {}
+    --~ k1[#k1 + 1] = "irrlicht"
+    --~ k1[#k1 + 1] = "freetype"
+    --~ for i = 1, #k1 do
+      --~ add_deps(k1[i])
+    --~ end
+  --~ end
+  --~ do
+    --~ local k1 = {}
+    --~ k1[#k1 + 1] = dir_path .. "ttf.cpp"
+    --~ k1[#k1 + 1] = dir_path .. "CGUITTFont.cpp"
+    --~ for i = 1, #k1 do
+      --~ add_files(k1[i])
+    --~ end
+  --~ end
+--~ end
