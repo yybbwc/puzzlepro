@@ -1,0 +1,92 @@
+
+#pragma once
+
+//~ #ifndef REPLAY_H
+//~ #define REPLAY_H
+
+namespace ygo {
+
+// replay flag
+#define REPLAY_COMPRESSED 0x1
+#define REPLAY_TAG 0x2
+#define REPLAY_DECODED 0x4
+#define REPLAY_SINGLE_MODE 0x8
+#define REPLAY_UNIFORM 0x10
+
+  // max size
+  constexpr int MAX_REPLAY_SIZE = 0x40000;
+  constexpr int MAX_COMP_SIZE = UINT16_MAX + 1;
+
+  struct ReplayHeader {
+    unsigned int id{};
+    unsigned int version{};
+    unsigned int flag{};
+    unsigned int seed{};
+    unsigned int datasize{};
+    unsigned int start_time{};
+    unsigned char props[8]{};
+  };
+
+  class Replay {
+
+  public:
+    Replay();
+    ~Replay();
+
+    // record
+    void BeginRecord();
+    void WriteHeader(ReplayHeader &header);
+    void WriteData(const void *data, size_t length);
+
+    template <typename T> void Write(T data) {
+      WriteData(&data, sizeof(T));
+    }
+
+    void EndRecord();
+    void SaveReplay(const wchar_t *name);
+
+    // play
+    bool OpenReplay(const wchar_t *name);
+    bool ReadNextResponse(unsigned char resp[]);
+    bool ReadName(wchar_t *data);
+    void ReadHeader(ReplayHeader &header);
+    bool ReadData(void *data, size_t length);
+
+    template <typename T> T Read() {
+      T ret{};
+      ReadData(&ret, sizeof(T));
+      return ret;
+    }
+
+    void Rewind();
+
+    FILE *fp{nullptr};
+#ifdef _WIN32
+    HANDLE recording_fp{nullptr};
+#endif
+
+    ReplayHeader pheader;
+    unsigned char *comp_data;
+    size_t comp_size{};
+
+    //~ template <typename T>
+    //~ void write_replay_head(fast_io::obuf_file& file, const T& data) {
+    //~ using std::byte;
+    //~ write_all_bytes(
+    //~ file,
+    //~ reinterpret_cast<const byte*>(&data),
+    //~ reinterpret_cast<const byte*>(&data + 1)
+    //~ );
+    //~ }
+
+  private:
+    unsigned char *replay_data;
+    size_t replay_size{};
+    size_t data_position{};
+    bool is_recording{};
+    bool is_replaying{};
+  };
+
+} // namespace ygo
+
+//~ #endif

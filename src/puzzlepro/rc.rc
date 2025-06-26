@@ -1,0 +1,27 @@
+1 ICON "rc.ico"  // 图标文件从 ygopro.ico 改为 puzzlepro.ico
+
+1 VERSIONINFO
+FILEVERSION 2025, 05, 19, 0    // 文件版本号（主版本.次版本.修订号.构建号）
+PRODUCTVERSION 2025, 05, 19, 0  // 产品版本号（同上）
+FILEOS 0x4       // 目标操作系统：Windows 32位（VOS_NT_WINDOWS32）
+FILETYPE 0x1     // 文件类型：应用程序（VFT_APP）
+
+BEGIN
+BLOCK "StringFileInfo"  // 字符串信息块
+BEGIN
+BLOCK "080404b0"  // 语言ID：0x0804（简体中文） + 代码页1200（Unicode）
+BEGIN
+VALUE "FileDescription", "PuzzlePro"  // 文件描述（原YGOPro）
+VALUE "InternalName", "PuzzlePro"     // 内部名称（原YGOPro）
+VALUE "LegalCopyright", "Copyright (C) 2025 Fluorohydride"  // 版权信息（未改动）
+VALUE "OriginalFilename", "PuzzlePro.exe"  // 原始文件名（原YGOPro.exe）
+VALUE "ProductName", "PuzzlePro"      // 产品名称（原YGOPro）
+VALUE "FileVersion", "2025.05.19"        // 文件版本（字符串格式）
+VALUE "ProductVersion", "v2025.05.19"     // 产品版本（字符串格式）
+END
+END
+BLOCK "VarFileInfo"  // 变量信息块
+BEGIN
+VALUE "Translation", 0x804, 1200  // 语言：简体中文（0x0804）+ Unicode（1200）
+END
+END
