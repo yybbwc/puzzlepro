@@ -21,52 +21,52 @@ namespace ygo {
       glDisable(GL_LINE_STIPPLE);
       glEnable(GL_TEXTURE_2D);
     }
-    else {
-      driver->setMaterial(matManager.mOutLine);
-      if (strip) {
-        if (linePatternD3D < 15) {
-          driver->draw3DLine(vec[0].Pos, vec[0].Pos + (vec[1].Pos - vec[0].Pos) * (linePatternD3D + 1) / 15.0);
-          driver->draw3DLine(vec[1].Pos, vec[1].Pos + (vec[3].Pos - vec[1].Pos) * (linePatternD3D + 1) / 15.0);
-          driver->draw3DLine(vec[3].Pos, vec[3].Pos + (vec[2].Pos - vec[3].Pos) * (linePatternD3D + 1) / 15.0);
-          driver->draw3DLine(vec[2].Pos, vec[2].Pos + (vec[0].Pos - vec[2].Pos) * (linePatternD3D + 1) / 15.0);
-        }
-        else {
-          driver->draw3DLine(vec[0].Pos + (vec[1].Pos - vec[0].Pos) * (linePatternD3D - 14) / 15.0, vec[1].Pos);
-          driver->draw3DLine(vec[1].Pos + (vec[3].Pos - vec[1].Pos) * (linePatternD3D - 14) / 15.0, vec[3].Pos);
-          driver->draw3DLine(vec[3].Pos + (vec[2].Pos - vec[3].Pos) * (linePatternD3D - 14) / 15.0, vec[2].Pos);
-          driver->draw3DLine(vec[2].Pos + (vec[0].Pos - vec[2].Pos) * (linePatternD3D - 14) / 15.0, vec[0].Pos);
-        }
-      }
-      else {
-        driver->draw3DLine(vec[0].Pos, vec[1].Pos);
-        driver->draw3DLine(vec[1].Pos, vec[3].Pos);
-        driver->draw3DLine(vec[3].Pos, vec[2].Pos);
-        driver->draw3DLine(vec[2].Pos, vec[0].Pos);
-      }
-    }
+    //~ else {
+    //~ driver->setMaterial(matManager.mOutLine);
+    //~ if (strip) {
+    //~ if (linePatternD3D < 15) {
+    //~ driver->draw3DLine(vec[0].Pos, vec[0].Pos + (vec[1].Pos - vec[0].Pos) * (linePatternD3D + 1) / 15.0);
+    //~ driver->draw3DLine(vec[1].Pos, vec[1].Pos + (vec[3].Pos - vec[1].Pos) * (linePatternD3D + 1) / 15.0);
+    //~ driver->draw3DLine(vec[3].Pos, vec[3].Pos + (vec[2].Pos - vec[3].Pos) * (linePatternD3D + 1) / 15.0);
+    //~ driver->draw3DLine(vec[2].Pos, vec[2].Pos + (vec[0].Pos - vec[2].Pos) * (linePatternD3D + 1) / 15.0);
+    //~ }
+    //~ else {
+    //~ driver->draw3DLine(vec[0].Pos + (vec[1].Pos - vec[0].Pos) * (linePatternD3D - 14) / 15.0, vec[1].Pos);
+    //~ driver->draw3DLine(vec[1].Pos + (vec[3].Pos - vec[1].Pos) * (linePatternD3D - 14) / 15.0, vec[3].Pos);
+    //~ driver->draw3DLine(vec[3].Pos + (vec[2].Pos - vec[3].Pos) * (linePatternD3D - 14) / 15.0, vec[2].Pos);
+    //~ driver->draw3DLine(vec[2].Pos + (vec[0].Pos - vec[2].Pos) * (linePatternD3D - 14) / 15.0, vec[0].Pos);
+    //~ }
+    //~ }
+    //~ else {
+    //~ driver->draw3DLine(vec[0].Pos, vec[1].Pos);
+    //~ driver->draw3DLine(vec[1].Pos, vec[3].Pos);
+    //~ driver->draw3DLine(vec[3].Pos, vec[2].Pos);
+    //~ driver->draw3DLine(vec[2].Pos, vec[0].Pos);
+    //~ }
+    //~ }
   }
 
-  void Game::DrawSelectionLine(irr::gui::IGUIElement *element, int width, irr::video::SColor color) {
-    irr::core::recti pos = element->getAbsolutePosition();
-    float x1 = pos.UpperLeftCorner.X;
-    float x2 = pos.LowerRightCorner.X;
-    float y1 = pos.UpperLeftCorner.Y;
-    float y2 = pos.LowerRightCorner.Y;
-    float w = pos.getWidth();
-    float h = pos.getHeight();
-    if (linePatternD3D < 15) {
-      driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y1 - 1 - width, x1 + (w * (linePatternD3D + 1) / 15.0) + 1 + width, y1 - 1));
-      driver->draw2DRectangle(color, irr::core::recti(x2 - (w * (linePatternD3D + 1) / 15.0) - 1 - width, y2 + 1, x2 + 1 + width, y2 + 1 + width));
-      driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y1 - 1 - width, x1 - 1, y2 - (h * (linePatternD3D + 1) / 15.0) + 1 + width));
-      driver->draw2DRectangle(color, irr::core::recti(x2 + 1, y1 + (h * (linePatternD3D + 1) / 15.0) - 1 - width, x2 + 1 + width, y2 + 1 + width));
-    }
-    else {
-      driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width + (w * (linePatternD3D - 14) / 15.0), y1 - 1 - width, x2 + 1 + width, y1 - 1));
-      driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y2 + 1, x2 - (w * (linePatternD3D - 14) / 15.0) + 1 + width, y2 + 1 + width));
-      driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y2 - (h * (linePatternD3D - 14) / 15.0) - 1 - width, x1 - 1, y2 + 1 + width));
-      driver->draw2DRectangle(color, irr::core::recti(x2 + 1, y1 - 1 - width, x2 + 1 + width, y1 + (h * (linePatternD3D - 14) / 15.0) + 1 + width));
-    }
-  }
+  //~ void Game::DrawSelectionLine(irr::gui::IGUIElement *element, int width, irr::video::SColor color) {
+  //~ irr::core::recti pos = element->getAbsolutePosition();
+  //~ float x1 = pos.UpperLeftCorner.X;
+  //~ float x2 = pos.LowerRightCorner.X;
+  //~ float y1 = pos.UpperLeftCorner.Y;
+  //~ float y2 = pos.LowerRightCorner.Y;
+  //~ float w = pos.getWidth();
+  //~ float h = pos.getHeight();
+  //~ if (linePatternD3D < 15) {
+  //~ driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y1 - 1 - width, x1 + (w * (linePatternD3D + 1) / 15.0) + 1 + width, y1 - 1));
+  //~ driver->draw2DRectangle(color, irr::core::recti(x2 - (w * (linePatternD3D + 1) / 15.0) - 1 - width, y2 + 1, x2 + 1 + width, y2 + 1 + width));
+  //~ driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y1 - 1 - width, x1 - 1, y2 - (h * (linePatternD3D + 1) / 15.0) + 1 + width));
+  //~ driver->draw2DRectangle(color, irr::core::recti(x2 + 1, y1 + (h * (linePatternD3D + 1) / 15.0) - 1 - width, x2 + 1 + width, y2 + 1 + width));
+  //~ }
+  //~ else {
+  //~ driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width + (w * (linePatternD3D - 14) / 15.0), y1 - 1 - width, x2 + 1 + width, y1 - 1));
+  //~ driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y2 + 1, x2 - (w * (linePatternD3D - 14) / 15.0) + 1 + width, y2 + 1 + width));
+  //~ driver->draw2DRectangle(color, irr::core::recti(x1 - 1 - width, y2 - (h * (linePatternD3D - 14) / 15.0) - 1 - width, x1 - 1, y2 + 1 + width));
+  //~ driver->draw2DRectangle(color, irr::core::recti(x2 + 1, y1 - 1 - width, x2 + 1 + width, y1 + (h * (linePatternD3D - 14) / 15.0) + 1 + width));
+  //~ }
+  //~ }
 
   void Game::DrawBackGround() {
     static int selFieldAlpha = 255;
@@ -313,12 +313,12 @@ namespace ygo {
       }
     }
     for (int p = 0; p < 2; ++p) {
-      for (auto &i : dField.mzone[p]) {
+      for (auto &i : dField.szone[p]) {
         if (i) {
           DrawCard(i);
         }
       }
-      for (auto &i : dField.szone[p]) {
+      for (auto &i : dField.mzone[p]) {
         if (i) {
           DrawCard(i);
         }
@@ -524,12 +524,12 @@ namespace ygo {
       driver->drawVertexPrimitiveList(matManager.vNegate, 4, matManager.iRectangle, 2);
     }
     // finish button
-    if (btnCancelOrFinish->isVisible() && dField.select_ready) {
-      DrawSelectionLine(btnCancelOrFinish, 2, 0xffffff00);
-    }
-    if (btnLeaveGame->isVisible() && dField.tag_teammate_surrender) {
-      DrawSelectionLine(btnLeaveGame, 2, 0xffffff00);
-    }
+    //~ if (btnCancelOrFinish->isVisible() && dField.select_ready) {
+    //~ DrawSelectionLine(btnCancelOrFinish, 2, 0xffffff00);
+    //~ }
+    //~ if (btnLeaveGame->isVisible() && dField.tag_teammate_surrender) {
+    //~ DrawSelectionLine(btnLeaveGame, 2, 0xffffff00);
+    //~ }
     // lp bar
     if ((dInfo.turn % 2 && dInfo.isFirst) || (!(dInfo.turn % 2) && !dInfo.isFirst)) {
       driver->draw2DRectangle(0xa0000000, Resize(327, 8, 630, 51));
@@ -1122,6 +1122,7 @@ namespace ygo {
   irr::core::rect<int32_t> Game::draw_gradient_background_size_text(irr::gui::IGUIElement *o1, const char *o2, int64_t o3, const wchar_t *o4) {
     auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
     fast_io::wstring wstr = fast_io::wconcat_fast_io(L" ", fast_io::mnp::os_c_str(dataManager.GetSysString(o3)), fast_io::mnp::os_c_str(o4), L" ");
+    //~ fast_io::io::perr(fast_io::mnp::code_cvt(wstr), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__, "\n");
     o1->setText(wstr.c_str());
     auto wh = guiFont->getDimension(wstr.c_str());
     auto rp = ResizeWin(gui_xy[o2]["x1"], gui_xy[o2]["y1"], gui_xy[o2]["x2"], gui_xy[o2]["y2"]);
@@ -1134,81 +1135,17 @@ namespace ygo {
   void Game::DrawDeckBd() {
     auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "color");
     auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "skin");
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
     int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
     int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
     int64_t gui_color_gradient_left_down = gui_color["gradient"]["left_down"];
     int64_t gui_color_gradient_right_down = gui_color["gradient"]["right_down"];
-    irr::core::rect<int32_t> rp;
     wchar_t textBuffer[64];
-    fast_io::wstring wstr;
-    // main deck
-    int main_deck_card_count = deckManager.current_deck.main.size();
-    rp = draw_gradient_background_size_text(static_text_deck_edit_main_deck_size, (deckBuilder.showing_pack ? "gradient_background_main_deck_pack" : "gradient_background_main_deck"), (deckBuilder.showing_pack ? 1477 : 1330), dataManager.GetNumString(main_deck_card_count).c_str());
-    driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
-    int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
-    int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
-    int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
-    int64_t gradient_background_main_deck_y1_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust"];
-    int64_t gradient_background_main_deck_y1_adjust_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust_adjust"];
-    int64_t gradient_background_main_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust_adjust_adjust"];
-    //~ int64_t gradient_background_main_deck_adjust_height_reduce = gui_xy["gradient_background_main_deck"]["adjust_height_reduce"];
-    int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
-    
-    int64_t per_row_max_card_capacity;
-    
-    per_row_max_card_capacity = get_deck_edit_per_row_max_card_capacity(main_deck_card_count);
-    
-    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
-    auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
-    
-    for (int i = 0; i < main_deck_card_count and i < Game::main_deck_pack_max_row_capacity * per_row_max_card_capacity; ++i) {
-      auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_main_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
-      DrawThumb(deckManager.current_deck.main[i], vec, deckBuilder.filterList);
-      if (deckBuilder.hovered_pos == 1 && deckBuilder.hovered_seq == i) {
-        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y1 = gradient_background_main_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y2 = gradient_background_main_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto r = ResizeWin(x1, y1, x2, y2);
-        driver->draw2DRectangleOutline(r);
-      }
-    }
-    int64_t dx;
-    int64_t dy;
+    this->DrawDeckBd_main_deck();
     if (!deckBuilder.showing_pack) {
-      // extra deck
-      rp = draw_gradient_background_size_text(static_text_deck_edit_extra_deck_size, "gradient_background_extra_deck", 1331, dataManager.GetNumString(deckManager.current_deck.extra.size()).c_str());
-      driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
-      if (deckManager.current_deck.extra.size() <= 10) {
-        dx = 436.0f / 9;
-      }
-      else {
-        dx = 436.0f / (deckManager.current_deck.extra.size() - 1);
-      }
-      for (size_t i = 0; i < deckManager.current_deck.extra.size(); ++i) {
-        DrawThumb(deckManager.current_deck.extra[i], irr::core::vector2di(314 + i * dx, 466), deckBuilder.filterList);
-        if (deckBuilder.hovered_pos == 2 && deckBuilder.hovered_seq == (int)i) {
-          driver->draw2DRectangleOutline(Resize(313 + i * dx, 465, 359 + i * dx, 531));
-        }
-      }
-      // side deck
-      rp = draw_gradient_background_size_text(static_text_deck_edit_side_deck_size, "gradient_background_side_deck", 1332, dataManager.GetNumString(deckManager.current_deck.side.size()).c_str());
-      driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
-      if (deckManager.current_deck.side.size() <= 10) {
-        dx = 436.0f / 9;
-      }
-      else {
-        dx = 436.0f / (deckManager.current_deck.side.size() - 1);
-      }
-      for (size_t i = 0; i < deckManager.current_deck.side.size(); ++i) {
-        DrawThumb(deckManager.current_deck.side[i], irr::core::vector2di(314 + i * dx, 564), deckBuilder.filterList);
-        if (deckBuilder.hovered_pos == 3 && deckBuilder.hovered_seq == (int)i) {
-          driver->draw2DRectangleOutline(Resize(313 + i * dx, 563, 359 + i * dx, 629));
-        }
-      }
+      static_text_deck_edit_extra_deck_size->setVisible(true);
+      static_text_deck_edit_side_deck_size->setVisible(true);
+      this->DrawDeckBd_extra_deck();
+      this->DrawDeckBd_side_deck();
     }
     else {
       static_text_deck_edit_extra_deck_size->setVisible(false);
@@ -1221,7 +1158,7 @@ namespace ygo {
     }
     else {
       // search result
-      rp = draw_gradient_background_size_text(static_text_deck_edit_search_result_size, "gradient_background_search_result", 1333, deckBuilder.result_string);
+      auto rp = draw_gradient_background_size_text(static_text_deck_edit_search_result_size, "gradient_background_search_result", 1333, deckBuilder.result_string);
       driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
     }
     int64_t EGDC_BUTTON_TEXT = irr::gui::EGDC_BUTTON_TEXT;
@@ -1290,16 +1227,171 @@ namespace ygo {
       DrawThumb(deckBuilder.draging_pointer, irr::core::vector2di(deckBuilder.dragx - CARD_THUMB_WIDTH / 2 * mainGame->xScale, deckBuilder.dragy - CARD_THUMB_HEIGHT / 2 * mainGame->yScale), deckBuilder.filterList, true);
     }
   }
-  
-  int64_t Game::get_deck_edit_per_row_max_card_capacity(int64_t main_deck_card_count) {
+
+  void Game::DrawDeckBd_side_deck() {
+    using boost::this_thread::get_id;
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_color = getGlobal(main_thread(this->get_lua(get_id())), "color");
+    auto gui_xy = getGlobal(main_thread(this->get_lua(get_id())), "xy");
+
+    int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
+    int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
+    int64_t gui_color_gradient_left_down = gui_color["gradient"]["left_down"];
+    int64_t gui_color_gradient_right_down = gui_color["gradient"]["right_down"];
+
+    int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
+    int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
+    int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
+    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
+    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
+    int64_t gradient_background_side_deck_y1_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust"];
+    int64_t gradient_background_side_deck_y1_adjust_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust_adjust"];
+    int64_t gradient_background_side_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust_adjust_adjust"];
+    int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
+
+    auto rp = draw_gradient_background_size_text(this->static_text_deck_edit_side_deck_size, "gradient_background_side_deck", 1331, dataManager.GetNumString(deckManager.current_deck.side.size()).c_str());
+    driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
+
+    int64_t per_row_max_card_capacity = this->get_side_deck_per_row_max_card_capacity();
+
+    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
+    auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
+
+    for (size_t i = 0; i < deckManager.current_deck.side.size(); ++i) {
+      auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_side_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
+      DrawThumb(deckManager.current_deck.side[i], vec, deckBuilder.filterList);
+      if (deckBuilder.hovered_pos == 3 && deckBuilder.hovered_seq == i) {
+        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
+        auto y1 = gradient_background_side_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
+        auto y2 = gradient_background_side_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto r = this->ResizeWin(x1, y1, x2, y2);
+        driver->draw2DRectangleOutline(r);
+      }
+    }
+  }
+
+  void Game::DrawDeckBd_extra_deck() {
+    using boost::this_thread::get_id;
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_color = getGlobal(main_thread(this->get_lua(get_id())), "color");
+    auto gui_xy = getGlobal(main_thread(this->get_lua(get_id())), "xy");
+
+    int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
+    int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
+    int64_t gui_color_gradient_left_down = gui_color["gradient"]["left_down"];
+    int64_t gui_color_gradient_right_down = gui_color["gradient"]["right_down"];
+
+    int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
+    int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
+    int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
+    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
+    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
+    int64_t gradient_background_extra_deck_y1_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust"];
+    int64_t gradient_background_extra_deck_y1_adjust_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust_adjust"];
+    int64_t gradient_background_extra_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust_adjust_adjust"];
+    int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
+
+    auto rp = draw_gradient_background_size_text(this->static_text_deck_edit_extra_deck_size, "gradient_background_extra_deck", 1331, dataManager.GetNumString(deckManager.current_deck.extra.size()).c_str());
+    driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
+
+    int64_t per_row_max_card_capacity = this->get_extra_deck_per_row_max_card_capacity();
+
+    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
+    auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
+
+    for (size_t i = 0; i < deckManager.current_deck.extra.size(); ++i) {
+      auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_extra_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
+      DrawThumb(deckManager.current_deck.extra[i], vec, deckBuilder.filterList);
+      if (deckBuilder.hovered_pos == 2 && deckBuilder.hovered_seq == i) {
+        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
+        auto y1 = gradient_background_extra_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
+        auto y2 = gradient_background_extra_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto r = this->ResizeWin(x1, y1, x2, y2);
+        driver->draw2DRectangleOutline(r);
+      }
+    }
+  }
+
+  void Game::DrawDeckBd_main_deck() {
+    using boost::this_thread::get_id;
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_color = getGlobal(main_thread(this->get_lua(get_id())), "color");
+    auto gui_xy = getGlobal(main_thread(this->get_lua(get_id())), "xy");
+
+    int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
+    int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
+    int64_t gui_color_gradient_left_down = gui_color["gradient"]["left_down"];
+    int64_t gui_color_gradient_right_down = gui_color["gradient"]["right_down"];
+
+    int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
+    int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
+    int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
+    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
+    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
+    int64_t gradient_background_main_deck_y1_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust"];
+    int64_t gradient_background_main_deck_y1_adjust_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust_adjust"];
+    int64_t gradient_background_main_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust_adjust_adjust"];
+    int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
+
+    int main_deck_card_count = deckManager.current_deck.main.size();
+    auto rp = draw_gradient_background_size_text(static_text_deck_edit_main_deck_size, (deckBuilder.showing_pack ? "gradient_background_main_deck_pack" : "gradient_background_main_deck"), (deckBuilder.showing_pack ? 1477 : 1330), dataManager.GetNumString(main_deck_card_count).c_str());
+    driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
+
+    int64_t per_row_max_card_capacity = get_main_deck_per_row_max_card_capacity();
+
+    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
+    auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
+
+    for (int i = 0; i < main_deck_card_count and i < Game::main_deck_pack_max_row_capacity * per_row_max_card_capacity; ++i) {
+      auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_main_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
+      DrawThumb(deckManager.current_deck.main[i], vec, deckBuilder.filterList);
+      if (deckBuilder.hovered_pos == 1 && deckBuilder.hovered_seq == i) {
+        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
+        auto y1 = gradient_background_main_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
+        auto y2 = gradient_background_main_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto r = this->ResizeWin(x1, y1, x2, y2);
+        this->driver->draw2DRectangleOutline(r);
+      }
+    }
+  }
+
+  int64_t Game::get_side_deck_per_row_max_card_capacity() {
+    if (deckManager.current_deck.side.size() > mainGame->per_row_min_card_capacity) {
+      return deckManager.current_deck.side.size();
+    }
+    else {
+      return mainGame->per_row_min_card_capacity;
+    }
+  }
+
+  int64_t Game::get_extra_deck_per_row_max_card_capacity() {
+    if (deckManager.current_deck.extra.size() > mainGame->per_row_min_card_capacity) {
+      return deckManager.current_deck.extra.size();
+    }
+    else {
+      return mainGame->per_row_min_card_capacity;
+    }
+  }
+
+  int64_t Game::get_main_deck_per_row_max_card_capacity() {
     if (deckBuilder.showing_pack) {
-      if (main_deck_card_count > this->main_deck_pack_min_capacity) {
-        return ((main_deck_card_count - (this->main_deck_pack_min_capacity + 1)) / this->main_deck_pack_max_row_capacity) + (this->per_row_min_card_capacity + 1);
+      if (deckManager.current_deck.main.size() > this->main_deck_pack_min_capacity) {
+        //~ return ((deckManager.current_deck.main.size() - (this->main_deck_pack_min_capacity + 1)) / (this->main_deck_pack_max_row_capacity + 1)) + (this->per_row_min_card_capacity + 1);
+        return ((deckManager.current_deck.main.size() - (this->main_deck_pack_min_capacity + 1)) / this->main_deck_pack_max_row_capacity) + (this->per_row_min_card_capacity + 1);
       }
     }
     else {
-      if (main_deck_card_count > DECK_MIN_SIZE) {
-        return (main_deck_card_count - (DECK_MIN_SIZE + 1)) / this->main_deck_max_row_capacity + (this->per_row_min_card_capacity + 1);
+      if (deckManager.current_deck.main.size() > DECK_MIN_SIZE) {
+        return (deckManager.current_deck.main.size() - (DECK_MIN_SIZE + 1)) / this->main_deck_max_row_capacity + (this->per_row_min_card_capacity + 1);
       }
     }
     return this->per_row_min_card_capacity;

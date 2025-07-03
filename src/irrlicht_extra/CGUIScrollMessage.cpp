@@ -366,6 +366,7 @@ namespace irr {
       else {
         ScrollText->setRelativePositionProportional(core::rect<f32>(1 / grid, 8 / grid, 49 / grid, 39 / grid));
         OkButton->setRelativePositionProportional(core::rect<f32>(20 / grid, 40 / grid, 31 / grid, 48 / grid));
+        CancelButton->setVisible(false);
       }
 
       //~ ScrollText->breakText();

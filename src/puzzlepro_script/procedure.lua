@@ -6,6 +6,13 @@ Auxiliary.FGoalCheckAdditional = nil
 Auxiliary.RCheckAdditional = nil
 Auxiliary.RGCheckAdditional = nil
 
+Card.CheckFusionMaterial_immune = function(o1, o2, o3, o4, o5, o6)
+  Auxiliary.CurrentFusionEffect = o2
+  local bool = Card.CheckFusionMaterial(o1, o3, o4, o5, o6)
+  Auxiliary.CurrentFusionEffect = nil
+  return bool
+end
+
 --Gemini Summon
 function Auxiliary.IsDualState(effect)
   local c = effect:GetHandler()
@@ -1131,7 +1138,16 @@ function Auxiliary.FConditionMix(insf, sub, ...)
     local hexsealed = chkfnf & 0x100 > 0
     local notfusion = chkfnf & 0x200 > 0
     local sub2 = (sub or hexsealed) and not notfusion
+    
+    --~ Debug.ShowHint(c:GetOriginalCodeRule())
+    --~ Debug.ShowHint(debug.traceback())
     local mg = g:Filter(Auxiliary.FConditionFilterMix, c, c, sub2, notfusion, table.unpack(funs))
+    
+    --~ -- 设置全局融合效果引用  
+    --~ Auxiliary.CurrentFusionEffect = Duel.GetChainInfo(0, CHAININFO_TRIGGERING_EFFECT)  
+    --~ local mg = g:Filter(Auxiliary.FConditionFilterMix, c, c, sub2, notfusion, table.unpack(funs))  
+    --~ Auxiliary.CurrentFusionEffect = nil
+    
     if gc then
       if not mg:IsContains(gc) then
         return false
@@ -1149,6 +1165,8 @@ function Auxiliary.FOperationMix(insf, sub, ...)
     local notfusion = chkfnf & 0x200 > 0
     local sub2 = (sub or hexsealed) and not notfusion
     local cancel = notfusion and Duel.GetCurrentChain() == 0
+    
+    --~ Debug.ShowHint(debug.traceback())
     local mg = eg:Filter(Auxiliary.FConditionFilterMix, c, c, sub2, notfusion, table.unpack(funs))
     if gc then
       Duel.SetSelectedCard(gc)
@@ -1167,6 +1185,14 @@ function Auxiliary.FConditionFilterMix(c, fc, sub, notfusion, ...)
   if not c:IsCanBeFusionMaterial(fc, check_type) then
     return false
   end
+  local e = c:IsHasEffect(EFFECT_IMMUNE_EFFECT)
+  if e then
+    if aux.CurrentFusionEffect then
+      --~ aux.DebugHint(not c:IsImmuneToEffect(aux.CurrentFusionEffect))
+      return not c:IsImmuneToEffect(aux.CurrentFusionEffect)
+    end
+  end
+  
   for i, f in ipairs({ ... }) do
     if f(c, fc, sub) then
       return true
@@ -1174,6 +1200,26 @@ function Auxiliary.FConditionFilterMix(c, fc, sub, notfusion, ...)
   end
   return false
 end
+--~ function Auxiliary.PreCheckFusionImmunity(c)  
+  --~ -- 检查是否有通用的融合免疫效果  
+  --~ if c:IsHasEffect(EFFECT_IMMUNE_EFFECT) then  
+    --~ local immune_effects = c:GetEffects(EFFECT_IMMUNE_EFFECT)  
+    --~ for _, eff in ipairs(immune_effects) do  
+      --~ -- 检查是否对魔法卡效果免疫（大部分融合魔法卡）  
+      --~ if eff:GetValue() and eff:GetValue()(eff, nil) then  
+        --~ -- 简化检查：如果对魔法效果免疫，则可能对融合效果免疫  
+        --~ return true  
+      --~ end  
+    --~ end  
+  --~ end  
+    
+  --~ -- 检查特定的融合免疫标记  
+  --~ if c:IsHasEffect(EFFECT_CANNOT_BE_FUSION_MATERIAL) then  
+    --~ return true  
+  --~ end  
+    
+  --~ return false  
+--~ end
 function Auxiliary.FCheckMix(c, mg, sg, fc, sub, fun1, fun2, ...)
   if fun2 then
     sg:AddCard(c)
@@ -1279,6 +1325,7 @@ function Auxiliary.FConditionMixRep(insf, sub, fun1, minc, maxc, ...)
     local hexsealed = chkfnf & 0x100 > 0
     local notfusion = chkfnf & 0x200 > 0
     local sub2 = (sub or hexsealed) and not notfusion
+    Debug.ShowHint(debug.traceback())
     local mg = g:Filter(Auxiliary.FConditionFilterMix, c, c, sub2, notfusion, fun1, table.unpack(funs))
     if gc then
       if not mg:IsContains(gc) then
@@ -1300,6 +1347,7 @@ function Auxiliary.FOperationMixRep(insf, sub, fun1, minc, maxc, ...)
     local notfusion = chkfnf & 0x200 > 0
     local sub2 = (sub or hexsealed) and not notfusion
     local cancel = notfusion and Duel.GetCurrentChain() == 0
+    Debug.ShowHint(debug.traceback())
     local mg = eg:Filter(Auxiliary.FConditionFilterMix, c, c, sub2, notfusion, fun1, table.unpack(funs))
     local sg = Group.CreateGroup()
     if gc then

@@ -67,17 +67,18 @@ namespace ygo {
     CloseHandle(recording_fp);
     pheader.datasize = replay_size;
     pheader.flag |= REPLAY_COMPRESSED;
-    size_t propsize = 5;
-    comp_size = MAX_COMP_SIZE;
-    int ret = LzmaCompress(comp_data, &comp_size, replay_data, replay_size, pheader.props, &propsize, 5, 1 << 24, 3, 0, 2, 32, 1);
-    if (ret != SZ_OK) {
-      std::memcpy(comp_data, &ret, sizeof ret);
-      comp_size = sizeof ret;
+    //~ size_t propsize = 5;
+    comp_size = ZSTD_compress(comp_data, MAX_COMP_SIZE, replay_data, replay_size, ZSTD_CLEVEL_DEFAULT);
+    if (ZSTD_isError(comp_size)) {
+      size_t error_code = comp_size;
+      std::memcpy(comp_data, &error_code, sizeof error_code);
+      comp_size = sizeof error_code;
     }
     is_recording = false;
   }
 
   void Replay::SaveReplay(const wchar_t *name) {
+    using boost::this_thread::get_id;
     using fast_io::at_fdcwd;
     using fast_io::concat_std;
     using fast_io::native_mkdirat;
@@ -88,28 +89,31 @@ namespace ygo {
     using luabridge::main_thread;
     using std::byte;
 
-    auto gui_config = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
     auto replay_dir = gui_config["replay_dir"].tostring();
     auto replay_file_suffix = gui_config["replay_file_suffix"].tostring();
 
     native_mkdirat(at_fdcwd(), replay_dir);
     obuf_file of(concat_std(replay_dir, code_cvt_os_c_str(name), ".", replay_file_suffix));
     write_all_bytes(of, reinterpret_cast<const byte *>(__builtin_addressof(pheader)), reinterpret_cast<const byte *>(__builtin_addressof(pheader) + 1));
-    //~ mainGame->write_all_bytes(of, &pheader, &pheader + 1);
     write_all_bytes(of, reinterpret_cast<const byte *>(comp_data), reinterpret_cast<const byte *>(comp_data + comp_size));
-    //~ mainGame->write_all_bytes(of, comp_data, comp_data + comp_size);
   }
 
   bool Replay::OpenReplay(const wchar_t *name) {
     auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
-    using fast_io::wconcat_fast_io;
+    using fast_io::concat_std;
+    using fast_io::wconcat_std;
+    using fast_io::mnp::code_cvt;
     using fast_io::mnp::code_cvt_os_c_str;
     FILE *rfp = mywfopen(name, "rb");
-    if (!rfp) {
-      wchar_t fname[256];
-      myswprintf(fname, wconcat_fast_io(code_cvt_os_c_str(gui_config["replay_dir"].tostring().c_str()), L"%ls").c_str(), name);
-      rfp = mywfopen(fname, "rb");
-    }
+    //~ mainGame->replay_relate_single_script_path = concat_std(code_cvt_os_c_str(name));
+    //~ if (!rfp) {
+    //~ wchar_t fname[256];
+    //~ auto str = wconcat_std(code_cvt_os_c_str(gui_config["replay_dir"].tostring().c_str()), L"%ls");
+    //~ mainGame->replay_relate_single_script_path = concat_std(code_cvt(str));
+    //~ myswprintf(fname, str.c_str(), name);
+    //~ rfp = mywfopen(fname, "rb");
+    //~ }
     if (!rfp) {
       return false;
     }
@@ -129,7 +133,9 @@ namespace ygo {
         return false;
       }
       replay_size = pheader.datasize;
-      if (LzmaUncompress(replay_data, &replay_size, comp_data, &comp_size, pheader.props, 5) != SZ_OK) {
+      size_t decompressed_size = ZSTD_decompress(replay_data, replay_size, comp_data, comp_size);
+      if (ZSTD_isError(decompressed_size) || decompressed_size != pheader.datasize) {
+        replay_size = 0;
         return false;
       }
     }
@@ -145,7 +151,7 @@ namespace ygo {
   bool Replay::ReadNextResponse(unsigned char resp[]) {
     int64_t len;
     if (!ReadData(&len, 1) or len == 0 or !ReadData(resp, len)) {
-      mainGame->check_single_replay_success = false;
+      mainGame->check_replay_success = false;
       mainGame->replay_finished = true;
       return false;
     }

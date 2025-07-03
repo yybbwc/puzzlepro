@@ -24,7 +24,6 @@ namespace ygo {
     if (!pduel) {
       return;
     }
-    //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
     last_replay.Write<uint8_t>(len);
     last_replay.WriteData(resp, len);
     set_responseb(pduel, resp);
@@ -45,13 +44,9 @@ namespace ygo {
     BufferIO::CopyCharArray(mainGame->dInfo.clientname, client_name);
     last_replay.WriteData(client_name, sizeof client_name);
     last_replay.Write<int32_t>(start_lp);
-    ;
     last_replay.Write<int32_t>(start_hand);
-    ;
     last_replay.Write<int32_t>(draw_count);
-    ;
     last_replay.Write<int32_t>(opt);
-    ;
     last_replay.Write<uint16_t>(slen);
     last_replay.WriteData(filename.c_str(), slen);
   }
@@ -69,7 +64,6 @@ namespace ygo {
     set_card_reader(DataManager::CardReader);
     set_message_handler(SingleMode::MessageHandler);
     pduel = create_duel(rnd.rand());
-    //~ DuelClient::last_replay_txt.reopen("./replay/_last_replay.txt");
     DuelClient::last_replay_txt.reopen(gui_config["replay_dir"].tostring().append("_last_replay.txt"));
     set_player_info(pduel, 0, start_lp, start_hand, draw_count);
     set_player_info(pduel, 1, start_lp, start_hand, draw_count);
@@ -84,10 +78,6 @@ namespace ygo {
     mainGame->dInfo.turn = 0;
     if (mainGame->chkSinglePlayReturnDeckTop->isChecked()) {
       opt |= DUEL_RETURN_DECK_TOP;
-    }
-    if (FileSystem::IsFileExists((mainGame->single_file_select_panel->getCurrentWorkingDirectory() + L"/common.lua").c_str())) {
-      filename = concat_fast_io(code_cvt_os_c_str((mainGame->single_file_select_panel->getCurrentWorkingDirectory() + L"/common.lua").c_str()));
-      preload_script(pduel, filename.c_str());
     }
     filename = concat_fast_io(gui_config["single_dir"].tostring(), code_cvt_os_c_str(mainGame->single_file_select_panel->getSelectedFileRelativePath().c_str()));
     if (!preload_script(pduel, filename.c_str())) {
@@ -167,7 +157,6 @@ namespace ygo {
   }
 
   void SingleMode::save_replay() {
-    //~ mainGame->gMutex.lock();
     time_t nowtime = std::time(nullptr);
     wchar_t timetext[40];
     std::wcsftime(timetext, sizeof timetext / sizeof timetext[0], L"%Y-%m-%d %H-%M-%S", std::localtime(&nowtime));
@@ -175,18 +164,13 @@ namespace ygo {
     wchar_t msgbuf[256];
     myswprintf(msgbuf, dataManager.GetSysString(1367), timetext);
     mainGame->SetStaticText(mainGame->stACMessage, 310, mainGame->guiFont, msgbuf);
-    //~ mainGame->PopupElement(mainGame->wACMessage, 20);
-    //~ mainGame->gMutex.unlock();
-    //~ mainGame->WaitFrameSignal(30);
-    //~ if (!mainGame->solve_puzzle_should and !mainGame->check_single_replay_should) {
     last_replay.SaveReplay(mainGame->ebRSName->getText());
-    //~ }
   }
 
   bool SingleMode::SinglePlayAnalyze(unsigned char *msg, unsigned int len) {
     auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
     auto gui_message = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "message");
-    
+
     using fast_io::string;
     unsigned char *offset = nullptr;
     unsigned char *pbuf = msg;
@@ -779,12 +763,8 @@ namespace ygo {
           char namebuf[128]{};
           wchar_t wname[20]{};
           int len = BufferIO::ReadInt16(pbuf);
-          //~ auto *begin = pbuf;
-          //~ auto wstr = wconcat_fast_io(code_cvt(string(reinterpret_cast<const char*>(pbuf), len)));
           BufferIO::DecodeUTF8(std::string(reinterpret_cast<const char *>(pbuf), len).c_str(), wname);
           pbuf += len + 1;
-          //~ std::memcpy(namebuf, begin, len + 1);
-          //~ BufferIO::DecodeUTF8(namebuf, wname);
           BufferIO::CopyCharArray(wname, mainGame->dInfo.clientname);
           break;
         }

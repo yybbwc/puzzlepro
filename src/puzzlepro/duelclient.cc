@@ -2441,7 +2441,9 @@ namespace ygo {
         return true;
       }
       case MSG_CONFIRM_CARDS: {
-        /*int player = */ mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
+        using namespace boost::math::double_constants;
+
+        int player = mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
         int count = BufferIO::ReadUInt8(pbuf);
         int c = 0;
         int s = 0;
@@ -2481,7 +2483,7 @@ namespace ygo {
                 pcard->dRot = irr::core::vector3df(0, 0, 0);
               }
               else {
-                pcard->dRot = irr::core::vector3df(0, 3.14159f / 5.0f, 0);
+                pcard->dRot = irr::core::vector3df(0, pi / 5.0f, 0);
               }
               pcard->is_moving = true;
               pcard->aniFrame = 5;
@@ -2504,6 +2506,7 @@ namespace ygo {
         if (!field_confirm.empty()) {
           mainGame->WaitFrameSignal(5);
           for (int i = 0; i < (int)field_confirm.size(); ++i) {
+            //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
             pcard = field_confirm[i];
             c = pcard->controler;
             l = pcard->location;
@@ -2517,10 +2520,10 @@ namespace ygo {
               }
               pcard->dPos = irr::core::vector3df(0, 0, 0);
               if (pcard->position == POS_FACEDOWN_ATTACK) {
-                pcard->dRot = irr::core::vector3df(0, 3.14159f / 5.0f, 0);
+                pcard->dRot = irr::core::vector3df(0, pi / 5.0f, 0);
               }
               else {
-                pcard->dRot = irr::core::vector3df(3.14159f / 5.0f, 0, 0);
+                pcard->dRot = irr::core::vector3df(pi / 5.0f, 0, 0);
               }
               pcard->is_moving = true;
               pcard->aniFrame = 5;
@@ -2530,7 +2533,7 @@ namespace ygo {
                 continue;
               }
               pcard->dPos = irr::core::vector3df(0, 0, 0);
-              pcard->dRot = irr::core::vector3df(0, 3.14159f / 5.0f, 0);
+              pcard->dRot = irr::core::vector3df(0, pi / 5.0f, 0);
               pcard->is_moving = true;
               pcard->aniFrame = 5;
             }
@@ -2865,9 +2868,9 @@ namespace ygo {
       }
       case MSG_NEW_PHASE: {
         using fast_io::io::print;
-        
+
         using std::string;
-        
+
         unsigned short phase = BufferIO::ReadInt16(pbuf);
         mainGame->btnPhaseStatus->setVisible(false);
         mainGame->btnBP->setVisible(false);
@@ -3376,12 +3379,12 @@ namespace ygo {
       }
       case MSG_CHAINING: {
         using fast_io::io::print;
-        
-        using fast_io::mnp::cond;
+
         using fast_io::mnp::code_cvt_os_c_str;
-        
+        using fast_io::mnp::cond;
+
         using std::string;
-        
+
         unsigned int code = BufferIO::ReadInt32(pbuf);
         int pcc = mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
         unsigned int pcl = BufferIO::ReadUInt8(pbuf);
@@ -4208,46 +4211,46 @@ namespace ygo {
         int count = BufferIO::ReadUInt8(pbuf);
         mainGame->gMutex.lock();
         mainGame->cbANNumber->clear();
-        bool quickmode = count <= 12;
-        if (quickmode) {
-          for (int i = 0; i < 12; ++i) {
-            mainGame->btnANNumber[i]->setEnabled(false);
-            mainGame->btnANNumber[i]->setPressed(false);
-            mainGame->btnANNumber[i]->setVisible(true);
-          }
-        }
+        //~ bool quickmode = count <= 12;
+        //~ if (quickmode) {
+        //~ for (int i = 0; i < 12; ++i) {
+        //~ mainGame->btnANNumber[i]->setEnabled(false);
+        //~ mainGame->btnANNumber[i]->setPressed(false);
+        //~ mainGame->btnANNumber[i]->setVisible(true);
+        //~ }
+        //~ }
         for (int i = 0; i < count; ++i) {
           int value = BufferIO::ReadInt32(pbuf);
           myswprintf(textBuffer, L" % d", value);
           mainGame->cbANNumber->addItem(textBuffer, value);
-          if (quickmode) {
-            if ((value > 12 || value <= 0)) {
-              quickmode = false;
-            }
-            else {
-              mainGame->btnANNumber[value - 1]->setEnabled(true);
-            }
-          }
+          //~ if (quickmode) {
+          //~ if ((value > 12 || value <= 0)) {
+          //~ quickmode = false;
+          //~ }
+          //~ else {
+          //~ mainGame->btnANNumber[value - 1]->setEnabled(true);
+          //~ }
+          //~ }
         }
-        mainGame->cbANNumber->setSelected(0);
-        if (quickmode) {
-          mainGame->cbANNumber->setVisible(false);
-          mainGame->btnANNumberOK->setRelativePosition(irr::core::rect<irr::s32>(20, 195, 210, 230));
-          mainGame->btnANNumberOK->setEnabled(false);
-          irr::core::recti pos = mainGame->wANNumber->getRelativePosition();
-          pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 250;
-          mainGame->wANNumber->setRelativePosition(pos);
-        }
-        else {
-          for (int i = 0; i < 12; ++i) {
-            mainGame->btnANNumber[i]->setVisible(false);
-          }
-          mainGame->cbANNumber->setVisible(true);
-          mainGame->btnANNumberOK->setRelativePosition(irr::core::rect<irr::s32>(80, 60, 150, 85));
-          irr::core::recti pos = mainGame->wANNumber->getRelativePosition();
-          pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 95;
-          mainGame->wANNumber->setRelativePosition(pos);
-        }
+        //~ mainGame->cbANNumber->setSelected(0);
+        //~ if (quickmode) {
+        //~ mainGame->cbANNumber->setVisible(false);
+        //~ mainGame->btnANNumberOK->setRelativePosition(irr::core::rect<irr::s32>(20, 195, 210, 230));
+        //~ mainGame->btnANNumberOK->setEnabled(false);
+        //~ irr::core::recti pos = mainGame->wANNumber->getRelativePosition();
+        //~ pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 250;
+        //~ mainGame->wANNumber->setRelativePosition(pos);
+        //~ }
+        //~ else {
+        //~ for (int i = 0; i < 12; ++i) {
+        //~ mainGame->btnANNumber[i]->setVisible(false);
+        //~ }
+        mainGame->cbANNumber->setVisible(true);
+        //~ mainGame->btnANNumberOK->setRelativePosition(irr::core::rect<irr::s32>(80, 60, 150, 85));
+        //~ irr::core::recti pos = mainGame->wANNumber->getRelativePosition();
+        //~ pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + 95;
+        //~ mainGame->wANNumber->setRelativePosition(pos);
+        //~ }
         if (select_hint) {
           myswprintf(textBuffer, L"%ls", dataManager.GetDesc(select_hint));
         }

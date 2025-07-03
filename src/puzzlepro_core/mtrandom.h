@@ -1,12 +1,4 @@
-/*
- * mtrandom.h
- *
- *  Created on: 2009-10-18
- *      Author: Argon.Sun
- */
-
-#ifndef MTRANDOM_H_
-#define MTRANDOM_H_
+#pragma once
 
 #include <random>
 #include <vector>
@@ -14,7 +6,8 @@
 
 class mt19937 {
 public:
-  const unsigned int rand_max;
+  const uint32_t rand_max;
+  std::mt19937 rng;
 
   mt19937() : rng(), rand_max(rng.max()) {
   }
@@ -32,53 +25,28 @@ public:
   }
 
   // uniform_int_distribution
-  int get_random_integer(int l, int h) {
+  int32_t get_random_integer(int32_t l, int32_t h) {
     uint_fast32_t range = (uint_fast32_t)(h - l + 1);
     uint_fast32_t secureMax = rng.max() - rng.max() % range;
     uint_fast32_t x = 0;
     do {
       x = rng();
     } while (x >= secureMax);
-    return l + (int)(x % range);
-  }
-
-  int get_random_integer_old(int l, int h) {
-    int result = (int)((double)rng() / rng.max() * ((double)h - l + 1)) + l;
-    if (result > h) {
-      result = h;
-    }
-    return result;
+    return l + (int32_t)(x % range);
   }
 
   // Fisher-Yates shuffle v[a]~v[b]
-  template <typename T> void shuffle_vector(std::vector<T> &v, int a = -1, int b = -1) {
+  template <typename T> void shuffle_vector(std::vector<T> &v, int32_t a = -1, int32_t b = -1) {
     if (a < 0) {
       a = 0;
     }
     if (b < 0) {
-      b = (int)v.size() - 1;
+      b = (int32_t)v.size() - 1;
     }
-    for (int i = a; i < b; ++i) {
-      int r = get_random_integer(i, b);
+    for (int32_t i = a; i < b; ++i) {
+      int32_t r = get_random_integer(i, b);
       std::swap(v[i], v[r]);
     }
   }
-
-  template <typename T> void shuffle_vector_old(std::vector<T> &v, int a = -1, int b = -1) {
-    if (a < 0) {
-      a = 0;
-    }
-    if (b < 0) {
-      b = (int)v.size() - 1;
-    }
-    for (int i = a; i < b; ++i) {
-      int r = get_random_integer_old(i, b);
-      std::swap(v[i], v[r]);
-    }
-  }
-
-private:
-  std::mt19937 rng;
 };
 
-#endif /* MTRANDOM_H_ */

@@ -4151,6 +4151,7 @@ int32_t card::is_can_be_flip_summoned(uint8_t playerid) {
 // check if this can be sp_summoned by EFFECT_SPSUMMON_PROC
 // call filter_spsummon_procedure()
 int32_t card::is_special_summonable(uint8_t playerid, uint32_t summon_type, material_info info) {
+//~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   if (!(data.type & TYPE_MONSTER)) {
     return FALSE;
   }
@@ -4172,6 +4173,7 @@ int32_t card::is_special_summonable(uint8_t playerid, uint32_t summon_type, mate
 }
 
 int32_t card::is_can_be_special_summoned(effect *reason_effect, uint32_t sumtype, uint8_t sumpos, uint8_t sumplayer, uint8_t toplayer, uint8_t nocheck, uint8_t nolimit, uint32_t zone) {
+//~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   if (reason_effect->get_handler() == this) {
     reason_effect->status |= EFFECT_STATUS_SPSELF;
   }
@@ -4203,6 +4205,16 @@ int32_t card::is_can_be_special_summoned(effect *reason_effect, uint32_t sumtype
     return FALSE;
   }
   if (is_affected_by_effect(EFFECT_CANNOT_SPECIAL_SUMMON)) {
+    //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+    //~ // 检查是否为正在进行的融合召唤或仪式召唤  
+    //~ if ((sumtype & SUMMON_TYPE_FUSION) && pduel->game_field->core.fusion_proceeding &&   
+        //~ pduel->game_field->core.fusion_target == this) {  
+        //~ return TRUE; // 允许继续融合召唤  
+    //~ }  
+    //~ if ((sumtype & SUMMON_TYPE_RITUAL) && pduel->game_field->core.ritual_proceeding &&   
+        //~ pduel->game_field->core.ritual_target == this) {  
+        //~ return TRUE; // 允许继续仪式召唤  
+    //~ }  
     return FALSE;
   }
   if (is_status(STATUS_FORBIDDEN)) {

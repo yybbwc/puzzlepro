@@ -95,11 +95,18 @@ function c5370235.thop(e, tp, eg, ep, ev, re, r, rp)
   e2:SetType(EFFECT_TYPE_FIELD)
   e2:SetCode(EFFECT_EXTRA_FUSION_MATERIAL)
   e2:SetTargetRange(LOCATION_GRAVE, 0)
-  --e2:SetCountLimit(1,5370237)
+  e2:SetCountLimit(1,5370237)
   e2:SetTarget(c5370235.mttg)
-  e2:SetValue(1)
+  e2:SetValue(c5370235.mtval)
   e2:SetReset(RESET_PHASE + PHASE_END)
   Duel.RegisterEffect(e2, tp)
+end
+function c5370235.mtval(e, c)  
+  if not c then  
+    return true  
+  end  
+  -- 使用现有的 CheckCountLimit 函数检查是否还能使用  
+  return e:CheckCountLimit(0) -- 0 表示当前玩家  
 end
 function c5370235.limittg(e, c)
   return not (c:IsRace(RACE_DRAGON + RACE_MACHINE) and c:IsSetCard(0x93))

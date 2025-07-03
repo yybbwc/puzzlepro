@@ -18,7 +18,10 @@ function c48130397.filter1(c, e)
   return c:IsFaceup() and c:IsCanBeFusionMaterial() and not c:IsImmuneToEffect(e)
 end
 function c48130397.filter2(c, e, tp, m, f, chkf)
-  return c:IsType(TYPE_FUSION) and (not f or f(c)) and c:IsCanBeSpecialSummoned(e, SUMMON_TYPE_FUSION, tp, false, false) and c:CheckFusionMaterial(m, nil, chkf)
+  --~ Debug.ShowHint(m:GetOriginalCodeRule())
+  --~ aux.DebugHint(e:GetHandler():GetOriginalCodeRule() .. "\n" .. debug.traceback())
+  --~ return c:IsType(TYPE_FUSION) and (not f or f(c)) and c:IsCanBeSpecialSummoned(e, SUMMON_TYPE_FUSION, tp, false, false) and c:CheckFusionMaterial(m, nil, chkf)
+  return c:IsType(TYPE_FUSION) and (not f or f(c)) and c:IsCanBeSpecialSummoned(e, SUMMON_TYPE_FUSION, tp, false, false) and c:CheckFusionMaterial_immune(e, m, nil, chkf)
 end
 function c48130397.filter3(c, e)
   return c:IsOnField() and not c:IsImmuneToEffect(e)

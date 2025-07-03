@@ -180,7 +180,7 @@ namespace ygo {
     }
     if (mainGame->dInfo.isReplaySkiping) {
       mainGame->dInfo.isReplaySkiping = false;
-      if (!mainGame->check_single_replay_should) {
+      if (!mainGame->check_replay_should) {
         mainGame->dField.RefreshAllCards();
       }
       mainGame->gMutex.unlock();
@@ -302,8 +302,10 @@ namespace ygo {
       filename[slen] = 0;
       if (mainGame->as_puzzle_should) {
         using fast_io::concat_fast_io;
-        using fast_io::mnp::os_c_str;
+        using fast_io::concat_std;
+        //~ using fast_io::mnp::os_c_str;
         SingleMode::filename = concat_fast_io(os_c_str(filename));
+        //~ mainGame->replay_relate_single_script_path = concat_std(os_c_str(filename));
         SingleMode::start_record(const_cast<ReplayHeader &>(rh));
       }
       if (!preload_script(pduel, filename)) {
@@ -328,11 +330,11 @@ namespace ygo {
       mainGame->gMutex.lock();
       mainGame->HideElement(mainGame->wCardSelect);
       mainGame->smMessage->setText_1(dataManager.GetSysString(1501), dataManager.GetSysString(1216));
-      if (!mainGame->check_single_replay_should and !mainGame->solve_puzzle_should) {
+      if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
         mainGame->PopupElement(mainGame->smMessage);
       }
       mainGame->gMutex.unlock();
-      if (!mainGame->check_single_replay_should and !mainGame->solve_puzzle_should) {
+      if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
         mainGame->actionSignal.Wait();
       }
       if (mainGame->as_puzzle_should) {
@@ -350,7 +352,7 @@ namespace ygo {
       mainGame->closeDoneSignal.Wait();
       mainGame->gMutex.lock();
       mainGame->ShowElement(mainGame->wReplay);
-      mainGame->check_single_replay_should = false;
+      mainGame->check_replay_should = false;
       mainGame->as_puzzle_should = false;
       mainGame->stTip->setVisible(false);
       mainGame->device->setEventReceiver(&mainGame->menuHandler);
@@ -515,10 +517,14 @@ namespace ygo {
   }
 
   bool ReplayMode::ReplayAnalyze(unsigned char *msg, unsigned int len) {
-    auto gui_message = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "message");
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
-    
-    pbuf = msg;
+    using boost::this_thread::get_id;
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_message = getGlobal(main_thread(mainGame->get_lua(get_id())), "message");
+    auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+
+    ReplayMode::pbuf = msg;
     int player = 0;
     int count = 0;
     is_restarting = false;
@@ -588,8 +594,8 @@ cc.p
       mainGame->dField.RefreshAllCards();
       mainGame->gMutex.unlock();
     }
-    mainGame->check_single_replay_success = false;
-    if (!mainGame->check_single_replay_should and !mainGame->solve_puzzle_should) {
+    mainGame->check_replay_success = false;
+    if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
       mainGame->gMutex.lock();
       mainGame->stMessage->setText(L"Error occurs.");
       mainGame->PopupElement(mainGame->wMessage);
@@ -609,14 +615,15 @@ cc.p
   int64_t ReplayMode::ReplayAnalyze_MSG_WIN() {
     if (mainGame->dInfo.isReplaySkiping) {
       mainGame->dInfo.isReplaySkiping = false;
+      //~ if (!mainGame->check_replay_should) {
       mainGame->dField.RefreshAllCards();
+      //~ }
       mainGame->gMutex.unlock();
     }
     int64_t player = BufferIO::ReadUInt8(pbuf);
     pbuf += 1;
     if (mainGame->solve_puzzle_should) {
       if (mainGame->LocalPlayer(player) == 0) {
-        mainGame->solve_puzzle_success = true;
       }
       else if (mainGame->LocalPlayer(player) == 1) {
         mainGame->solve_puzzle_string_s1.push_back(mainGame->solve_puzzle_string);
@@ -698,19 +705,9 @@ cc.p
     if (mainGame->solve_puzzle_should) {
       return mainGame->create_solve_puzzle_behavior(MSG_SELECT_IDLECMD);
     }
-    //~ else if (mainGame->as_puzzle_should) {
-    //~ bool success = ReadReplayResponse();
-    //~ if (success) {
-    //~ return success;
-    //~ }
-    //~ else {
-    //~ return SingleMode::SinglePlayAnalyze(pbuf - len, );
-    //~ }
-    //~ }
     else {
       return ReadReplayResponse();
     }
-    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_EFFECTYN() {
@@ -778,8 +775,6 @@ cc.p
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_CHAIN() {
-    //~ player;
-    //~ int64_t count;
     int64_t player = BufferIO::ReadUInt8(pbuf);
     int64_t count = BufferIO::ReadUInt8(pbuf);
     if (mainGame->solve_puzzle_should) {
@@ -792,7 +787,12 @@ cc.p
     }
     pbuf += 8 + count * 13;
     if (mainGame->solve_puzzle_should) {
-      return mainGame->create_solve_puzzle_behavior(MSG_SELECT_CHAIN);
+      if (mainGame->solve_puzzle_select_chains_size == 0) {
+        
+      }
+      else {
+        return mainGame->create_solve_puzzle_behavior(MSG_SELECT_CHAIN);
+      }
     }
     else {
       return ReadReplayResponse();

@@ -704,6 +704,7 @@ int32_t scriptlib::duel_special_summon_step(lua_State *L) {
   if (lua_gettop(L) >= 8) {
     zone = (uint32_t)lua_tointeger(L, 8);
   }
+  //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   pduel->game_field->special_summon_step(pcard, sumtype, sumplayer, playerid, nocheck, nolimit, positions, zone);
   return lua_yieldk(L, 0, (lua_KContext)pduel, [](lua_State *L, int32_t status, lua_KContext ctx) {
     duel *pduel = (duel *)ctx;

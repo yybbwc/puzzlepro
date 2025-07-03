@@ -1,9 +1,6 @@
 
 #pragma once
 
-//~ #ifndef REPLAY_H
-//~ #define REPLAY_H
-
 namespace ygo {
 
 // replay flag
@@ -18,13 +15,13 @@ namespace ygo {
   constexpr int MAX_COMP_SIZE = UINT16_MAX + 1;
 
   struct ReplayHeader {
-    unsigned int id{};
-    unsigned int version{};
-    unsigned int flag{};
-    unsigned int seed{};
-    unsigned int datasize{};
-    unsigned int start_time{};
-    unsigned char props[8]{};
+    uint32_t id{};
+    uint32_t version{};
+    uint32_t flag{};
+    uint32_t seed{};
+    uint32_t datasize{};
+    uint32_t start_time{};
+    uint32_t msg_count = 0;
   };
 
   class Replay {
@@ -40,6 +37,7 @@ namespace ygo {
 
     template <typename T> void Write(T data) {
       WriteData(&data, sizeof(T));
+      this->pheader.msg_count = this->pheader.msg_count + 1;
     }
 
     void EndRecord();
@@ -61,23 +59,11 @@ namespace ygo {
     void Rewind();
 
     FILE *fp{nullptr};
-#ifdef _WIN32
     HANDLE recording_fp{nullptr};
-#endif
 
     ReplayHeader pheader;
     unsigned char *comp_data;
     size_t comp_size{};
-
-    //~ template <typename T>
-    //~ void write_replay_head(fast_io::obuf_file& file, const T& data) {
-    //~ using std::byte;
-    //~ write_all_bytes(
-    //~ file,
-    //~ reinterpret_cast<const byte*>(&data),
-    //~ reinterpret_cast<const byte*>(&data + 1)
-    //~ );
-    //~ }
 
   private:
     unsigned char *replay_data;

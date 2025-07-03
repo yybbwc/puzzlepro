@@ -152,97 +152,97 @@ namespace ygo {
             return false;
           }
           case BUTTON_HOST_CONFIRM: {
-            bot_mode = false;
-            BufferIO::CopyWideString(mainGame->ebServerName->getText(), mainGame->gameConf.gamename);
-            if (!NetServer::StartServer(mainGame->gameConf.serverport)) {
-              soundManager.PlaySoundEffect(SOUND_INFO);
-              mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
-              return false;
-            }
-            if (!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
-              NetServer::StopServer();
-              soundManager.PlaySoundEffect(SOUND_INFO);
-              mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
-              return false;
-            }
-            mainGame->btnHostConfirm->setEnabled(false);
-            mainGame->btnHostCancel->setEnabled(false);
-            return false;
+            //~ bot_mode = false;
+            //~ BufferIO::CopyWideString(mainGame->ebServerName->getText(), mainGame->gameConf.gamename);
+            //~ if (!NetServer::StartServer(mainGame->gameConf.serverport)) {
+            //~ soundManager.PlaySoundEffect(SOUND_INFO);
+            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
+            //~ return false;
+            //~ }
+            //~ if (!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
+            //~ NetServer::StopServer();
+            //~ soundManager.PlaySoundEffect(SOUND_INFO);
+            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
+            //~ return false;
+            //~ }
+            //~ mainGame->btnHostConfirm->setEnabled(false);
+            //~ mainGame->btnHostCancel->setEnabled(false);
+            //~ return false;
           }
           case BUTTON_HOST_CANCEL: {
-            mainGame->btnCreateHost->setEnabled(true);
-            mainGame->btnJoinHost->setEnabled(true);
-            mainGame->btnJoinCancel->setEnabled(true);
-            mainGame->HideElement(mainGame->wCreateHost);
-            mainGame->ShowElement(mainGame->wLanWindow);
-            return false;
+            //~ mainGame->btnCreateHost->setEnabled(true);
+            //~ mainGame->btnJoinHost->setEnabled(true);
+            //~ mainGame->btnJoinCancel->setEnabled(true);
+            //~ mainGame->HideElement(mainGame->wCreateHost);
+            //~ mainGame->ShowElement(mainGame->wLanWindow);
+            //~ return false;
           }
           case BUTTON_HP_DUELIST: {
-            mainGame->cbCategorySelect->setEnabled(true);
-            mainGame->cbDeckSelect->setEnabled(true);
-            DuelClient::SendPacketToServer(CTOS_HS_TODUELIST);
-            return false;
+            //~ mainGame->cbCategorySelect->setEnabled(true);
+            //~ mainGame->cbDeckSelect->setEnabled(true);
+            //~ DuelClient::SendPacketToServer(CTOS_HS_TODUELIST);
+            //~ return false;
           }
           case BUTTON_HP_OBSERVER: {
-            DuelClient::SendPacketToServer(CTOS_HS_TOOBSERVER);
-            return false;
+            //~ DuelClient::SendPacketToServer(CTOS_HS_TOOBSERVER);
+            //~ return false;
           }
           case BUTTON_HP_KICK: {
-            int index = 0;
-            while (index < 4) {
-              if (mainGame->btnHostPrepKick[index] == caller) {
-                return false;
-              }
-              ++index;
-            }
-            CTOS_Kick csk;
-            csk.pos = index;
-            DuelClient::SendPacketToServer(CTOS_HS_KICK, csk);
-            return false;
+            //~ int index = 0;
+            //~ while (index < 4) {
+            //~ if (mainGame->btnHostPrepKick[index] == caller) {
+            //~ return false;
+            //~ }
+            //~ ++index;
+            //~ }
+            //~ CTOS_Kick csk;
+            //~ csk.pos = index;
+            //~ DuelClient::SendPacketToServer(CTOS_HS_KICK, csk);
+            //~ return false;
           }
           case BUTTON_HP_READY: {
-            if (mainGame->cbCategorySelect->getSelected() == -1 || mainGame->cbDeckSelect->getSelected() == -1 || !deckManager.LoadCurrentDeck(mainGame->cbCategorySelect->getSelected(), mainGame->cbCategorySelect->getText(), mainGame->cbDeckSelect->getText())) {
-              mainGame->gMutex.lock();
-              soundManager.PlaySoundEffect(SOUND_INFO);
-              mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1406));
-              mainGame->gMutex.unlock();
-              return false;
-            }
-            UpdateDeck();
-            DuelClient::SendPacketToServer(CTOS_HS_READY);
-            mainGame->cbCategorySelect->setEnabled(false);
-            mainGame->cbDeckSelect->setEnabled(false);
-            return false;
+            //~ if (mainGame->cbCategorySelect->getSelected() == -1 || mainGame->cbDeckSelect->getSelected() == -1 || !deckManager.LoadCurrentDeck(mainGame->cbCategorySelect->getSelected(), mainGame->cbCategorySelect->getText(), mainGame->cbDeckSelect->getText())) {
+            //~ mainGame->gMutex.lock();
+            //~ soundManager.PlaySoundEffect(SOUND_INFO);
+            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1406));
+            //~ mainGame->gMutex.unlock();
+            //~ return false;
+            //~ }
+            //~ UpdateDeck();
+            //~ DuelClient::SendPacketToServer(CTOS_HS_READY);
+            //~ mainGame->cbCategorySelect->setEnabled(false);
+            //~ mainGame->cbDeckSelect->setEnabled(false);
+            //~ return false;
           }
           case BUTTON_HP_NOTREADY: {
-            DuelClient::SendPacketToServer(CTOS_HS_NOTREADY);
-            mainGame->cbCategorySelect->setEnabled(true);
-            mainGame->cbDeckSelect->setEnabled(true);
-            return false;
+            //~ DuelClient::SendPacketToServer(CTOS_HS_NOTREADY);
+            //~ mainGame->cbCategorySelect->setEnabled(true);
+            //~ mainGame->cbDeckSelect->setEnabled(true);
+            //~ return false;
           }
           case BUTTON_HP_START: {
-            DuelClient::SendPacketToServer(CTOS_HS_START);
-            return false;
+            //~ DuelClient::SendPacketToServer(CTOS_HS_START);
+            //~ return false;
           }
           case BUTTON_HP_CANCEL: {
-            DuelClient::StopClient();
-            mainGame->btnCreateHost->setEnabled(true);
-            mainGame->btnJoinHost->setEnabled(true);
-            mainGame->btnJoinCancel->setEnabled(true);
-            mainGame->btnStartBot->setEnabled(true);
-            mainGame->btnBotCancel->setEnabled(true);
-            mainGame->HideElement(mainGame->wHostPrepare);
-            if (bot_mode) {
-              mainGame->ShowElement(mainGame->wSinglePlay);
-            }
-            else {
-              mainGame->ShowElement(mainGame->wLanWindow);
-            }
-            mainGame->wChat->setVisible(false);
-            if (exit_on_return) {
-              mainGame->device->closeDevice();
-            }
-            return false;
+            //~ DuelClient::StopClient();
+            //~ mainGame->btnCreateHost->setEnabled(true);
+            //~ mainGame->btnJoinHost->setEnabled(true);
+            //~ mainGame->btnJoinCancel->setEnabled(true);
+            //~ mainGame->btnStartBot->setEnabled(true);
+            //~ mainGame->btnBotCancel->setEnabled(true);
+            //~ mainGame->HideElement(mainGame->wHostPrepare);
+            //~ if (bot_mode) {
+            //~ mainGame->ShowElement(mainGame->wSinglePlay);
+            //~ }
+            //~ else {
+            //~ mainGame->ShowElement(mainGame->wLanWindow);
+            //~ }
+            //~ mainGame->wChat->setVisible(false);
+            //~ if (exit_on_return) {
+            //~ mainGame->device->closeDevice();
+            //~ }
+            //~ return false;
           }
           case BUTTON_REPLAY_MODE: {
             mainGame->HideElement(mainGame->wMainMenu);
@@ -264,19 +264,103 @@ namespace ygo {
             return false;
           }
           case check_single_replay_button_id: {
+            using boost::thread;
+            using fast_io::wconcat_std;
+            using fast_io::mnp::os_c_str;
+
+            if (!mainGame->replay_file_select_panel->isSelectedFileReal()) {
+              break;
+            }
+            mainGame->wReplay->setVisible(false);
             mainGame->check_replay_window->setVisible(true);
             mainGame->check_replay_table->clearRows();
-            mainGame->check_replay_vector_0.clear();
-            mainGame->check_replay_vector_fail.clear();
-            mainGame->check_replay_vector_0.push_back(fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->replay_file_select_panel->getSelectedFilePath().c_str())));
-            std::thread(mainGame->check_replay_vector_thread).detach();
+            mainGame->check_replay_path_vector.clear();
+            mainGame->check_replay_path_vector.push_back(wconcat_std(os_c_str(mainGame->replay_file_select_panel->getSelectedFilePath().c_str())));
+            boost::thread(mainGame->check_replay_vector_thread).detach();
+            return false;
+          }
+          case check_single_layer_replay_button_id: {
+            using boost::thread;
+            using boost::filesystem::canonical;
+            using boost::filesystem::directory_iterator;
+            using boost::filesystem::exists;
+            using boost::filesystem::is_directory;
+            using boost::filesystem::path;
+            using boost::this_thread::get_id;
+            using fast_io::wconcat_std;
+            using fast_io::mnp::code_cvt;
+            using luabridge::getGlobal;
+            using luabridge::main_thread;
+            using std::string;
+
+            auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+            string replay_file_suffix = gui_config["replay_file_suffix"];
+
+            mainGame->wReplay->setVisible(false);
+            mainGame->check_replay_window->setVisible(true);
+            mainGame->check_replay_table->clearRows();
+            mainGame->check_replay_path_vector.clear();
+
+            auto dir = canonical(path(mainGame->replay_file_select_panel->getCurrentWorkingDirectory().c_str()));
+
+            if (exists(dir) and is_directory(dir)) {
+              for (auto &file : directory_iterator(dir)) {
+                auto str = file.path().string();
+                if (file.is_regular_file() and str.ends_with(replay_file_suffix)) {
+                  mainGame->check_replay_path_vector.push_back(wconcat_std(code_cvt(str)));
+                }
+              }
+            }
+            boost::thread(mainGame->check_replay_vector_thread).detach();
+            return false;
+          }
+          case check_multi_layer_replay_button_id: {
+            using boost::thread;
+            using boost::filesystem::canonical;
+            using boost::filesystem::exists;
+            using boost::filesystem::is_directory;
+            using boost::filesystem::path;
+            using boost::filesystem::recursive_directory_iterator;
+            using boost::this_thread::get_id;
+            using fast_io::wconcat_std;
+            using fast_io::mnp::code_cvt;
+            using luabridge::getGlobal;
+            using luabridge::main_thread;
+            using std::string;
+
+            auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+            string replay_file_suffix = gui_config["replay_file_suffix"];
+
+            mainGame->wReplay->setVisible(false);
+            mainGame->check_replay_window->setVisible(true);
+            mainGame->check_replay_table->clearRows();
+            mainGame->check_replay_path_vector.clear();
+
+            auto dir = canonical(path(mainGame->replay_file_select_panel->getCurrentWorkingDirectory().c_str()));
+            if (exists(dir) and is_directory(dir)) {
+              for (auto &file : recursive_directory_iterator(dir)) {
+                auto str = file.path().string();
+                if (file.is_regular_file() and str.ends_with(replay_file_suffix)) {
+                  mainGame->check_replay_path_vector.push_back(wconcat_std(code_cvt(str)));
+                }
+              }
+            }
+            boost::thread(mainGame->check_replay_vector_thread).detach();
             return false;
           }
           case solve_puzzle_button_id: {
+            using boost::thread;
+
+            if (!mainGame->replay_file_select_panel->isSelectedFileReal()) {
+              return false;
+            }
+            if (!ReplayMode::cur_replay.OpenReplay(mainGame->replay_file_select_panel->getSelectedFilePath().c_str())) {
+              return false;
+            }
+
             mainGame->solve_puzzle_should = true;
-            mainGame->solve_puzzle_success = false;
             mainGame->solve_puzzle_window->setVisible(true);
-            std::thread(mainGame->solve_puzzle_thread).detach();
+            thread(mainGame->solve_puzzle_thread).detach();
             return false;
           }
           case as_puzzle_button_id: {
@@ -290,21 +374,23 @@ namespace ygo {
           }
           case BUTTON_CANCEL_REPLAY: {
             mainGame->HideElement(mainGame->wReplay);
+            mainGame->HideElement(mainGame->check_replay_window);
             mainGame->ShowElement(mainGame->wMainMenu);
             return false;
           }
           case BUTTON_EXPORT_DECK: {
-            auto selected = mainGame->lstReplayList->getSelected();
-            if (selected == -1) {
+            //~ auto selected = mainGame->lstReplayList->getSelected();
+            if (!mainGame->replay_file_select_panel->isSelectedFileReal()) {
               return false;
             }
+            return false;
             Replay replay;
             wchar_t ex_filename[256]{};
             wchar_t namebuf[4][20]{};
             wchar_t filename[256]{};
             wchar_t replay_path[256]{};
-            BufferIO::CopyWideString(mainGame->lstReplayList->getListItem(selected), ex_filename);
-            myswprintf(replay_path, wconcat_fast_io(code_cvt_os_c_str(gui_config["replay_dir"].tostring().c_str()), L"%ls").c_str(), ex_filename);
+            //~ BufferIO::CopyWideString(mainGame->replay_file_select_panel->getListItem(selected), ex_filename);
+            //~ myswprintf(replay_path, wconcat_fast_io(code_cvt_os_c_str(gui_config["replay_dir"].tostring().c_str()), L"%ls").c_str(), ex_filename);
             if (!replay.OpenReplay(replay_path)) {
               return false;
             }
@@ -345,50 +431,50 @@ namespace ygo {
             return false;
           }
           case BUTTON_BOT_START: {
-            int sel = mainGame->lstBotList->getSelected();
-            if (sel == -1) {
-              return false;
-            }
-            bot_mode = true;
-            if (!NetServer::StartServer(mainGame->gameConf.serverport)) {
-              soundManager.PlaySoundEffect(SOUND_INFO);
-              mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
-              return false;
-            }
-            if (!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
-              NetServer::StopServer();
-              soundManager.PlaySoundEffect(SOUND_INFO);
-              mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
-              return false;
-            }
-            STARTUPINFOW si;
-            PROCESS_INFORMATION pi;
-            ZeroMemory(&si, sizeof(si));
-            si.cb = sizeof(si);
-            ZeroMemory(&pi, sizeof(pi));
-            wchar_t cmd[MAX_PATH];
-            wchar_t arg1[512];
-            if (mainGame->botInfo[sel].select_deckfile) {
-              wchar_t botdeck[256];
-              DeckManager::GetDeckFile(botdeck, mainGame->cbBotDeckCategory->getSelected(), mainGame->cbBotDeckCategory->getText(), mainGame->cbBotDeck->getText());
-              myswprintf(arg1, L"%ls DeckFile='%ls'", mainGame->botInfo[sel].command, botdeck);
-            }
-            else {
-              myswprintf(arg1, L"%ls", mainGame->botInfo[sel].command);
-            }
-            int flag = 0;
-            flag += (mainGame->chkBotHand->isChecked() ? 0x1 : 0);
-            myswprintf(cmd, L"Bot.exe \"%ls\" %d %d", arg1, flag, mainGame->gameConf.serverport);
-            if (!CreateProcessW(nullptr, cmd, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
-              NetServer::StopServer();
-              return false;
-            }
-            mainGame->btnStartBot->setEnabled(false);
-            mainGame->btnBotCancel->setEnabled(false);
-            return false;
+            //~ int sel = mainGame->lstBotList->getSelected();
+            //~ if (sel == -1) {
+            //~ return false;
+            //~ }
+            //~ bot_mode = true;
+            //~ if (!NetServer::StartServer(mainGame->gameConf.serverport)) {
+            //~ soundManager.PlaySoundEffect(SOUND_INFO);
+            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
+            //~ return false;
+            //~ }
+            //~ if (!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
+            //~ NetServer::StopServer();
+            //~ soundManager.PlaySoundEffect(SOUND_INFO);
+            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
+            //~ return false;
+            //~ }
+            //~ STARTUPINFOW si;
+            //~ PROCESS_INFORMATION pi;
+            //~ ZeroMemory(&si, sizeof(si));
+            //~ si.cb = sizeof(si);
+            //~ ZeroMemory(&pi, sizeof(pi));
+            //~ wchar_t cmd[MAX_PATH];
+            //~ wchar_t arg1[512];
+            //~ if (mainGame->botInfo[sel].select_deckfile) {
+            //~ wchar_t botdeck[256];
+            //~ DeckManager::GetDeckFile(botdeck, mainGame->cbBotDeckCategory->getSelected(), mainGame->cbBotDeckCategory->getText(), mainGame->cbBotDeck->getText());
+            //~ myswprintf(arg1, L"%ls DeckFile='%ls'", mainGame->botInfo[sel].command, botdeck);
+            //~ }
+            //~ else {
+            //~ myswprintf(arg1, L"%ls", mainGame->botInfo[sel].command);
+            //~ }
+            //~ int flag = 0;
+            //~ flag += (mainGame->chkBotHand->isChecked() ? 0x1 : 0);
+            //~ myswprintf(cmd, L"Bot.exe \"%ls\" %d %d", arg1, flag, mainGame->gameConf.serverport);
+            //~ if (!CreateProcessW(nullptr, cmd, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
+            //~ NetServer::StopServer();
+            //~ return false;
+            //~ }
+            //~ mainGame->btnStartBot->setEnabled(false);
+            //~ mainGame->btnBotCancel->setEnabled(false);
+            //~ return false;
           }
           case BUTTON_LOAD_SINGLEPLAY: {
-            if (mainGame->single_file_select_panel->getSelectedFilePath().empty()) {
+            if (!mainGame->single_file_select_panel->isSelectedFileReal()) {
               return false;
             }
             mainGame->singleSignal.SetNoWait(false);
@@ -606,8 +692,15 @@ namespace ygo {
   }
 
   bool MenuHandler::OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_EGFSPE_REAL_FILE_SELECTED() {
+    using fast_io::wconcat_std;
+    using fast_io::mnp::code_cvt;
+    using std::wstring;
+
     wchar_t infobuf[256]{};
-    std::wstring repinfo;
+    wstring repinfo;
+    //~ if (ReplayMode::cur_replay.pheader.flag & REPLAY_SINGLE_MODE) {
+    //~ repinfo.append(wconcat_std(code_cvt(mainGame->replay_relate_single_script_path), L"\n"));
+    //~ }
     time_t curtime = 0;
     if (ReplayMode::cur_replay.pheader.flag & REPLAY_UNIFORM) {
       curtime = ReplayMode::cur_replay.pheader.start_time;
@@ -617,6 +710,8 @@ namespace ygo {
     }
     std::wcsftime(infobuf, sizeof infobuf / sizeof infobuf[0], L"%Y/%m/%d %H:%M:%S\n", std::localtime(&curtime));
     repinfo.append(infobuf);
+    repinfo.append(fast_io::wconcat_std(ReplayMode::cur_replay.pheader.msg_count, L"\n"));
+    //~ repinfo.append(L"\n");
     wchar_t namebuf[4][20]{};
     ReplayMode::cur_replay.ReadName(namebuf[0]);
     ReplayMode::cur_replay.ReadName(namebuf[1]);
@@ -675,7 +770,7 @@ namespace ygo {
   }
 
   void Game::load_replay() {
-    if (replay_file_select_panel->getSelectedFilePath().empty()) {
+    if (!replay_file_select_panel->isSelectedFileReal()) {
       return;
     }
     if (!ReplayMode::cur_replay.OpenReplay(replay_file_select_panel->getSelectedFilePath().c_str())) {
@@ -703,7 +798,7 @@ namespace ygo {
     HideElement(wReplay);
     device->setEventReceiver(&dField);
     unsigned int start_turn = std::wcstol(ebRepStartTurn->getText(), nullptr, 10);
-    if (mainGame->check_single_replay_should or mainGame->as_puzzle_should) {
+    if (mainGame->check_replay_should or mainGame->as_puzzle_should) {
       start_turn = 10;
     }
     else if (start_turn == 1) {
@@ -713,97 +808,85 @@ namespace ygo {
   }
 
   void Game::check_replay_vector_thread() {
-    for (int64_t i = 0, n = mainGame->check_replay_vector_0.size(); i != n; ++i) {
-      auto t0(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-      mainGame->check_single_replay_should = true;
-      mainGame->check_single_replay_success = true;
-      int64_t row_count = mainGame->check_replay_table->addRow(mainGame->check_replay_table->getRowCount());
-      mainGame->check_replay_table->setCellText(row_count, 0, mainGame->check_replay_vector_0[i].c_str());
-      if (!ReplayMode::cur_replay.OpenReplay(mainGame->check_replay_vector_0[i].c_str())) {
-        mainGame->check_single_replay_should = false;
-        mainGame->check_replay_table->setCellText(row_count, 1, dataManager.GetSysString(4008));
-        break;
+    using fast_io::posix_clock_gettime;
+    using fast_io::wconcat_std;
+    using fast_io::mnp::code_cvt;
+    using fast_io::mnp::os_c_str;
+    using fast_io::posix_clock_id::monotonic_raw;
+    using fmt::format;
+
+    int64_t fail_count = 0;
+    double time_count = 0;
+    int64_t id = 0;
+    for (int64_t i = 0, n = mainGame->check_replay_path_vector.size(); i != n; ++i) {
+      auto t0(posix_clock_gettime(monotonic_raw));
+      mainGame->check_replay_should = true;
+      mainGame->check_replay_success = true;
+      id += 1;
+      if (!ReplayMode::cur_replay.OpenReplay(mainGame->check_replay_path_vector[i].c_str())) {
+        mainGame->check_replay_should = false;
+        mainGame->update_check_replay_window(id, i);
+        fail_count += 1;
+        continue;
       }
       mainGame->check_replay_vector_thread_impl();
-      if (mainGame->check_single_replay_success) {
-        mainGame->check_replay_table->setCellText(row_count, 1, dataManager.GetSysString(4007));
+      if (!mainGame->check_replay_success) {
+        mainGame->update_check_replay_window(id, i);
+        fail_count += 1;
       }
-      else {
-        mainGame->check_replay_table->setCellText(row_count, 1, dataManager.GetSysString(4008));
-        mainGame->check_replay_vector_fail.push_back(1);
-      }
-      auto t1(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-      mainGame->check_replay_table->setCellText(row_count, 2, fast_io::wconcat_std(t1 - t0, L"s").c_str());
+      auto t1(posix_clock_gettime(monotonic_raw));
+      time_count += static_cast<double>(t1 - t0);
     }
+    mainGame->check_replay_static_text->setText(wconcat_std(os_c_str(dataManager.GetSysString(4008)), L" ", fail_count, L"  ", os_c_str(dataManager.GetSysString(4007)), L" ", mainGame->check_replay_path_vector.size(), L"  ", os_c_str(dataManager.GetSysString(4006)), L" ", time_count, L"s").c_str());
+    mainGame->wReplay->setVisible(true);
+  }
+
+  void Game::update_check_replay_window(int64_t id, int64_t i) {
+    using fast_io::wconcat_std;
+    using fast_io::mnp::code_cvt;
+    using fmt::format;
+
     int64_t row_count = mainGame->check_replay_table->addRow(mainGame->check_replay_table->getRowCount());
-    mainGame->check_replay_table->setCellText(row_count, 0, fast_io::wconcat_std(mainGame->check_replay_vector_fail.size(), L"/", mainGame->check_replay_vector_0.size()).c_str());
+    mainGame->check_replay_table->setCellText(row_count, 0, wconcat_std(code_cvt(format("{:04}", id))).c_str());
+    mainGame->check_replay_table->setCellText(row_count, 1, mainGame->check_replay_path_vector[i].c_str());
+    mainGame->check_replay_table->setCellText(row_count, 2, dataManager.GetSysString(4008));
   }
 
   void Game::check_replay_vector_thread_impl() {
-    ClearCardInfo();
-    wCardImg->setVisible(true);
-    wInfos->setVisible(true);
-    //~ wReplay->setVisible(true);
-    wReplayControl->setVisible(true);
-    btnReplayStart->setVisible(false);
-    btnReplayPause->setVisible(true);
-    btnReplayStep->setVisible(false);
-    btnReplayUndo->setVisible(false);
-    wPhase->setVisible(true);
     dField.Clear();
-    HideElement(wReplay);
     device->setEventReceiver(&dField);
-    unsigned int start_turn = std::wcstol(ebRepStartTurn->getText(), nullptr, 10);
-    if (start_turn == 1) {
-      start_turn = 0;
-    }
-    if (mainGame->check_single_replay_should) {
-      start_turn = 10;
-    }
-    ReplayMode::start_replay(start_turn);
-    //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+    ReplayMode::start_replay(10);
   }
 
   void Game::solve_puzzle_thread() {
-    mainGame->solve_puzzle_table->addRow(0);
-    int64_t fail_count = 0;
-    mainGame->solve_puzzle_spend_time = 0;
-    mainGame->solve_puzzle_string_s1.clear();
-    for (; !mainGame->solve_puzzle_success;) {
-      mainGame->solve_puzzle_string.clear();
-      auto t0(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-      //~ int64_t row_count = mainGame->solve_puzzle_table->addRow(mainGame->solve_puzzle_table->getRowCount());
-      mainGame->solve_puzzle_thread_impl();
-      auto t1(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-      mainGame->solve_puzzle_spend_time += static_cast<double>(t1 - t0);
-      //~ mainGame->solve_puzzle_spend_time += t1 - t0;
-      if (mainGame->solve_puzzle_success) {
-        //~ mainGame->solve_puzzle_table->setCellText(row_count, 0, dataManager.GetSysString(4007));
-        //~ auto t1(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-        //~ mainGame->solve_puzzle_table->setCellText(row_count, 1, fast_io::wconcat_std(t1 - t0, L"s").c_str());
-        //~ mainGame->solve_puzzle_success
-        fast_io::obuf_file solve_puzzle_txt{"./replay/_solve_puzzle.txt"};
-        fast_io::io::print(solve_puzzle_txt, mainGame->solve_puzzle_string);
-        break;
-      }
-      else {
-        fail_count += 1;
-        mainGame->solve_puzzle_table->setCellText(0, 0, fast_io::wconcat_std(fail_count).c_str());
-        mainGame->solve_puzzle_table->setCellText(0, 1, fast_io::wconcat_std(mainGame->solve_puzzle_spend_time, L"s").c_str());
-      }
-      //~ mainGame->solve_puzzle_table->setCellText(row_count, 1, fast_io::wconcat_std(t1 - t0, L"s").c_str());
-      //~ mainGame->solve_puzzle_table->setCellText(0, 0, fast_io::wconcat_std(fast_io::mnp::os_c_str(dataManager.GetSysString(4008)), L": ", fail_count).c_str());
-    }
+    mainGame->solve_puzzle_root_node = new Game::solve_puzzle_node();
+    mainGame->solve_puzzle_current_node = mainGame->solve_puzzle_root_node;
+    //~ mainGame->solve_puzzle_table->addRow(0);
+    //~ int64_t fail_count = 0;
+    //~ mainGame->solve_puzzle_spend_time = 0;
+    //~ mainGame->solve_puzzle_string_s1.clear();
+    //~ for (; !mainGame->solve_puzzle_success;) {
+    //~ mainGame->solve_puzzle_string.clear();
+    //~ auto t0(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
+    mainGame->solve_puzzle_thread_impl();
+    //~ auto t1(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
+    //~ mainGame->solve_puzzle_spend_time += static_cast<double>(t1 - t0);
+    //~ mainGame->solve_puzzle_spend_time += t1 - t0;
+    //~ if (mainGame->solve_puzzle_success) {
+    //~ fast_io::obuf_file solve_puzzle_txt{"./replay/_solve_puzzle.txt"};
+    //~ fast_io::io::print(solve_puzzle_txt, mainGame->solve_puzzle_string);
+    //~ break;
+    //~ }
+    //~ else {
+    //~ fail_count += 1;
+    //~ mainGame->solve_puzzle_table->setCellText(0, 0, fast_io::wconcat_std(fail_count).c_str());
+    //~ mainGame->solve_puzzle_table->setCellText(0, 1, fast_io::wconcat_std(mainGame->solve_puzzle_spend_time, L"s").c_str());
+    //~ }
+    //~ }
     mainGame->solve_puzzle_should = false;
   }
 
   void Game::solve_puzzle_thread_impl() {
-    if (replay_file_select_panel->getSelectedFilePath().empty()) {
-      return;
-    }
-    if (!ReplayMode::cur_replay.OpenReplay(replay_file_select_panel->getSelectedFilePath().c_str())) {
-      return;
-    }
     ClearCardInfo();
     wCardImg->setVisible(true);
     wInfos->setVisible(true);
@@ -816,14 +899,14 @@ namespace ygo {
     dField.Clear();
     HideElement(wReplay);
     device->setEventReceiver(&dField);
-    unsigned int start_turn = std::wcstol(ebRepStartTurn->getText(), nullptr, 10);
-    if (start_turn == 1) {
-      start_turn = 0;
-    }
-    else if (mainGame->check_single_replay_should) {
-      start_turn = 10;
-    }
-    ReplayMode::start_replay(start_turn);
+    //~ unsigned int start_turn = std::wcstol(ebRepStartTurn->getText(), nullptr, 10);
+    //~ if (start_turn == 1) {
+    //~ start_turn = 0;
+    //~ }
+    //~ else if (mainGame->check_replay_should) {
+    //~ start_turn = 10;
+    //~ }
+    ReplayMode::start_replay(0);
   }
 
 } // namespace ygo

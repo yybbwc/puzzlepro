@@ -71,8 +71,6 @@ uint32_t default_message_handler(intptr_t pduel, uint32_t message_type) {
 
 extern "C" DECL_DLLEXPORT intptr_t create_duel(uint_fast32_t seed) {
   duel* pduel = new duel();
-  //~ pduel->last_replay_txt = new fast_io::obuf_file("./replay/_LastReplay.txt");
-  //~ pduel->last_replay_txt->reopen("./replay/_LastReplay.txt");
   duel_set.insert(pduel);
   pduel->random.reset(seed);
   return (intptr_t)pduel;

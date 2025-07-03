@@ -1,12 +1,9 @@
-/*
- * field.h
- *
- *  Created on: 2010-5-8
- *      Author: Argon
- */
 
-#ifndef FIELD_H_
-#define FIELD_H_
+
+//~ #ifndef FIELD_H_
+//~ #define FIELD_H_
+
+#pragma once
 
 #include "common.h"
 #include "card.h"
@@ -52,6 +49,21 @@ struct optarget {
   uint8_t op_player{PLAYER_NONE};
   int32_t op_param{0};
 };
+
+// 添加召唤状态枚举  
+enum SUMMON_PHASE {  
+    SUMMON_PHASE_NONE = 0,  
+    SUMMON_PHASE_CHECKING = 1,  
+    SUMMON_PHASE_PROCEEDING = 2  
+};  
+
+// 在 field 类中添加成员变量  
+struct {  
+    uint32_t fusion_phase;  
+    uint32_t ritual_phase;  
+    card* fusion_target;  
+    card* ritual_target;  
+} summon_state;
 
 struct chain {
   using opmap = std::unordered_map<uint32_t, optarget>;
@@ -369,6 +381,11 @@ struct processor {
   activity_map chain_counter;
   processor_list recover_damage_reserve;
   effect_vector dec_count_reserve;
+  
+    //~ bool fusion_proceeding = false;  
+    //~ bool ritual_proceeding = false;  
+    //~ card* fusion_target = nullptr;  
+    //~ card* ritual_target = nullptr;  
 };
 
 class field {
@@ -394,6 +411,18 @@ public:
   void swap_card(card *pcard1, card *pcard2, uint8_t new_sequence1, uint8_t new_sequence2);
   void swap_card(card *pcard1, card *pcard2);
   void set_control(card *pcard, uint8_t playerid, uint16_t reset_phase, uint8_t reset_count);
+  
+    // AI 选择辅助函数  
+    bool select_sum_ai_exact_match(int32_t target, int32_t min_count, int32_t max_count, std::vector<int>& result);  
+    bool select_sum_ai_range_match(int32_t target, int32_t min_count, std::vector<int>& result);  
+    bool find_exact_sum_combination(const std::vector<std::pair<int, uint32_t>>& cards,   
+                                   int32_t target, int32_t min_count, int32_t max_count,   
+                                   std::vector<int>& result);  
+    bool backtrack_sum_search(const std::vector<std::pair<int, uint32_t>>& cards,   
+                             size_t index, int32_t remaining_target,   
+                             int32_t min_count, int32_t max_count,  
+                             std::vector<int>& current, std::vector<int>& best_result);
+  
 
   int32_t get_pzone_sequence(uint8_t pseq) const;
   card *get_field_card(uint8_t playerid, uint32_t general_location, uint8_t sequence) const;
@@ -659,6 +688,13 @@ public:
   int32_t announce_attribute(int16_t step, uint8_t playerid, int32_t count, int32_t available);
   int32_t announce_card(int16_t step, uint8_t playerid);
   int32_t announce_number(int16_t step, uint8_t playerid);
+  
+    //~ void prefilter_fusion_materials(effect* peffect);  
+    //~ int32_t check_filtered_fusion_materials(effect* peffect); 
+    //~ int32_t check_fusion_monsters_available(uint8_t tp, const card_set& materials, effect* peffect);
+    
+//~ int32_t check_fusion_materials_after_immunity_filter(effect* peffect);  
+//~ int32_t check_fusion_monsters_available(uint8_t tp, const card_set& materials, effect* peffect);
 };
 
 // Location Use Reason
@@ -854,4 +890,4 @@ public:
 // #define PROCESSOR_SWAP_CONTROL_S	145
 // #define PROCESSOR_MOVETOFIELD_S		161
 
-#endif /* FIELD_H_ */
+//~ #endif /* FIELD_H_ */

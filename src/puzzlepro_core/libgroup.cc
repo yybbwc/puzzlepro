@@ -1,9 +1,3 @@
-/*
- * libgroup.cpp
- *
- *  Created on: 2010-5-6
- *      Author: Argon
- */
 
 #include "scriptlib.h"
 #include "group.h"

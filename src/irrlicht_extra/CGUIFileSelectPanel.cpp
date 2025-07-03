@@ -310,7 +310,7 @@ namespace irr {
     }
 
     io::path CGUIFileSelectPanel::getCurrentWorkingDirectory() {
-      fileSystem->flattenFilename(currentWorkingDir);
+      //~ fileSystem->flattenFilename(currentWorkingDir);
       return currentWorkingDir;
     }
 

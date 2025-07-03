@@ -152,7 +152,7 @@ namespace ygo {
     void RefreshSingleplay();
     void RefreshBot();
     void DrawSelectionLine(irr::video::S3DVertex *vec, bool strip, int width, float *cv);
-    void DrawSelectionLine(irr::gui::IGUIElement *element, int width, irr::video::SColor color);
+    //~ void DrawSelectionLine(irr::gui::IGUIElement *element, int width, irr::video::SColor color);
     void DrawBackGround();
     void DrawLinkedZones(ClientCard *pcard);
     void CheckMutual(ClientCard *pcard, int mark);
@@ -170,6 +170,10 @@ namespace ygo {
     //~ void DrawThumb(code_pointer cp, irr::core::vector2di pos, const std::unordered_map<int, int>* lflist, bool drag = false);
     void DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList *lflist, bool drag = false);
     void DrawDeckBd();
+    void DrawDeckBd_main_deck();
+    void DrawDeckBd_side_deck();
+    void DrawDeckBd_extra_deck();
+    void DrawDeckBd_search_result();
     void LoadConfig();
     void SaveConfig();
     void ShowCardInfo(int code, bool resize = false);
@@ -199,7 +203,6 @@ namespace ygo {
       text.trim();
       editbox->setText(text.c_str());
     }
-    
 
     void OnResize();
     void ResizeChatInputWindow();
@@ -230,7 +233,7 @@ namespace ygo {
 
     std::map<int64_t, int64_t> code_btnPS;
 
-    bool check_single_replay_success;
+    bool check_replay_success;
 
     //~ void scaleEntireGUI(irr::gui::IGUIEnvironment* guiEnv);
     void scale_whole_gui(irr::gui::IGUIEnvironment *gui_environment);
@@ -267,7 +270,9 @@ namespace ygo {
     inline static constexpr double main_deck_width_adjust_radio = (per_row_min_card_capacity - 1) / static_cast<double>(per_row_min_card_capacity);
     inline static constexpr double main_deck_height_adjust_radio = (main_deck_max_row_capacity - 1) / static_cast<double>(main_deck_max_row_capacity);
     
-    int64_t get_deck_edit_per_row_max_card_capacity(int64_t main_deck_card_count);
+    int64_t get_main_deck_per_row_max_card_capacity();
+    int64_t get_extra_deck_per_row_max_card_capacity();
+    int64_t get_side_deck_per_row_max_card_capacity();
 
     void update_lua();
     
@@ -307,7 +312,7 @@ namespace ygo {
 
     irr::gui::IGUIButton *solve_puzzle_button;
     bool solve_puzzle_should;
-    bool solve_puzzle_success;
+    //~ bool solve_puzzle_success;
 
     irr::gui::IGUIButton *as_puzzle_button;
     bool as_puzzle_should;
@@ -324,7 +329,7 @@ namespace ygo {
 
     std::string solve_puzzle_string;
     std::vector<std::string> solve_puzzle_string_s1;
-    double solve_puzzle_spend_time;
+    //~ double solve_puzzle_spend_time;
     std::string solve_puzzle_last_msg;
 
     bool solve_puzzle_select_cancelable_last_MSG_SELECT_PLACE;
@@ -435,6 +440,8 @@ namespace ygo {
     irr::scene::ICameraSceneNode *camera;
 
     fast_io::string currentCardName;
+    
+    boost::circular_buffer<std::wstring> circular_buffer_search_record{32};
 
     //~ #ifdef _WIN32
     HWND hWnd;
@@ -456,22 +463,25 @@ namespace ygo {
 
     irr::gui::IGUIWindow *check_replay_window;
     irr::gui::IGUITable *check_replay_table;
+    irr::gui::IGUIStaticText *check_replay_static_text;
+    
+    bool can_button;
 
     irr::gui::IGUIWindow *solve_puzzle_window;
-    irr::gui::IGUITable *solve_puzzle_table;
+    //~ irr::gui::IGUITable *solve_puzzle_table;
 
     irr::core::rect<int32_t> draw_gradient_background_size_text(irr::gui::IGUIElement *o1, const char *o2, int64_t o3, const wchar_t *o4);
 
-    std::vector<std::wstring> check_replay_vector_0;
-    std::vector<std::wstring> check_replay_vector_1;
-    std::vector<int64_t> check_replay_vector_fail;
-    std::vector<std::wstring> check_replay_vector_2;
+    std::vector<std::wstring> check_replay_path_vector;
+    //~ std::vector<std::wstring> check_replay_vector_1;
+    //~ std::vector<int64_t> check_replay_vector_fail;
+    //~ std::vector<std::wstring> check_replay_vector_2;
 
     static void check_replay_vector_thread();
     void check_replay_vector_thread_impl();
 
     std::unordered_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_int;
-    std::unordered_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_float;
+    //~ std::unordered_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_float;
 
     void init_resize_element_unordered_map();
     
@@ -595,7 +605,7 @@ namespace ygo {
     irr::gui::IGUIButton *btnHostPrepCancel;
     // replay
     irr::gui::IGUIWindow *wReplay;
-    irr::gui::IGUIListBox *lstReplayList;
+    //~ irr::gui::IGUIListBox *lstReplayList;
     irr::gui::CGUIFileSelectPanel *replay_file_select_panel;
     irr::gui::CGUIPanel *replay_panel;
     irr::gui::IGUIStaticText *stReplayInfo;
@@ -612,7 +622,7 @@ namespace ygo {
     irr::gui::IGUIButton *check_single_layer_replay_button;
     irr::gui::IGUIButton *check_multi_layer_replay_button;
 
-    bool check_single_replay_should;
+    bool check_replay_should;
     //~ bool button_single_layer_replay_bool;
     //~ bool button_multi_layer_replay_bool;
     // single play
@@ -705,6 +715,9 @@ namespace ygo {
     irr::gui::IGUIWindow *wANRace;
     irr::gui::IGUICheckBox *chkRace[RACES_COUNT];
     irr::gui::IGUIContextMenu *cmMenu;
+    
+    void update_check_replay_window(int64_t id, int64_t i);
+    //~ std::string replay_relate_single_script_path;
 
     // cmd menu
     //~ irr::gui::IGUIWindow* wCmdMenu;
@@ -777,7 +790,7 @@ namespace ygo {
     irr::gui::IGUIComboBox *cbDMCategory;
     irr::gui::IGUIButton *btnDMOK;
     irr::gui::IGUIButton *btnDMCancel;
-    irr::gui::IGUIScrollBar *scrPackCards;
+    //~ irr::gui::IGUIScrollBar *scrPackCards;
     // filter
     irr::gui::IGUIStaticText *wFilter;
     irr::gui::IGUIScrollBar *scrFilter;
@@ -791,9 +804,13 @@ namespace ygo {
     irr::gui::IGUIEditBox *ebAttack;
     irr::gui::IGUIEditBox *ebDefense;
     irr::gui::IGUIEditBox *ebCardName;
-    irr::gui::IGUIButton *btnEffectFilter;
+    //~ irr::gui::IGUIButton *btnEffectFilter;
     irr::gui::IGUIButton *btnStartFilter;
     irr::gui::IGUIButton *btnClearFilter;
+    
+    irr::gui::IGUIStaticText *static_text_search_record;
+    irr::gui::IGUIComboBox *combo_box_search_record;
+    
     irr::gui::IGUIWindow *wCategories;
     irr::gui::IGUICheckBox *chkCategory[32];
     irr::gui::IGUIButton *btnCategoryOK;
@@ -832,16 +849,46 @@ namespace ygo {
     // big picture
     irr::gui::IGUIWindow *wBigCard;
     irr::gui::IGUIImage *imgBigCard;
-    irr::gui::IGUIButton *btnBigCardOriginalSize;
-    irr::gui::IGUIButton *btnBigCardZoomIn;
-    irr::gui::IGUIButton *btnBigCardZoomOut;
-    irr::gui::IGUIButton *btnBigCardClose;
+    //~ irr::gui::IGUIButton *btnBigCardOriginalSize;
+    //~ irr::gui::IGUIButton *btnBigCardZoomIn;
+    //~ irr::gui::IGUIButton *btnBigCardZoomOut;
+    //~ irr::gui::IGUIButton *btnBigCardClose;
     
     template <typename T> irr::core::rect<T> get_origin_rect(const char *o1) {
       auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
       return irr::core::rect<T>(gui_xy[o1]["x1"], gui_xy[o1]["y1"], gui_xy[o1]["x2"], gui_xy[o1]["y2"]);
     }
+    
+    struct solve_puzzle_node {
+      double reward;
+      int64_t reward_count;
+      int64_t visit_count;
+      solve_puzzle_node *parent;
+      boost::container::vector<solve_puzzle_node> children;
+      std::string action;
+
+      solve_puzzle_node() = default;
+      
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int version) {
+        ar & BOOST_SERIALIZATION_NVP(reward);
+        ar & BOOST_SERIALIZATION_NVP(reward_count);
+        ar & BOOST_SERIALIZATION_NVP(visit_count);
+        ar & BOOST_SERIALIZATION_NVP(parent);
+        ar & BOOST_SERIALIZATION_NVP(children);
+        ar & BOOST_SERIALIZATION_NVP(action);
+      }
+    };
+    
+    solve_puzzle_node *solve_puzzle_root_node;
+    solve_puzzle_node *solve_puzzle_current_node;
+    
+    void solve_puzzle_select_node();
   };
+  
+
+  
+  //~ BOOST_CLASS_EXPORT(solve_puzzle_node)
 
   extern Game *mainGame;
 
@@ -892,7 +939,7 @@ namespace ygo {
 #define BUTTON_HP_READY 126
 #define BUTTON_HP_NOTREADY 127
 #define COMBOBOX_HP_CATEGORY 128
-#define LISTBOX_REPLAY_LIST 130
+//~ #define LISTBOX_REPLAY_LIST 130
 #define BUTTON_LOAD_REPLAY 131
 #define BUTTON_CANCEL_REPLAY 132
 //~ #define BUTTON_DELETE_REPLAY 133
@@ -969,18 +1016,18 @@ namespace ygo {
 #define BUTTON_CHAIN_WHENAVAIL 266
 #define BUTTON_CANCEL_OR_FINISH 267
 #define BUTTON_PHASE 268
-#define BUTTON_ANNUMBER_1 270
-#define BUTTON_ANNUMBER_2 271
-#define BUTTON_ANNUMBER_3 272
-#define BUTTON_ANNUMBER_4 273
-#define BUTTON_ANNUMBER_5 274
-#define BUTTON_ANNUMBER_6 275
-#define BUTTON_ANNUMBER_7 276
-#define BUTTON_ANNUMBER_8 277
-#define BUTTON_ANNUMBER_9 278
-#define BUTTON_ANNUMBER_10 279
-#define BUTTON_ANNUMBER_11 280
-#define BUTTON_ANNUMBER_12 281
+//~ #define BUTTON_ANNUMBER_1 270
+//~ #define BUTTON_ANNUMBER_2 271
+//~ #define BUTTON_ANNUMBER_3 272
+//~ #define BUTTON_ANNUMBER_4 273
+//~ #define BUTTON_ANNUMBER_5 274
+//~ #define BUTTON_ANNUMBER_6 275
+//~ #define BUTTON_ANNUMBER_7 276
+//~ #define BUTTON_ANNUMBER_8 277
+//~ #define BUTTON_ANNUMBER_9 278
+//~ #define BUTTON_ANNUMBER_10 279
+//~ #define BUTTON_ANNUMBER_11 280
+//~ #define BUTTON_ANNUMBER_12 281
 #define BUTTON_DISPLAY_0 290
 #define BUTTON_DISPLAY_1 291
 #define BUTTON_DISPLAY_2 292
@@ -1004,7 +1051,7 @@ namespace ygo {
 #define BUTTON_SHUFFLE_DECK 310
 #define COMBOBOX_MAINTYPE 311
 #define COMBOBOX_SECONDTYPE 312
-#define BUTTON_EFFECT_FILTER 313
+//~ #define BUTTON_EFFECT_FILTER 313
 #define BUTTON_START_FILTER 314
 #define SCROLL_FILTER 315
 #define EDITBOX_KEYWORD 316
@@ -1067,6 +1114,7 @@ inline constexpr int64_t solve_puzzle_button_id = 1005;
 inline constexpr int64_t chain_timing_combo_box_id = 1006;
 inline constexpr int64_t as_puzzle_button_id = 1007;
 inline constexpr int64_t wOptions_combo_box_option_id = 1008;
+inline constexpr int64_t combo_box_search_record_id = 1009;
 
 #define AVAIL_OCG 0x1
 #define AVAIL_TCG 0x2

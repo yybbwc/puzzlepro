@@ -28,26 +28,6 @@ uint32_t field::process() {
     return PROCESSOR_END | pduel->buffer_size();
   }
   auto it = core.units.begin();
-  //~ aux["DebugConstant"](it->type, "PROCESSOR");
-  //~ aux["DebugHint"](it->type, "PROCESSOR");
-  //~ luabridge::LuaRef aux = luabridge::getGlobal(pduel->lua->lua_state, "aux");
-  //~ aux["DebugConstant"](reason, "REASON");
-  //~ aux["HINTMSG_EQUIP"];
-  //~ luabridge::LuaRef v (pduel->lua->lua_state);
-  //~ v = luabridge::newTable (pduel->lua->lua_state);
-
-  //~ v ["name"] = "John Doe";             // string key, string value
-  //~ v [1] = 200;
-  //~ luabridge::setGlobal (pduel->lua->lua_state, v, "a");
-  //~ luabridge::LuaRef a = luabridge::getGlobal(pduel->lua->lua_state, "a");
-  //~ fast_io::io::print(fast_io::win32_box_t(), luabridge::getGlobal(pduel->lua->lua_state, "aux")["DebugConstant_PROCESSOR"].cast<std::string>().valueOr("4"), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-  //~ std::string k1 = luabridge::passString(aux["DebugConstant"](it->type, "PROCESSOR").size());
-  //~ if (aux["DebugConstant"](it->type, "PROCESSOR")) {
-  //~ fast_io::io::print(fast_io::win32_box_t(), aux["DebugConstant"](it->type, "PROCESSOR")[0].cast<std::string>().valueOr("出错了"), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-  //~ fast_io::io::print(fast_io::win32_box_t(), aux["DebugConstant"](it->type, "PROCESSOR")[0].tostring(), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-  //~ }
-  //~ fast_io::io::print(fast_io::win32_box_t(), aux["PROCESSOR"][it->type].cast<std::string>().valueOr("4"), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-  //~ luabridge::getGlobal(pduel->lua->lua_state, "aux")["DebugHint"]("hell");
   if (aux["DebugConstant_PROCESSOR"]) {
     if (not(it->type == PROCESSOR_ADJUST) and not(it->type == PROCESSOR_REFRESH_LOC)) {
       fast_io::io::print(fast_io::win32_box_t(), aux["DebugConstant"](it->type, "PROCESSOR")[0].tostring(), " ", it->step, "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
@@ -207,6 +187,7 @@ uint32_t field::process() {
       }
     }
     case PROCESSOR_SELECT_SUM: {
+      //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
       if (select_with_sum_limit(it->step, it->arg2, it->arg1, it->arg3, it->arg4)) {
         core.units.pop_front();
         return pduel->buffer_size();
@@ -455,6 +436,7 @@ uint32_t field::process() {
       return pduel->buffer_size();
     }
     case PROCESSOR_SPSUMMON_RULE: {
+      //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
       if (special_summon_rule(it->step, it->arg1, (card *)it->ptarget, it->arg2, it->arg3)) {
         core.units.pop_front();
       }
@@ -464,6 +446,7 @@ uint32_t field::process() {
       return pduel->buffer_size();
     }
     case PROCESSOR_SPSUMMON: {
+      //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
       if (special_summon(it->step, it->peffect, it->arg1, it->ptarget, it->arg2)) {
         core.units.pop_front();
       }

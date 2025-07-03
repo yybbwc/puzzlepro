@@ -732,13 +732,13 @@ namespace ygo {
   }
 
   void ClientField::ShowSelectOption(int select_hint) {
-    using boost::mutex;
     using boost::lock_guard;
-    
+    using boost::mutex;
+
     lock_guard<mutex> mutex_guard(mainGame->gMutex);
-    
+
     selected_option = 0;
-  
+
     int64_t count = select_options.size();
     mainGame->btnOptionOK->setVisible(true);
     mainGame->wOptions_combo_box_option->clear();
@@ -929,6 +929,8 @@ namespace ygo {
   }
 
   void ClientField::GetCardLocation(ClientCard *pcard, irr::core::vector3df *t, irr::core::vector3df *r, bool setTrans) {
+    using namespace boost::math::double_constants;
+
     int controler = pcard->controler;
     int sequence = pcard->sequence;
     int location = pcard->location;
@@ -944,7 +946,7 @@ namespace ygo {
         if (controler == 0) {
           if (deck_reversed == pcard->is_reversed) {
             r->X = 0.0f;
-            r->Y = 3.1415926f;
+            r->Y = pi;
             r->Z = 0.0f;
           }
           else {
@@ -956,13 +958,13 @@ namespace ygo {
         else {
           if (deck_reversed == pcard->is_reversed) {
             r->X = 0.0f;
-            r->Y = 3.1415926f;
-            r->Z = 3.1415926f;
+            r->Y = pi;
+            r->Z = pi;
           }
           else {
             r->X = 0.0f;
             r->Y = 0.0f;
-            r->Z = 3.1415926f;
+            r->Z = pi;
           }
         }
         break;
@@ -985,6 +987,9 @@ namespace ygo {
             t->Y = 4.0f;
             t->Z = 0.5f + 0.001f * sequence;
           }
+          //~ if (pcard->is_hovered) {
+          //~ driver->draw2DRectangleOutline(mainGame->ResizeWin())
+          //~ }
           if (pcard->code) {
             r->X = -0.798056f;
             r->Y = 0.0f;
@@ -992,7 +997,7 @@ namespace ygo {
           }
           else {
             r->X = 0.798056f;
-            r->Y = 3.1415926f;
+            r->Y = pi;
             r->Z = 0;
           }
         }

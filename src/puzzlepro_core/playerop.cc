@@ -690,6 +690,17 @@ int32_t field::select_counter(uint16_t step, uint8_t playerid, uint16_t countert
       pduel->write_buffer8(MSG_RETRY);
       return FALSE;
     }
+if ((playerid == 1) && (core.duel_options & DUEL_SIMPLE_AI)) {  
+  // AI逻辑：简单选择前面的卡片直到满足count要求  
+  int32_t remaining = count;  
+  for (int32_t i = 0; i < (int32_t)core.select_cards.size() && remaining > 0; ++i) {  
+    int32_t available = core.select_cards[i]->get_counter(countertype);  
+    int32_t take = std::min(remaining, available);  
+    returns.svalue[i] = take;  
+    remaining -= take;  
+  }  
+  return TRUE;  
+}
     pduel->write_buffer8(MSG_SELECT_COUNTER);
     pduel->write_buffer8(playerid);
     pduel->write_buffer16(countertype);
@@ -750,6 +761,38 @@ int32_t field::select_with_sum_limit(int16_t step, uint8_t playerid, int32_t acc
     if (core.must_select_cards.size() > UINT8_MAX) {
       core.must_select_cards.resize(UINT8_MAX);
     }
+// 在 step == 0 阶段，替换现有的简单 AI 逻辑  
+if ((playerid == 1) && (core.duel_options & DUEL_SIMPLE_AI)) {  
+    // 智能 AI 选择逻辑  
+    std::vector<int> selected_indices;  
+      
+    if (max > 0) {  
+        // 精确匹配模式：寻找能精确达到目标值的组合  
+        if (select_sum_ai_exact_match(acc, min, max, selected_indices)) {  
+            returns.bvalue[0] = selected_indices.size() + core.must_select_cards.size();
+            for (size_t i = 0; i < selected_indices.size(); ++i) {  
+                returns.bvalue[i + 1] = selected_indices[i];  
+            }  
+            return TRUE;  
+        }  
+    } else {  
+        // 范围匹配模式：寻找能达到目标范围的最优组合  
+        if (select_sum_ai_range_match(acc, min, selected_indices)) {  
+            returns.bvalue[0] = selected_indices.size();  
+            for (size_t i = 0; i < selected_indices.size(); ++i) {  
+                returns.bvalue[i + 1] = selected_indices[i];  
+            }  
+            return TRUE;  
+        }  
+    }  
+      
+    // 如果智能选择失败，回退到简单选择  
+    returns.bvalue[0] = min;  
+    for (uint8_t i = 0; i < min; ++i) {  
+        returns.bvalue[i + 1] = i;  
+    }  
+    return TRUE;  
+}
     pduel->write_buffer8(MSG_SELECT_SUM);
     if (max) {
       pduel->write_buffer8(0);
@@ -799,6 +842,9 @@ int32_t field::select_with_sum_limit(int16_t step, uint8_t playerid, int32_t acc
         oparam[i] = core.must_select_cards[i]->sum_param;
       }
       int32_t m = (int32_t)core.select_cards.size();
+      //~ for (int32_t i = 0; i < returns.bvalue[0]; ++i) {
+        //~ fast_io::io::print(fast_io::win32_box_t(), returns.bvalue[i], "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+      //~ }
       for (int32_t i = mcount; i < returns.bvalue[0]; ++i) {
         int32_t v = returns.bvalue[i + 1];
         if (v < 0 || v >= m || c.count(v)) {
@@ -853,6 +899,142 @@ int32_t field::select_with_sum_limit(int16_t step, uint8_t playerid, int32_t acc
     }
   }
   return TRUE;
+}
+
+// 在 field 类中添加这些私有辅助函数  
+  
+// 精确匹配 AI 逻辑  
+bool field::select_sum_ai_exact_match(int32_t target, int32_t min_count, int32_t max_count, std::vector<int>& result) {  
+    // 构建可选卡牌的参数数组  
+    std::vector<std::pair<int, uint32_t>> available_cards; // <索引, sum_param>  
+      
+    // 添加必选卡牌  
+    for (size_t i = 0; i < core.must_select_cards.size(); ++i) {  
+        available_cards.push_back({-1, core.must_select_cards[i]->sum_param});  
+    }  
+      
+    // 添加可选卡牌  
+    for (size_t i = 0; i < core.select_cards.size(); ++i) {  
+        available_cards.push_back({i, core.select_cards[i]->sum_param});  
+    }  
+      
+    // 使用动态规划或回溯算法寻找最优解  
+    return find_exact_sum_combination(available_cards, target, min_count, max_count, result);  
+}  
+  
+// 范围匹配 AI 逻辑  
+bool field::select_sum_ai_range_match(int32_t target, int32_t min_count, std::vector<int>& result) {  
+    // 计算必选卡牌的贡献  
+    int32_t must_sum_min = 0, must_sum_max = 0;  
+    for (auto& pcard : core.must_select_cards) {  
+        uint32_t op = pcard->sum_param;  
+        int32_t o1 = op & 0xffff;  
+        int32_t o2 = op >> 16;  
+        int32_t ms = (o2 && o2 < o1) ? o2 : o1;  
+        must_sum_min += ms;  
+        must_sum_max += std::max(o1, o2);  
+    }  
+      
+    // 如果必选卡牌已经满足条件，直接返回  
+    if (must_sum_min >= target) {  
+        return true; // 不需要选择额外卡牌  
+    }  
+      
+    // 贪心算法：优先选择性价比高的卡牌  
+    std::vector<std::pair<int, double>> card_efficiency; // <索引, 效率值>  
+      
+    for (size_t i = 0; i < core.select_cards.size(); ++i) {  
+        uint32_t op = core.select_cards[i]->sum_param;  
+        int32_t o1 = op & 0xffff;  
+        int32_t o2 = op >> 16;  
+        int32_t max_val = std::max(o1, o2);  
+        int32_t min_val = (o2 && o2 < o1) ? o2 : o1;  
+          
+        // 计算效率：最大贡献值 / 最小贡献值（避免除零）  
+        double efficiency = min_val > 0 ? (double)max_val / min_val : max_val;  
+        card_efficiency.push_back({i, efficiency});  
+    }  
+      
+    // 按效率排序  
+    std::sort(card_efficiency.begin(), card_efficiency.end(),   
+              [](const auto& a, const auto& b) { return a.second > b.second; });  
+      
+    // 贪心选择  
+    int32_t current_sum = must_sum_min;  
+    for (auto& [index, efficiency] : card_efficiency) {  
+        if (current_sum >= target) break;  
+          
+        uint32_t op = core.select_cards[index]->sum_param;  
+        int32_t o1 = op & 0xffff;  
+        int32_t o2 = op >> 16;  
+        int32_t contribution = std::max(o1, o2);  
+          
+        result.push_back(index);  
+        current_sum += contribution;  
+          
+        if (result.size() >= 255) break; // 防止溢出  
+    }  
+      
+    return current_sum >= target && result.size() >= min_count;  
+}  
+  
+// 精确组合查找算法（回溯法）  
+bool field::find_exact_sum_combination(const std::vector<std::pair<int, uint32_t>>& cards,   
+                                      int32_t target, int32_t min_count, int32_t max_count,   
+                                      std::vector<int>& result) {  
+    std::vector<int> current_selection;  
+    return backtrack_sum_search(cards, 0, target, min_count, max_count, current_selection, result);  
+}  
+  
+bool field::backtrack_sum_search(const std::vector<std::pair<int, uint32_t>>& cards,   
+                                size_t index, int32_t remaining_target,   
+                                int32_t min_count, int32_t max_count,  
+                                std::vector<int>& current, std::vector<int>& best_result) {  
+    // 剪枝：如果已经超过最大选择数量  
+    if (current.size() > max_count) return false;  
+      
+    // 成功条件：目标值为0且选择数量在范围内  
+    if (remaining_target == 0 && current.size() >= min_count && current.size() <= max_count) {  
+        best_result = current;  
+        return true;  
+    }  
+      
+    // 剪枝：如果剩余目标值小于0或已经遍历完所有卡牌  
+    if (remaining_target < 0 || index >= cards.size()) return false;  
+      
+    // 尝试选择当前卡牌的第一个值  
+    uint32_t op = cards[index].second;  
+    int32_t o1 = op & 0xffff;  
+    int32_t o2 = op >> 16;  
+      
+    // 选择 o1  
+    if (o1 <= remaining_target) {  
+        if (cards[index].first >= 0) { // 只有可选卡牌才加入结果  
+            current.push_back(cards[index].first);  
+        }  
+        if (backtrack_sum_search(cards, index + 1, remaining_target - o1, min_count, max_count, current, best_result)) {  
+            return true;  
+        }  
+        if (cards[index].first >= 0) {  
+            current.pop_back();  
+        }  
+    }  
+      
+    // 选择 o2（如果存在且不同于o1）  
+    if (o2 > 0 && o2 != o1 && o2 <= remaining_target) {  
+        if (cards[index].first >= 0) {  
+            current.push_back(cards[index].first);  
+        }  
+        if (backtrack_sum_search(cards, index + 1, remaining_target - o2, min_count, max_count, current, best_result)) {  
+            return true;  
+        }  
+        if (cards[index].first >= 0) {  
+            current.pop_back();  
+        }  
+    }  
+      
+    // 不选择当前卡牌  
+    return backtrack_sum_search(cards, index + 1, remaining_target, min_count, max_count, current, best_result);  
 }
 
 int32_t field::sort_card(int16_t step, uint8_t playerid) {
@@ -910,6 +1092,22 @@ int32_t field::announce_race(int16_t step, uint8_t playerid, int32_t count, int3
       count = scount;
       core.units.begin()->arg1 = (count << 16) + playerid;
     }
+    // AI逻辑  
+    if ((playerid == 1) && (core.duel_options & DUEL_SIMPLE_AI)) {  
+      int32_t selected_races = 0;  
+      int32_t selected_count = 0;  
+        
+      // 简单AI策略：按位顺序选择可用的种族  
+      for (uint32_t ft = 0x1; ft < (0x1U << RACES_COUNT) && selected_count < count; ft <<= 1) {  
+        if (ft & available) {  
+          selected_races |= ft;  
+          ++selected_count;  
+        }  
+      }  
+        
+      returns.ivalue[0] = selected_races;  
+      return TRUE;  
+    }  
     pduel->write_buffer8(MSG_ANNOUNCE_RACE);
     pduel->write_buffer8(playerid);
     pduel->write_buffer8(count);
@@ -954,6 +1152,19 @@ int32_t field::announce_attribute(int16_t step, uint8_t playerid, int32_t count,
       count = scount;
       core.units.begin()->arg1 = (count << 16) + playerid;
     }
+  // 添加 AI 逻辑  
+  if ((playerid == 1) && (core.duel_options & DUEL_SIMPLE_AI)) {  
+    int32_t selected = 0;  
+    int32_t selected_count = 0;  
+    for (int32_t ft = 0x1; ft != 0x80 && selected_count < count; ft <<= 1) {  
+      if (ft & available) {  
+        selected |= ft;  
+        ++selected_count;  
+      }  
+    }  
+    returns.ivalue[0] = selected;  
+    return TRUE;  
+  }  
     pduel->write_buffer8(MSG_ANNOUNCE_ATTRIB);
     pduel->write_buffer8(playerid);
     pduel->write_buffer8(count);

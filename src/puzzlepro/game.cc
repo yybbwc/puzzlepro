@@ -45,7 +45,7 @@ namespace ygo {
 #endif
     fast_io::fast_terminate();
   }
-  
+
   lua_State *Game::create_lua_state(const char *o1) {
     lua_State *k1 = luaL_newstate();
     luaL_openlibs(k1);
@@ -55,40 +55,40 @@ namespace ygo {
     lua_atpanic(k1, my_lua_panic);
     return k1;
   }
-  
+
   lua_State *Game::get_lua(boost::thread::id thread_id) {
-    using boost::mutex;
     using boost::lock_guard;
+    using boost::mutex;
     using id = boost::thread::id;
-    
+
     lock_guard<mutex> mutex_guard(this->lua_mutex);
-    
+
     if (this->new_lua_sup1[thread_id]) {
       return this->new_lua_sup1[thread_id];
     }
-    
-    for (auto& pair : this->new_lua_sup1) {
+
+    for (auto &pair : this->new_lua_sup1) {
       if (pair.first == this->dead_thread_id) {
         pair.first = thread_id;
         return pair.second;
       }
     }
-    
+
     this->new_lua_sup1[thread_id] = this->create_lua_state("./lua/main.lua");
     return this->new_lua_sup1[thread_id];
   }
-  
+
   void Game::replace_new_lua_sup1() {
-    using boost::mutex;
     using boost::lock_guard;
-    
+    using boost::mutex;
+
     lock_guard<mutex> mutex_guard(this->lua_mutex);
-    
-    for (auto& pair : this->new_lua_sup1) {
+
+    for (auto &pair : this->new_lua_sup1) {
       this->old_lua_sup1.push_back(pair.second);
       pair.second = this->create_lua_state("./lua/main.lua");
     }
-    
+
     int64_t size = 128;
     if (this->old_lua_sup1.size() > size) {
       size = this->old_lua_sup1.size() - size;
@@ -148,58 +148,65 @@ namespace ygo {
       return false;
     }
     LoadExpansions();
+
     guiEnv = device->getGUIEnvironment();
-    //~ numFont = irr::gui::CGUIT1TFont::1);
-    numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16, true, true, font_outline);
-    if (!numFont) {
-      const wchar_t *numFontPaths[] = {L"C:/Windows/Fonts/arialbd.ttf", L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf", L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc", L"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf", L"/System/Library/Fonts/SFNS.ttf", L"./fonts/numFont.ttf", L"./fonts/numFont.ttc", L"./fonts/numFont.otf"};
-      for (const wchar_t *path : numFontPaths) {
-        BufferIO::CopyWideString(path, gameConf.numfont);
-        numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16, true, true, font_outline);
-        if (numFont) {
-          break;
-        }
-      }
-    }
+
     textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
-    if (!textFont) {
-      const wchar_t *textFontPaths[] = {L"C:/Windows/Fonts/msyh.ttc", L"C:/Windows/Fonts/msyh.ttf", L"C:/Windows/Fonts/simsun.ttc", L"C:/Windows/Fonts/YuGothM.ttc", L"C:/Windows/Fonts/meiryo.ttc", L"C:/Windows/Fonts/msgothic.ttc", L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf", L"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc", L"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc", L"/System/Library/Fonts/PingFang.ttc", L"./fonts/textFont.ttf", L"./fonts/textFont.ttc", L"./fonts/textFont.otf"};
-      for (const wchar_t *path : textFontPaths) {
-        BufferIO::CopyWideString(path, gameConf.textfont);
-        textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
-        if (textFont) {
-          break;
-        }
-      }
-    }
-    if (!numFont || !textFont) {
-      wchar_t fpath[1024]{};
-      fpath[0] = 0;
-      FileSystem::TraversalDir(L"./fonts", [&fpath](const wchar_t *name, bool isdir) {
-        if (!isdir && (IsExtension(name, L".ttf") || IsExtension(name, L".ttc") || IsExtension(name, L".otf"))) {
-          myswprintf(fpath, L"./fonts/%ls", name);
-        }
-      });
-      if (fpath[0] == 0) {
-        ErrorLog("No fonts found! Please place appropriate font file in the fonts directory, or edit system.conf manually.");
-        return false;
-      }
-      if (!numFont) {
-        BufferIO::CopyWideString(fpath, gameConf.numfont);
-        numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16, true, true, font_outline);
-      }
-      if (!textFont) {
-        BufferIO::CopyWideString(fpath, gameConf.textfont);
-        textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
-      }
-    }
-    if (!numFont || !textFont) {
-      ErrorLog("Failed to load font(s)!");
-      return false;
-    }
+    guiFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    guiFont->setFontHinting(true, false);
+    textFont->setFontHinting(true, false);
+    guiEnv->getSkin()->setFont(guiFont);
+
+    //~ if (!numFont) {
+    //~ const wchar_t *numFontPaths[] = {L"C:/Windows/Fonts/arialbd.ttf", L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf", L"/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc", L"/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", L"/System/Library/Fonts/SFNSTextCondensed-Bold.otf", L"/System/Library/Fonts/SFNS.ttf", L"./fonts/numFont.ttf", L"./fonts/numFont.ttc", L"./fonts/numFont.otf"};
+    //~ for (const wchar_t *path : numFontPaths) {
+    //~ BufferIO::CopyWideString(path, gameConf.numfont);
+    //~ numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16, true, true, font_outline);
+    //~ if (numFont) {
+    //~ break;
+    //~ }
+    //~ }
+    //~ }
+    //~ textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    //~ if (!textFont) {
+    //~ const wchar_t *textFontPaths[] = {L"C:/Windows/Fonts/msyh.ttc", L"C:/Windows/Fonts/msyh.ttf", L"C:/Windows/Fonts/simsun.ttc", L"C:/Windows/Fonts/YuGothM.ttc", L"C:/Windows/Fonts/meiryo.ttc", L"C:/Windows/Fonts/msgothic.ttc", L"/usr/share/fonts/truetype/DroidSansFallbackFull.ttf", L"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc", L"/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc", L"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc", L"/System/Library/Fonts/PingFang.ttc", L"./fonts/textFont.ttf", L"./fonts/textFont.ttc", L"./fonts/textFont.otf"};
+    //~ for (const wchar_t *path : textFontPaths) {
+    //~ BufferIO::CopyWideString(path, gameConf.textfont);
+    //~ textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    //~ if (textFont) {
+    //~ break;
+    //~ }
+    //~ }
+    //~ }
+    //~ if (!numFont || !textFont) {
+    //~ wchar_t fpath[1024]{};
+    //~ fpath[0] = 0;
+    //~ FileSystem::TraversalDir(L"./fonts", [&fpath](const wchar_t *name, bool isdir) {
+    //~ if (!isdir && (IsExtension(name, L".ttf") || IsExtension(name, L".ttc") || IsExtension(name, L".otf"))) {
+    //~ myswprintf(fpath, L"./fonts/%ls", name);
+    //~ }
+    //~ });
+    //~ if (fpath[0] == 0) {
+    //~ ErrorLog("No fonts found! Please place appropriate font file in the fonts directory, or edit system.conf manually.");
+    //~ return false;
+    //~ }
+    //~ if (!numFont) {
+    //~ BufferIO::CopyWideString(fpath, gameConf.numfont);
+    //~ numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16, true, true, font_outline);
+    //~ }
+    //~ if (!textFont) {
+    //~ BufferIO::CopyWideString(fpath, gameConf.textfont);
+    //~ textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    //~ }
+    //~ }
+    //~ if (!numFont || !textFont) {
+    //~ ErrorLog("Failed to load font(s)!");
+    //~ return false;
+    //~ }
+    numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16, true, true, font_outline);
     adFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 12, true, true, font_outline);
     lpcFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 48, true, true, font_outline);
-    guiFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    //~ guiFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
     smgr = device->getSceneManager();
     device->setWindowCaption(L"PuzzlePro");
     device->setResizable(true);
@@ -208,30 +215,26 @@ namespace ygo {
     }
     //~ #ifdef _WIN32
     irr::video::SExposedVideoData exposedData = driver->getExposedVideoData();
-    if (gameConf.use_d3d) {
-      hWnd = reinterpret_cast<HWND>(exposedData.D3D9.HWnd);
-    }
-    else {
-      hWnd = reinterpret_cast<HWND>(exposedData.OpenGLWin32.HWnd);
-    }
+    //~ if (gameConf.use_d3d) {
+    //~ hWnd = reinterpret_cast<HWND>(exposedData.D3D9.HWnd);
+    //~ }
+    //~ else {
+    hWnd = reinterpret_cast<HWND>(exposedData.OpenGLWin32.HWnd);
+    //~ }
     //~ #endif
     SetWindowsIcon();
 
     static_text_deck_edit_main_deck_size = guiEnv->addStaticText(L"", irr::core::rect<int32_t>(0, 0, 0, 0), true, true, nullptr, -1, true);
     static_text_deck_edit_main_deck_size->setVisible(false);
-    //~ static_text_deck_edit_main_deck_size->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
     static_text_deck_edit_main_deck_size->setTextAlignment(static_cast<irr::gui::EGUI_ALIGNMENT>(0), irr::gui::EGUIA_CENTER);
     static_text_deck_edit_extra_deck_size = guiEnv->addStaticText(L"", irr::core::rect<int32_t>(0, 0, 0, 0), true, true, nullptr, -1, true);
     static_text_deck_edit_extra_deck_size->setVisible(false);
-    //~ static_text_deck_edit_extra_deck_size->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
     static_text_deck_edit_extra_deck_size->setTextAlignment(static_cast<irr::gui::EGUI_ALIGNMENT>(0), irr::gui::EGUIA_CENTER);
     static_text_deck_edit_side_deck_size = guiEnv->addStaticText(L"", irr::core::rect<int32_t>(0, 0, 0, 0), true, true, nullptr, -1, true);
     static_text_deck_edit_side_deck_size->setVisible(false);
-    //~ static_text_deck_edit_side_deck_size->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
     static_text_deck_edit_side_deck_size->setTextAlignment(static_cast<irr::gui::EGUI_ALIGNMENT>(0), irr::gui::EGUIA_CENTER);
     static_text_deck_edit_search_result_size = guiEnv->addStaticText(L"", irr::core::rect<int32_t>(0, 0, 0, 0), true, true, nullptr, -1, true);
     static_text_deck_edit_search_result_size->setVisible(false);
-    //~ static_text_deck_edit_search_result_size->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
     static_text_deck_edit_search_result_size->setTextAlignment(static_cast<irr::gui::EGUI_ALIGNMENT>(0), irr::gui::EGUIA_CENTER);
 
     // main menu
@@ -247,15 +250,6 @@ namespace ygo {
     btnDeckEdit = guiEnv->addButton(irr::core::rect<irr::s32>(gui_xy["btnDeckEdit"]["x1"], gui_xy["btnDeckEdit"]["y1"], gui_xy["btnDeckEdit"]["x2"], gui_xy["btnDeckEdit"]["y2"]), wMainMenu, BUTTON_DECK_EDIT, dataManager.GetSysString(1204));
     btnModeExit = guiEnv->addButton(irr::core::rect<irr::s32>(gui_xy["btnModeExit"]["x1"], gui_xy["btnModeExit"]["y1"], gui_xy["btnModeExit"]["x2"], gui_xy["btnModeExit"]["y2"]), wMainMenu, BUTTON_MODE_EXIT, dataManager.GetSysString(1210));
 
-    //~ should_resize_element_unordered_map_int.insert_or_assign(wMainMenu, "wMainMenu");
-    //~ should_resize_element_unordered_map_int.insert_or_assign(btnLanMode, "btnLanMode");
-    //~ should_resize_element_unordered_map_int.insert_or_assign(btnSingleMode, "btnSingleMode");
-    //~ should_resize_element_unordered_map_int.insert_or_assign(btnReplayMode, "btnReplayMode");
-    //~ should_resize_element_unordered_map_int.insert_or_assign(btnDeckEdit, "btnDeckEdit");
-    //~ should_resize_element_unordered_map_int.insert_or_assign(btnModeExit, "btnModeExit");
-
-    //~ should_resize_element_unordered_map_int.insert_or_assign($a.3, "$a.3");
-    //~ cc.p
     // lan mode
     wLanWindow = guiEnv->addWindow(irr::core::rect<irr::s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
     wLanWindow->getCloseButton()->setVisible(false);
@@ -671,18 +665,17 @@ namespace ygo {
     }
     scrDisplayList = guiEnv->addScrollBar(true, irr::core::rect<irr::s32>(30, 235, 650, 255), wCardDisplay, SCROLL_CARD_DISPLAY);
     btnDisplayOK = guiEnv->addButton(irr::core::rect<irr::s32>(300, 265, 380, 290), wCardDisplay, BUTTON_CARD_DISP_OK, dataManager.GetSysString(1211));
+
     // announce number
-    wANNumber = guiEnv->addWindow(irr::core::rect<irr::s32>(550, 180, 780, 430), false, L"");
+    wANNumber = guiEnv->addWindow(this->get_origin_rect<int32_t>("wANNumber"), false, L"");
     wANNumber->getCloseButton()->setVisible(false);
+    cbANNumber = guiEnv->addComboBox(this->get_origin_rect<int32_t>("cbANNumber"), wANNumber, -1);
+    btnANNumberOK = guiEnv->addButton(this->get_origin_rect<int32_t>("btnANNumberOK"), wANNumber, BUTTON_ANNUMBER_OK, dataManager.GetSysString(1211));
     wANNumber->setVisible(false);
-    cbANNumber = guiEnv->addComboBox(irr::core::rect<irr::s32>(40, 30, 190, 50), wANNumber, -1);
-    cbANNumber->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-    for (int i = 0; i < 12; ++i) {
-      myswprintf(strbuf, L"%d", i + 1);
-      btnANNumber[i] = guiEnv->addButton(irr::core::rect<irr::s32>(20 + 50 * (i % 4), 40 + 50 * (i / 4), 60 + 50 * (i % 4), 80 + 50 * (i / 4)), wANNumber, BUTTON_ANNUMBER_1 + i, strbuf);
-      btnANNumber[i]->setIsPushButton(true);
-    }
-    btnANNumberOK = guiEnv->addButton(irr::core::rect<irr::s32>(80, 60, 150, 85), wANNumber, BUTTON_ANNUMBER_OK, dataManager.GetSysString(1211));
+    should_resize_element_unordered_map_int.insert_or_assign(wANNumber, "wANNumber");
+    should_resize_element_unordered_map_int.insert_or_assign(cbANNumber, "cbANNumber");
+    should_resize_element_unordered_map_int.insert_or_assign(btnANNumberOK, "btnANNumberOK");
+
     // announce card
     wANCard = guiEnv->addWindow(irr::core::rect<irr::s32>(510, 120, 820, 420), false, L"");
     wANCard->getCloseButton()->setVisible(false);
@@ -692,11 +685,17 @@ namespace ygo {
     lstANCard = guiEnv->addListBox(irr::core::rect<irr::s32>(20, 50, 290, 265), wANCard, LISTBOX_ANCARD, true);
     btnANCardOK = guiEnv->addButton(irr::core::rect<irr::s32>(110, 270, 200, 295), wANCard, BUTTON_ANCARD_OK, dataManager.GetSysString(1211));
     // announce attribute
-    wANAttribute = guiEnv->addWindow(irr::core::rect<irr::s32>(500, 200, 830, 285), false, dataManager.GetSysString(562));
+    wANAttribute = guiEnv->addWindow(this->get_origin_rect<int32_t>("wANAttribute"), false, dataManager.GetSysString(562));
     wANAttribute->getCloseButton()->setVisible(false);
     wANAttribute->setVisible(false);
     for (int filter = 0x1, i = 0; i < 7; filter <<= 1, ++i) {
-      chkAttribute[i] = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(10 + (i % 4) * 80, 25 + (i / 4) * 25, 90 + (i % 4) * 80, 50 + (i / 4) * 25), wANAttribute, CHECK_ATTRIBUTE, dataManager.FormatAttribute(filter).c_str());
+      int64_t gui_xy_chkAttribute_x1 = gui_xy["chkAttribute"]["x1"];
+      int64_t gui_xy_chkAttribute_y1 = gui_xy["chkAttribute"]["y1"];
+      int64_t gui_xy_chkAttribute_x2 = gui_xy["chkAttribute"]["x2"];
+      int64_t gui_xy_chkAttribute_y2 = gui_xy["chkAttribute"]["y2"];
+      int64_t gui_xy_chkAttribute_width_offset = gui_xy["chkAttribute"]["width_offset"];
+      int64_t gui_xy_chkAttribute_height_offset = gui_xy["chkAttribute"]["height_offset"];
+      chkAttribute[i] = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(gui_xy_chkAttribute_x1 + (i % 4) * gui_xy_chkAttribute_width_offset, gui_xy_chkAttribute_y1 + (i / 4) * gui_xy_chkAttribute_height_offset, gui_xy_chkAttribute_x2 + (i % 4) * gui_xy_chkAttribute_width_offset, gui_xy_chkAttribute_y2 + (i / 4) * gui_xy_chkAttribute_height_offset), wANAttribute, CHECK_ATTRIBUTE, dataManager.FormatAttribute(filter).c_str());
     }
     // announce race
     wANRace = guiEnv->addWindow(get_origin_rect<int32_t>("wANRace"), false, dataManager.GetSysString(563));
@@ -759,10 +758,10 @@ namespace ygo {
     cbDMCategory->setMaxSelectionRows(10);
     btnDMOK = guiEnv->addButton(irr::core::rect<irr::s32>(70, 80, 140, 105), wDMQuery, BUTTON_DM_OK, dataManager.GetSysString(1211));
     btnDMCancel = guiEnv->addButton(irr::core::rect<irr::s32>(170, 80, 240, 105), wDMQuery, BUTTON_DM_CANCEL, dataManager.GetSysString(1212));
-    scrPackCards = guiEnv->addScrollBar(false, irr::core::recti(775, 161, 795, 629), nullptr, SCROLL_FILTER);
-    scrPackCards->setLargeStep(1);
-    scrPackCards->setSmallStep(1);
-    scrPackCards->setVisible(false);
+    //~ scrPackCards = guiEnv->addScrollBar(false, irr::core::recti(775, 161, 795, 629), nullptr, SCROLL_FILTER);
+    //~ scrPackCards->setLargeStep(1);
+    //~ scrPackCards->setSmallStep(1);
+    //~ scrPackCards->setVisible(false);
 
     stDBCategory = guiEnv->addStaticText(dataManager.GetSysString(1300), get_origin_rect<int32_t>("stDBCategory"), false, false, wDeckEdit);
     cbDBCategory = guiEnv->addComboBox(get_origin_rect<int32_t>("cbDBCategory"), wDeckEdit, COMBOBOX_DBCATEGORY);
@@ -852,31 +851,47 @@ namespace ygo {
     stSearch = guiEnv->addStaticText(dataManager.GetSysString(1325), get_origin_rect<int32_t>("stSearch"), false, false, wFilter);
     ebCardName = guiEnv->addEditBox(L"", get_origin_rect<int32_t>("ebCardName"), true, wFilter, EDITBOX_KEYWORD);
     ebCardName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-    btnEffectFilter = guiEnv->addButton(get_origin_rect<int32_t>("btnEffectFilter"), wFilter, BUTTON_EFFECT_FILTER, dataManager.GetSysString(1326));
+    //~ btnEffectFilter = guiEnv->addButton(get_origin_rect<int32_t>("btnEffectFilter"), wFilter, BUTTON_EFFECT_FILTER, dataManager.GetSysString(1326));
     btnClearFilter = guiEnv->addButton(get_origin_rect<int32_t>("btnClearFilter"), wFilter, BUTTON_CLEAR_FILTER, dataManager.GetSysString(1304));
     btnStartFilter = guiEnv->addButton(get_origin_rect<int32_t>("btnStartFilter"), wFilter, BUTTON_START_FILTER, dataManager.GetSysString(1327));
+
+    static_text_search_record = guiEnv->addStaticText(dataManager.GetSysString(4011), get_origin_rect<int32_t>("static_text_search_record"), false, false, wFilter);
+    combo_box_search_record = guiEnv->addComboBox(get_origin_rect<int32_t>("combo_box_search_record"), wFilter, combo_box_search_record_id);
+    combo_box_search_record->addItem(dataManager.GetSysString(1310));
+
+    stCategory->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stAttribute->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stRace->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    static_text_search_record->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stLimit->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stAttack->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stDefense->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stStar->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stScale->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+    stSearch->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+
     //~ if (gameConf.separate_clear_button) {
     //~ btnStartFilter->setRelativePosition(irr::core::rect<irr::s32>(260, 80 + 125 / 6, 390, 100 + 125 / 6));
     //~ }
-    wCategories = guiEnv->addWindow(irr::core::rect<irr::s32>(600, 60, 1000, 305), false, L"");
-    wCategories->getCloseButton()->setVisible(false);
-    wCategories->setDrawTitlebar(false);
-    wCategories->setDraggable(false);
-    wCategories->setVisible(false);
-    btnCategoryOK = guiEnv->addButton(irr::core::rect<irr::s32>(150, 210, 250, 235), wCategories, BUTTON_CATEGORY_OK, dataManager.GetSysString(1211));
-    int catewidth = 0;
-    for (int i = 0; i < 32; ++i) {
-      irr::core::dimension2d<unsigned int> dtxt = guiFont->getDimension(dataManager.GetSysString(1100 + i));
-      if ((int)dtxt.Width + 40 > catewidth) {
-        catewidth = dtxt.Width + 40;
-      }
-    }
-    for (int i = 0; i < 32; ++i) {
-      chkCategory[i] = guiEnv->addCheckBox(false, irr::core::recti(10 + (i % 4) * catewidth, 5 + (i / 4) * 25, 10 + (i % 4 + 1) * catewidth, 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
-    }
-    int wcatewidth = catewidth * 4 + 16;
-    wCategories->setRelativePosition(irr::core::rect<irr::s32>(1000 - wcatewidth, 60, 1000, 305));
-    btnCategoryOK->setRelativePosition(irr::core::recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
+    //~ wCategories = guiEnv->addWindow(irr::core::rect<irr::s32>(600, 60, 1000, 305), false, L"");
+    //~ wCategories->getCloseButton()->setVisible(false);
+    //~ wCategories->setDrawTitlebar(false);
+    //~ wCategories->setDraggable(false);
+    //~ wCategories->setVisible(false);
+    //~ btnCategoryOK = guiEnv->addButton(irr::core::rect<irr::s32>(150, 210, 250, 235), wCategories, BUTTON_CATEGORY_OK, dataManager.GetSysString(1211));
+    //~ int catewidth = 0;
+    //~ for (int i = 0; i < 32; ++i) {
+    //~ irr::core::dimension2d<unsigned int> dtxt = guiFont->getDimension(dataManager.GetSysString(1100 + i));
+    //~ if ((int)dtxt.Width + 40 > catewidth) {
+    //~ catewidth = dtxt.Width + 40;
+    //~ }
+    //~ }
+    //~ for (int i = 0; i < 32; ++i) {
+    //~ chkCategory[i] = guiEnv->addCheckBox(false, irr::core::recti(10 + (i % 4) * catewidth, 5 + (i / 4) * 25, 10 + (i % 4 + 1) * catewidth, 5 + (i / 4 + 1) * 25), wCategories, -1, dataManager.GetSysString(1100 + i));
+    //~ }
+    //~ int wcatewidth = catewidth * 4 + 16;
+    //~ wCategories->setRelativePosition(irr::core::rect<irr::s32>(1000 - wcatewidth, 60, 1000, 305));
+    //~ btnCategoryOK->setRelativePosition(irr::core::recti(wcatewidth / 2 - 50, 210, wcatewidth / 2 + 50, 235));
     btnMarksFilter = guiEnv->addButton(get_origin_rect<int32_t>("btnMarksFilter"), wFilter, BUTTON_MARKS_FILTER, dataManager.GetSysString(1374));
     wLinkMarks = guiEnv->addWindow(irr::core::rect<irr::s32>(700, 30, 820, 150), false, L"");
     wLinkMarks->getCloseButton()->setVisible(false);
@@ -899,9 +914,9 @@ namespace ygo {
     wReplay = guiEnv->addWindow(irr::core::rect<irr::s32>(gui_xy["wReplay"]["x1"], gui_xy["wReplay"]["y1"], gui_xy["wReplay"]["x2"], gui_xy["wReplay"]["y2"]), false, dataManager.GetSysString(1202));
     wReplay->getCloseButton()->setVisible(false);
     wReplay->setVisible(false);
-    lstReplayList = guiEnv->addListBox(irr::core::rect<irr::s32>(gui_xy["lstReplayList"]["x1"], gui_xy["lstReplayList"]["y1"], gui_xy["lstReplayList"]["x2"], gui_xy["lstReplayList"]["y2"]), wReplay, LISTBOX_REPLAY_LIST, true);
+    //~ lstReplayList = guiEnv->addListBox(irr::core::rect<irr::s32>(gui_xy["lstReplayList"]["x1"], gui_xy["lstReplayList"]["y1"], gui_xy["lstReplayList"]["x2"], gui_xy["lstReplayList"]["y2"]), wReplay, LISTBOX_REPLAY_LIST, true);
     replay_file_select_panel = new irr::gui::CGUIFileSelectPanel(guiEnv, wReplay, get_origin_rect<int32_t>("replay_file_select_panel"), replay_file_select_panel_id);
-    lstReplayList->setItemHeight(18);
+    //~ lstReplayList->setItemHeight(18);
 
     replay_panel = addCGUIPanel(guiEnv, wReplay, -1, get_origin_rect<int32_t>("replay_panel"), false, irr::gui::ESBM_AUTOMATIC, irr::gui::ESBM_AUTOMATIC);
 
@@ -911,7 +926,7 @@ namespace ygo {
     btnReplayCancel = guiEnv->addButton(get_origin_rect<int32_t>("btnReplayCancel"), replay_panel, BUTTON_CANCEL_REPLAY, dataManager.GetSysString(1347));
     btnExportDeck = guiEnv->addButton(get_origin_rect<int32_t>("btnExportDeck"), replay_panel, BUTTON_EXPORT_DECK, dataManager.GetSysString(1369));
     stReplayTip = guiEnv->addStaticText(dataManager.GetSysString(1349), get_origin_rect<int32_t>("stReplayTip"), false, true, wReplay);
-    stReplayInfo = guiEnv->addStaticText(L"", get_origin_rect<int32_t>("stReplayInfo"), false, true, wReplay);
+    stReplayInfo = irr::gui::CGUIScrollText::addScrollText(guiEnv, L"", get_origin_rect<int32_t>("stReplayInfo"), false, true, wReplay);
     stReplayTurnTip = guiEnv->addStaticText(dataManager.GetSysString(1353), get_origin_rect<int32_t>("stReplayTurnTip"), false, true, replay_panel);
     ebRepStartTurn = guiEnv->addEditBox(L"", get_origin_rect<int32_t>("ebRepStartTurn"), true, replay_panel, -1);
     //~ cc.gc w a
@@ -943,16 +958,24 @@ namespace ygo {
     check_replay_window = guiEnv->addWindow(get_origin_rect<int32_t>("check_replay_window"), false, dataManager.GetSysString(4003));
     //~ check_replay_table = guiEnv->addTable(get_origin_rect<int32_t>("check_replay_table"), check_replay_window);
     check_replay_table = guiEnv->addTable(irr::core::rect<int32_t>(0, 0, 0, 0), check_replay_window);
+    check_replay_table->addColumn(L"id");
     check_replay_table->addColumn(dataManager.GetSysString(4004));
     check_replay_table->addColumn(dataManager.GetSysString(4005));
     check_replay_table->addColumn(dataManager.GetSysString(4006));
+    check_replay_table->setColumnOrdering(0, irr::gui::EGCO_FLIP_ASCENDING_DESCENDING);
+    check_replay_table->setColumnOrdering(1, irr::gui::EGCO_FLIP_ASCENDING_DESCENDING);
+    check_replay_table->setColumnOrdering(2, irr::gui::EGCO_FLIP_ASCENDING_DESCENDING);
+    check_replay_table->setColumnOrdering(3, irr::gui::EGCO_FLIP_ASCENDING_DESCENDING);
     check_replay_window->setVisible(false);
+    check_replay_window->getCloseButton()->setVisible(false);
+    //~ check_replay_window->getMinimizeButton()->setVisible(true);
+    check_replay_static_text = guiEnv->addStaticText(L"", get_origin_rect<int32_t>("check_replay_static_text"), false, false, check_replay_window);
 
     solve_puzzle_window = guiEnv->addWindow(get_origin_rect<int32_t>("solve_puzzle_window"), false, dataManager.GetSysString(4009));
-    solve_puzzle_table = guiEnv->addTable(get_origin_rect<int32_t>("solve_puzzle_table"), solve_puzzle_window);
+    //~ solve_puzzle_table = guiEnv->addTable(get_origin_rect<int32_t>("solve_puzzle_table"), solve_puzzle_window);
     //~ solve_puzzle_table->addColumn(dataManager.GetSysString(4004));
-    solve_puzzle_table->addColumn(dataManager.GetSysString(4005));
-    solve_puzzle_table->addColumn(dataManager.GetSysString(4006));
+    //~ solve_puzzle_table->addColumn(dataManager.GetSysString(4005));
+    //~ solve_puzzle_table->addColumn(dataManager.GetSysString(4006));
 
     solve_puzzle_window->setVisible(false);
 
@@ -1058,14 +1081,14 @@ namespace ygo {
     imgBigCard = guiEnv->addImage(irr::core::rect<irr::s32>(0, 0, 0, 0), wBigCard);
     imgBigCard->setScaleImage(false);
     imgBigCard->setUseAlphaChannel(true);
-    btnBigCardOriginalSize = guiEnv->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), nullptr, BUTTON_BIG_CARD_ORIG_SIZE, dataManager.GetSysString(1443));
-    btnBigCardZoomIn = guiEnv->addButton(irr::core::rect<irr::s32>(205, 140, 295, 175), nullptr, BUTTON_BIG_CARD_ZOOM_IN, dataManager.GetSysString(1441));
-    btnBigCardZoomOut = guiEnv->addButton(irr::core::rect<irr::s32>(205, 180, 295, 215), nullptr, BUTTON_BIG_CARD_ZOOM_OUT, dataManager.GetSysString(1442));
-    btnBigCardClose = guiEnv->addButton(irr::core::rect<irr::s32>(205, 230, 295, 265), nullptr, BUTTON_BIG_CARD_CLOSE, dataManager.GetSysString(1440));
-    btnBigCardOriginalSize->setVisible(false);
-    btnBigCardZoomIn->setVisible(false);
-    btnBigCardZoomOut->setVisible(false);
-    btnBigCardClose->setVisible(false);
+    //~ btnBigCardOriginalSize = guiEnv->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), nullptr, BUTTON_BIG_CARD_ORIG_SIZE, dataManager.GetSysString(1443));
+    //~ btnBigCardZoomIn = guiEnv->addButton(irr::core::rect<irr::s32>(205, 140, 295, 175), nullptr, BUTTON_BIG_CARD_ZOOM_IN, dataManager.GetSysString(1441));
+    //~ btnBigCardZoomOut = guiEnv->addButton(irr::core::rect<irr::s32>(205, 180, 295, 215), nullptr, BUTTON_BIG_CARD_ZOOM_OUT, dataManager.GetSysString(1442));
+    //~ btnBigCardClose = guiEnv->addButton(irr::core::rect<irr::s32>(205, 230, 295, 265), nullptr, BUTTON_BIG_CARD_CLOSE, dataManager.GetSysString(1440));
+    //~ btnBigCardOriginalSize->setVisible(false);
+    //~ btnBigCardZoomIn->setVisible(false);
+    //~ btnBigCardZoomOut->setVisible(false);
+    //~ btnBigCardClose->setVisible(false);
     // leave/surrender/exit
     btnLeaveGame = guiEnv->addButton(get_origin_rect<int32_t>("btnLeaveGame"), nullptr, BUTTON_LEAVE_GAME, L"");
     btnLeaveGame->setVisible(false);
@@ -1092,7 +1115,7 @@ namespace ygo {
       chkMusicMode->setEnabled(false);
       chkMusicMode->setVisible(false);
     }
-    guiEnv->getSkin()->setFont(guiFont);
+    //~ guiEnv->getSkin()->setFont(guiFont);
     guiEnv->setFocus(wMainMenu);
 
     init_resize_element_unordered_map();
@@ -1104,8 +1127,6 @@ namespace ygo {
       yScale = window_size.Height / 640.0;
       OnResize();
     }
-    textFont->setFontHinting(true, true);
-    guiFont->setFontHinting(true, true);
 
     return true;
   }
@@ -1113,7 +1134,7 @@ namespace ygo {
   void Game::resize_skin() {
     auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "skin");
     auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
-    
+
     for (int64_t i = 0, n = irr::gui::EGDC_COUNT; i != n; ++i) {
       auto col = static_cast<int64_t>(gui_skin[i]);
       guiEnv->getSkin()->setColor(static_cast<irr::gui::EGUI_DEFAULT_COLOR>(i), col);
@@ -1889,7 +1910,9 @@ namespace ygo {
         target = dataManager.GetCodePointer(cd.alias);
       }
       if (target->second.setcode[0]) {
-        str.append(fast_io::concatln_fast_io(fast_io::mnp::code_cvt_os_c_str(dataManager.GetSysString(1329)), fast_io::mnp::code_cvt_os_c_str(dataManager.FormatSetName(target->second.setcode).c_str())));
+        auto setcode_str = fast_io::concat_fast_io(fast_io::mnp::code_cvt_os_c_str(dataManager.GetSysString(1329)), fast_io::mnp::code_cvt_os_c_str(dataManager.FormatSetName(target->second.setcode).c_str()));
+        setcode_str.append("\n");
+        str.append(setcode_str);
       }
     }
     showingcode = code;
@@ -2161,25 +2184,23 @@ namespace ygo {
     o1->setRelativePosition(ResizeWin(gui_xy[o2]["x1"], gui_xy[o2]["y1"], gui_xy[o2]["x2"], gui_xy[o2]["y2"]));
   }
 
-  void Game::resize_element_float(irr::gui::IGUIElement *o1, const char *o2) {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
-    
-    o1->setRelativePositionProportional(get_origin_rect<float>(o2));
-    //~ o1->setRelativePositionProportional(irr::core::rect<float>(0.1, 0.1, 0.9, 0.9));
-  }
-
   void Game::resize_font() {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
-    
-    irr::gui::CGUITTFont *old_numFont = numFont;
-    irr::gui::CGUITTFont *old_adFont = adFont;
-    irr::gui::CGUITTFont *old_lpcFont = lpcFont;
-    numFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16 * yScale, true, true, gui_config["font_outline_width"]);
-    adFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 12 * yScale, true, true, gui_config["font_outline_width"]);
-    lpcFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 48 * yScale, true, true, gui_config["font_outline_width"]);
-    numFont->setFontHinting(true, true);
-    adFont->setFontHinting(true, true);
-    lpcFont->setFontHinting(true, true);
+    using boost::this_thread::get_id;
+    using irr::gui::CGUITTFont;
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_config = getGlobal(main_thread(this->get_lua(get_id())), "config");
+
+    CGUITTFont *old_numFont = numFont;
+    CGUITTFont *old_adFont = adFont;
+    CGUITTFont *old_lpcFont = lpcFont;
+    numFont = CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 16 * yScale, true, true, gui_config["font_outline_width"]);
+    adFont = CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 12 * yScale, true, true, gui_config["font_outline_width"]);
+    lpcFont = CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.numfont, 48 * yScale, true, true, gui_config["font_outline_width"]);
+    numFont->setFontHinting(true, false);
+    adFont->setFontHinting(true, false);
+    lpcFont->setFontHinting(true, false);
     int64_t font_outline_width = gui_config["font_outline_color"];
     numFont->setOutlineColor(font_outline_width);
     adFont->setOutlineColor(font_outline_width);
@@ -2187,13 +2208,23 @@ namespace ygo {
     old_numFont->drop();
     old_adFont->drop();
     old_lpcFont->drop();
+
+    CGUITTFont *old_guiFont = guiFont;
+    CGUITTFont *old_textFont = textFont;
+    guiFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    textFont = irr::gui::CGUITTFont::createTTFont(driver, DataManager::FileSystem, gameConf.textfont, gameConf.textfontsize, true, true);
+    guiFont->setFontHinting(true, false);
+    textFont->setFontHinting(true, false);
+    old_guiFont->drop();
+    old_textFont->drop();
+    guiEnv->getSkin()->setFont(guiFont);
   }
 
   void Game::OnResize() {
     this->replace_new_lua_sup1();
     auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
     auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
-    
+
     WINDOWPLACEMENT plc;
     plc.length = sizeof(WINDOWPLACEMENT);
     if (GetWindowPlacement(hWnd, &plc)) {
@@ -2422,12 +2453,22 @@ namespace ygo {
     //~ btnOption[i]->setRelativePosition(ResizeWin(gui_xy["btnOption"]["x1"], btnOption_y1 + btnOption_height_offset * i, gui_xy["btnOption"]["x2"], btnOption_y2 + btnOption_height_offset * i));
     //~ }
 
+    for (int64_t filter = 0x1, i = 0; i < 7; filter <<= 1, ++i) {
+      int64_t gui_xy_chkAttribute_x1 = gui_xy["chkAttribute"]["x1"];
+      int64_t gui_xy_chkAttribute_y1 = gui_xy["chkAttribute"]["y1"];
+      int64_t gui_xy_chkAttribute_x2 = gui_xy["chkAttribute"]["x2"];
+      int64_t gui_xy_chkAttribute_y2 = gui_xy["chkAttribute"]["y2"];
+      int64_t gui_xy_chkAttribute_width_offset = gui_xy["chkAttribute"]["width_offset"];
+      int64_t gui_xy_chkAttribute_height_offset = gui_xy["chkAttribute"]["height_offset"];
+      chkAttribute[i]->setRelativePosition(ResizeWin(gui_xy_chkAttribute_x1 + (i % 4) * gui_xy_chkAttribute_width_offset, gui_xy_chkAttribute_y1 + (i / 4) * gui_xy_chkAttribute_height_offset, gui_xy_chkAttribute_x2 + (i % 4) * gui_xy_chkAttribute_width_offset, gui_xy_chkAttribute_y2 + (i / 4) * gui_xy_chkAttribute_height_offset));
+    }
+
     for (const auto &i : should_resize_element_unordered_map_int) {
       resize_element_int(i.first, i.second);
     }
-    for (const auto &i : should_resize_element_unordered_map_float) {
-      resize_element_float(i.first, i.second);
-    }
+    //~ for (const auto &i : should_resize_element_unordered_map_float) {
+    //~ resize_element_float(i.first, i.second);
+    //~ }
 
     //~ double check_replay_table_column_width_1 = gui_config["check_replay_table_column_width"][1];
     //~ double check_replay_table_column_width_2 = gui_config["check_replay_table_column_width"][2];
@@ -2449,11 +2490,11 @@ namespace ygo {
 
   void Game::resize_item_height() {
     auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
-    
+
     int64_t item_height = gui_config["item_height"].cast<double>().value() * yScale;
     lstHostList->setItemHeight(item_height);
     lstLog->setItemHeight(item_height);
-    lstReplayList->setItemHeight(item_height);
+    //~ lstReplayList->setItemHeight(item_height);
     lstBotList->setItemHeight(item_height);
     single_file_select_panel->setItemHeight(item_height);
     replay_file_select_panel->setItemHeight(item_height);
@@ -2671,7 +2712,7 @@ namespace ygo {
   }
 
   fast_io::string Game::get_location_string(int32_t o1, int32_t o2) { // 区域，格子编号
-    
+
     if (o1 == LOCATION_HAND) {
       return fast_io::concat_fast_io("手卡区域");
     }

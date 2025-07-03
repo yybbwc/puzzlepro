@@ -177,10 +177,5 @@ void duel::set_responseb(byte *resp) {
 }
 
 int32_t duel::get_next_integer(int32_t l, int32_t h) {
-  if (game_field->core.duel_options & DUEL_OLD_REPLAY) {
-    return random.get_random_integer_old(l, h);
-  }
-  else {
-    return random.get_random_integer(l, h);
-  }
+  return random.get_random_integer(l, h);
 }

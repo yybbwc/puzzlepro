@@ -10,7 +10,9 @@ namespace ygo {
     void Terminate();
     void GetHoveredCard();
     void GetHoveredCard_main_deck(int64_t x, int64_t y);
-    int64_t GetHoveredCard_main_deck_get_per_row_max_card_capacity();
+    //~ int64_t GetHoveredCard_main_deck_get_per_row_max_card_capacity();
+    //~ int64_t GetHoveredCard_extra_deck_get_per_row_max_card_capacity();
+    //~ int64_t GetHoveredCard_side_deck_get_per_row_max_card_capacity();
     void GetHoveredCard_extra_deck(int64_t x, int64_t y);
     void GetHoveredCard_side_deck(int64_t x, int64_t y);
     void GetHoveredCard_search_result(int64_t x, int64_t y);

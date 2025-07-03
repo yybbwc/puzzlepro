@@ -23,19 +23,34 @@ extern "C" {
 //~ #include <fast_io_dsal/vector.h>
 //~ #include <fast_io_dsal/queue.h>
 
-
-#include <boost/spirit/home/x3.hpp>
+//boost
 #include <boost/algorithm/string_regex.hpp>
-
-//~ #include <stdfloat>doubleqdouble
-
-//~ #include <boost/system.hpp>
-#include <boost/thread.hpp>
-//~ #include <boost/unordered/unordered_flat_map.hpp>
-#include <boost/container/vector.hpp>
+#include <boost/algorithm/cxx11/none_of.hpp>
 #include <boost/container/deque.hpp>
+#include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
-#include <boost/container/string.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/thread.hpp>
+#include <boost/circular_buffer.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/filesystem.hpp>
+
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/export.hpp>
+
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
+
+#include <fmt/format.h>
+
+
+
+#include <zstd.h>
 
 #define NOMINMAX
 #include <WinSock2.h>
@@ -45,20 +60,12 @@ extern "C" {
 #include <stdlib.h>
 #include <iostream>
 #include <algorithm>
-//~ #define STB_IMAGE_RESIZE2_IMPLEMENTATION
-//~ #include "stb_image_resize2.h"
-
-//~ #include <libunwind.h>
-//~ #include <cxxabi.h>
-
-//~ #include <stacktrace>
 
 #include <cstdint>
 #include <cwchar>
 #include "../ocgcore/buffer.h"
 #include "bufferio.h"
 
-//~ #include <stdint.h>
 #include <vector>
 #include "replay.h"
 
@@ -82,7 +89,6 @@ extern "C" {
 #include "mysignal.h"
 
 #include "../ocgcore/mtrandom.h"
-//~ #include <vector>
 #include <set>
 #include <map>
 #include "client_field.h"
@@ -114,7 +120,7 @@ extern "C" {
 #include "myfilesystem.h"
 
 #include "network.h"
-#include "netserver.h"
+//~ #include "netserver.h"
 
 #include "duelclient.h"
 
@@ -137,18 +143,10 @@ extern "C" {
 
 #include <stack>
 
-#include "single_duel.h"
+//~ #include "single_duel.h"
 
-#include "tag_duel.h"
-
-#include "LzmaLib.h"
+//~ #include "tag_duel.h"
 
 #include "clip.h"
 #include "miniaudio.h"
 #include "sound_manager.h"
-
-//~ #include "lua_creater.h"
-
-
-
-//~ #include <tao/pegtl.hpp>

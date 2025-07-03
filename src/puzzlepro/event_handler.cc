@@ -296,31 +296,31 @@ namespace ygo {
                 ShowCancelOrFinishButton(0);
                 break;
               }
-              case BUTTON_ANNUMBER_1:
-              case BUTTON_ANNUMBER_2:
-              case BUTTON_ANNUMBER_3:
-              case BUTTON_ANNUMBER_4:
-              case BUTTON_ANNUMBER_5:
-              case BUTTON_ANNUMBER_6:
-              case BUTTON_ANNUMBER_7:
-              case BUTTON_ANNUMBER_8:
-              case BUTTON_ANNUMBER_9:
-              case BUTTON_ANNUMBER_10:
-              case BUTTON_ANNUMBER_11:
-              case BUTTON_ANNUMBER_12: {
-                soundManager.PlaySoundEffect(SOUND_BUTTON);
-                for (int i = 0; i < (int)mainGame->cbANNumber->getItemCount(); ++i) {
-                  if (id - BUTTON_ANNUMBER_1 + 1 == mainGame->cbANNumber->getItemData(i)) {
-                    mainGame->cbANNumber->setSelected(i);
-                    break;
-                  }
-                }
-                for (int i = 0; i < 12; ++i) {
-                  mainGame->btnANNumber[i]->setPressed(event.GUIEvent.Caller == mainGame->btnANNumber[i]);
-                }
-                mainGame->btnANNumberOK->setEnabled(true);
-                break;
-              }
+                //~ case BUTTON_ANNUMBER_1:
+                //~ case BUTTON_ANNUMBER_2:
+                //~ case BUTTON_ANNUMBER_3:
+                //~ case BUTTON_ANNUMBER_4:
+                //~ case BUTTON_ANNUMBER_5:
+                //~ case BUTTON_ANNUMBER_6:
+                //~ case BUTTON_ANNUMBER_7:
+                //~ case BUTTON_ANNUMBER_8:
+                //~ case BUTTON_ANNUMBER_9:
+                //~ case BUTTON_ANNUMBER_10:
+                //~ case BUTTON_ANNUMBER_11:
+                //~ case BUTTON_ANNUMBER_12: {
+                //~ soundManager.PlaySoundEffect(SOUND_BUTTON);
+                //~ for (int i = 0; i < (int)mainGame->cbANNumber->getItemCount(); ++i) {
+                //~ if (id - BUTTON_ANNUMBER_1 + 1 == mainGame->cbANNumber->getItemData(i)) {
+                //~ mainGame->cbANNumber->setSelected(i);
+                //~ break;
+                //~ }
+                //~ }
+                //~ for (int i = 0; i < 12; ++i) {
+                //~ mainGame->btnANNumber[i]->setPressed(event.GUIEvent.Caller == mainGame->btnANNumber[i]);
+                //~ }
+                //~ mainGame->btnANNumberOK->setEnabled(true);
+                //~ break;
+              //~ }
               case BUTTON_ANNUMBER_OK: {
                 soundManager.PlaySoundEffect(SOUND_BUTTON);
                 DuelClient::SetResponseI(mainGame->cbANNumber->getSelected());
@@ -2623,14 +2623,14 @@ namespace ygo {
       }
       case irr::EET_KEY_INPUT_EVENT: {
         switch (event.KeyInput.Key) {
-          case irr::KEY_KEY_R: {
-            if (mainGame->gameConf.control_mode == 0 && !event.KeyInput.PressedDown && !mainGame->HasFocus(irr::gui::EGUIET_EDIT_BOX)) {
-              mainGame->textFont->setTransparency(true);
-              mainGame->guiFont->setTransparency(true);
-            }
-            return true;
-            break;
-          }
+            //~ case irr::KEY_KEY_R: {
+            //~ if (mainGame->gameConf.control_mode == 0 && !event.KeyInput.PressedDown && !mainGame->HasFocus(irr::gui::EGUIET_EDIT_BOX)) {
+            //~ mainGame->textFont->setTransparency(true);
+            //~ mainGame->guiFont->setTransparency(true);
+            //~ }
+            //~ return true;
+            //~ break;
+          //~ }
           case irr::KEY_F9: {
             if (mainGame->gameConf.control_mode == 1 && !event.KeyInput.PressedDown && !mainGame->HasFocus(irr::gui::EGUIET_EDIT_BOX)) {
               mainGame->textFont->setTransparency(true);
@@ -2654,9 +2654,7 @@ namespace ygo {
       case irr::EET_MOUSE_INPUT_EVENT: {
         switch (event.MouseInput.Event) {
           case irr::EMIE_LMOUSE_LEFT_UP: {
-            if (mainGame->guiEnv->getHovered()) {
-            }
-            else {
+            if (!mainGame->guiEnv->getHovered()) {
               break;
             }
             irr::s32 id = mainGame->guiEnv->getHovered()->getID();
@@ -2964,7 +2962,7 @@ namespace ygo {
 
   void ClientField::ShowMenu(int flag, int x, int y) {
     auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
-    
+
     if (!flag) {
       HideMenu();
       return;

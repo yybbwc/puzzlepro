@@ -40,7 +40,8 @@ namespace ygo {
   }
 
   static inline bool havePopupWindow() {
-    return mainGame->wQuery->isVisible() || mainGame->wCategories->isVisible() || mainGame->wLinkMarks->isVisible() || mainGame->wDeckManage->isVisible() || mainGame->wDMQuery->isVisible();
+    //~ return mainGame->wQuery->isVisible() || mainGame->wCategories->isVisible() || mainGame->wLinkMarks->isVisible() || mainGame->wDeckManage->isVisible() || mainGame->wDMQuery->isVisible();
+    return mainGame->wQuery->isVisible() || mainGame->wLinkMarks->isVisible() || mainGame->wDeckManage->isVisible() || mainGame->wDMQuery->isVisible();
   }
 
   static inline void get_deck_file(wchar_t *ret) {
@@ -105,17 +106,17 @@ namespace ygo {
     mainGame->is_building = false;
     mainGame->ClearCardInfo();
     mainGame->wDeckEdit->setVisible(false);
-    mainGame->wCategories->setVisible(false);
+    //~ mainGame->wCategories->setVisible(false);
     mainGame->wFilter->setVisible(false);
     mainGame->wSort->setVisible(false);
     mainGame->wCardImg->setVisible(false);
     mainGame->wInfos->setVisible(false);
     mainGame->btnLeaveGame->setVisible(false);
     mainGame->wBigCard->setVisible(false);
-    mainGame->btnBigCardOriginalSize->setVisible(false);
-    mainGame->btnBigCardZoomIn->setVisible(false);
-    mainGame->btnBigCardZoomOut->setVisible(false);
-    mainGame->btnBigCardClose->setVisible(false);
+    //~ mainGame->btnBigCardOriginalSize->setVisible(false);
+    //~ mainGame->btnBigCardZoomIn->setVisible(false);
+    //~ mainGame->btnBigCardZoomOut->setVisible(false);
+    //~ mainGame->btnBigCardClose->setVisible(false);
     mainGame->ResizeChatInputWindow();
     mainGame->PopupElement(mainGame->wMainMenu);
     mainGame->device->setEventReceiver(&mainGame->menuHandler);
@@ -123,8 +124,8 @@ namespace ygo {
     mainGame->ClearTextures();
     mainGame->showingcode = 0;
     mainGame->scrFilter->setVisible(false);
-    mainGame->scrPackCards->setVisible(false);
-    mainGame->scrPackCards->setPos(0);
+    //~ mainGame->scrPackCards->setVisible(false);
+    //~ mainGame->scrPackCards->setPos(0);
     mainGame->static_text_deck_edit_main_deck_size->setVisible(false);
     mainGame->static_text_deck_edit_extra_deck_size->setVisible(false);
     mainGame->static_text_deck_edit_side_deck_size->setVisible(false);
@@ -268,34 +269,48 @@ namespace ygo {
                 Terminate();
                 break;
               }
-              case BUTTON_EFFECT_FILTER: {
-                mainGame->PopupElement(mainGame->wCategories);
-                break;
-              }
+              //~ case BUTTON_EFFECT_FILTER: {
+              //~ mainGame->PopupElement(mainGame->wCategories);
+              //~ break;
+              //~ }
               case BUTTON_START_FILTER: {
+                using boost::adaptors::reversed;
+                using boost::adaptors::uniqued;
+                using boost::algorithm::none_of_equal;
                 StartFilter();
-                if (!mainGame->gameConf.separate_clear_button) {
-                  ClearFilter();
+                //~ if (mainGame->ebCardName->getText() != L"") {
+                auto str = fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->ebCardName->getText()));
+                if (str != L"" and none_of_equal(mainGame->circular_buffer_search_record, str)) {
+                  mainGame->circular_buffer_search_record.push_back(fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->ebCardName->getText())));
+                  mainGame->combo_box_search_record->clear();
+                  mainGame->combo_box_search_record->addItem(dataManager.GetSysString(1310));
+                  for (const auto &str : mainGame->circular_buffer_search_record | reversed) {
+                    mainGame->combo_box_search_record->addItem(str.c_str());
+                  }
                 }
+                //~ }
+                //~ if (!mainGame->gameConf.separate_clear_button) {
+                //~ ClearFilter();
+                //~ }
                 break;
               }
               case BUTTON_CLEAR_FILTER: {
                 ClearSearch();
                 break;
               }
-              case BUTTON_CATEGORY_OK: {
-                filter_effect = 0;
-                long long filter = 0x1;
-                for (int i = 0; i < 32; ++i, filter <<= 1) {
-                  if (mainGame->chkCategory[i]->isChecked()) {
-                    filter_effect |= filter;
-                  }
-                }
-                mainGame->btnEffectFilter->setPressed(filter_effect > 0);
-                mainGame->HideElement(mainGame->wCategories);
-                InstantSearch();
-                break;
-              }
+                //~ case BUTTON_CATEGORY_OK: {
+                //~ filter_effect = 0;
+                //~ long long filter = 0x1;
+                //~ for (int i = 0; i < 32; ++i, filter <<= 1) {
+                //~ if (mainGame->chkCategory[i]->isChecked()) {
+                //~ filter_effect |= filter;
+                //~ }
+                //~ }
+                //~ mainGame->btnEffectFilter->setPressed(filter_effect > 0);
+                //~ mainGame->HideElement(mainGame->wCategories);
+                //~ InstantSearch();
+                //~ break;
+              //~ }
               case BUTTON_MANAGE_DECK: {
                 if (is_modified && !readonly && !mainGame->chkIgnoreDeckChanges->isChecked()) {
                   mainGame->gMutex.lock();
@@ -703,24 +718,24 @@ namespace ygo {
 
                 break;
               }
-              case BUTTON_BIG_CARD_ORIG_SIZE: {
-                ShowBigCard(bigcard_code, 1);
-                break;
-              }
-              case BUTTON_BIG_CARD_ZOOM_IN: {
-                bigcard_zoom += 0.2f;
-                ZoomBigCard();
-                break;
-              }
-              case BUTTON_BIG_CARD_ZOOM_OUT: {
-                bigcard_zoom -= 0.2f;
-                ZoomBigCard();
-                break;
-              }
-              case BUTTON_BIG_CARD_CLOSE: {
-                CloseBigCard();
-                break;
-              }
+              //~ case BUTTON_BIG_CARD_ORIG_SIZE: {
+              //~ ShowBigCard(bigcard_code, 1);
+              //~ break;
+              //~ }
+              //~ case BUTTON_BIG_CARD_ZOOM_IN: {
+              //~ bigcard_zoom += 0.2f;
+              //~ ZoomBigCard();
+              //~ break;
+              //~ }
+              //~ case BUTTON_BIG_CARD_ZOOM_OUT: {
+              //~ bigcard_zoom -= 0.2f;
+              //~ ZoomBigCard();
+              //~ break;
+              //~ }
+              //~ case BUTTON_BIG_CARD_CLOSE: {
+              //~ CloseBigCard();
+              //~ break;
+              //~ }
               case BUTTON_MSG_OK: {
                 fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
                 mainGame->HideElement(mainGame->wMessage);
@@ -857,6 +872,10 @@ namespace ygo {
           }
           case irr::gui::EGET_COMBO_BOX_CHANGED: {
             switch (id) {
+              case combo_box_search_record_id: {
+                StartFilter();
+                break;
+              }
               case COMBOBOX_DBCATEGORY: {
                 if (havePopupWindow()) {
                   mainGame->cbDBCategory->setSelected(prev_category);
@@ -1105,9 +1124,13 @@ namespace ygo {
           }
           case irr::EMIE_LMOUSE_LEFT_UP: {
             is_starting_dragging = false;
-            irr::gui::IGUIElement *root = mainGame->guiEnv->getRootGUIElement();
-            if (!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == mainGame->imgCard) {
+            //~ irr::gui::IGUIElement *root = mainGame->guiEnv->getRootGUIElement();
+            if (!is_draging && !mainGame->is_siding && mainGame->guiEnv->getHovered() == mainGame->imgCard and !mainGame->wBigCard->isVisible()) {
               ShowBigCard(mainGame->showingcode, 1);
+              break;
+            }
+            else if (!is_draging && !mainGame->is_siding && mainGame->guiEnv->getHovered() == mainGame->imgCard and mainGame->wBigCard->isVisible()) {
+              mainGame->wBigCard->setVisible(false);
               break;
             }
             if (!is_draging) {
@@ -1141,14 +1164,14 @@ namespace ygo {
             is_draging = false;
             break;
           }
-          case irr::EMIE_LMOUSE_DOUBLE_CLICK: {
-            irr::gui::IGUIElement *root = mainGame->guiEnv->getRootGUIElement();
-            if (!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == root && hovered_code) {
-              ShowBigCard(hovered_code, 1);
-              break;
-            }
-            break;
-          }
+            //~ case irr::EMIE_LMOUSE_DOUBLE_CLICK: {
+            //~ irr::gui::IGUIElement *root = mainGame->guiEnv->getRootGUIElement();
+            //~ if (!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == root && hovered_code) {
+            //~ ShowBigCard(hovered_code, 1);
+            //~ break;
+            //~ }
+            //~ break;
+          //~ }
           case irr::EMIE_RMOUSE_LEFT_UP: {
             if (mainGame->is_siding) {
               if (is_draging) {
@@ -1361,9 +1384,10 @@ namespace ygo {
     int64_t gradient_background_main_deck_x2 = gui_xy["gradient_background_main_deck"]["x2"];
     int64_t gradient_background_main_deck_y1 = gui_xy["gradient_background_main_deck"]["y1"];
     int64_t gradient_background_main_deck_y2 = gui_xy["gradient_background_main_deck"]["y2"];
-    int64_t gradient_background_main_deck_adjust_x1_offset = gui_xy["gradient_background_main_deck"]["adjust_x1_offset"];
-    int64_t gradient_background_main_deck_adjust_y1_offset = gui_xy["gradient_background_main_deck"]["adjust_y1_offset"];
-    int64_t gradient_background_main_deck_adjust_height_reduce = gui_xy["gradient_background_main_deck"]["adjust_height_reduce"];
+    int64_t gradient_background_extra_deck_y1 = gui_xy["gradient_background_extra_deck"]["y1"];
+    int64_t gradient_background_extra_deck_y2 = gui_xy["gradient_background_extra_deck"]["y2"];
+    int64_t gradient_background_side_deck_y1 = gui_xy["gradient_background_side_deck"]["y1"];
+    int64_t gradient_background_side_deck_y2 = gui_xy["gradient_background_side_deck"]["y2"];
     int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
     if (x >= gradient_background_main_deck_x1 && x <= gradient_background_main_deck_x2) {
       if (showing_pack) {
@@ -1372,51 +1396,53 @@ namespace ygo {
       else if (y >= gradient_background_main_deck_y1 && y <= gradient_background_main_deck_y2) {
         GetHoveredCard_main_deck(x, y);
       }
-      else if (y >= 466 && y <= 530) {
-        int lx = deckManager.current_deck.extra.size();
-        hovered_pos = 2;
-        if (lx < 10) {
-          lx = 10;
-        }
-        if (x >= 750) {
-          hovered_seq = lx - 1;
-        }
-        else {
-          hovered_seq = (x - 314) * (lx - 1) / 436;
-        }
-        if (hovered_seq >= (int)deckManager.current_deck.extra.size()) {
-          hovered_seq = -1;
-          hovered_code = 0;
-        }
-        else {
-          hovered_code = deckManager.current_deck.extra[hovered_seq]->first;
-          if (x >= 772) {
-            is_lastcard = 1;
-          }
-        }
+      else if (y >= gradient_background_extra_deck_y1 && y <= gradient_background_extra_deck_y2) {
+        GetHoveredCard_extra_deck(x, y);
+        //~ int lx = deckManager.current_deck.extra.size();
+        //~ hovered_pos = 2;
+        //~ if (lx < 10) {
+        //~ lx = 10;
+        //~ }
+        //~ if (x >= 750) {
+        //~ hovered_seq = lx - 1;
+        //~ }
+        //~ else {
+        //~ hovered_seq = (x - 314) * (lx - 1) / 436;
+        //~ }
+        //~ if (hovered_seq >= (int)deckManager.current_deck.extra.size()) {
+        //~ hovered_seq = -1;
+        //~ hovered_code = 0;
+        //~ }
+        //~ else {
+        //~ hovered_code = deckManager.current_deck.extra[hovered_seq]->first;
+        //~ if (x >= 772) {
+        //~ is_lastcard = 1;
+        //~ }
+        //~ }
       }
-      else if (y >= 564 && y <= 628) {
-        int lx = deckManager.current_deck.side.size();
-        hovered_pos = 3;
-        if (lx < 10) {
-          lx = 10;
-        }
-        if (x >= 750) {
-          hovered_seq = lx - 1;
-        }
-        else {
-          hovered_seq = (x - 314) * (lx - 1) / 436;
-        }
-        if (hovered_seq >= (int)deckManager.current_deck.side.size()) {
-          hovered_seq = -1;
-          hovered_code = 0;
-        }
-        else {
-          hovered_code = deckManager.current_deck.side[hovered_seq]->first;
-          if (x >= 772) {
-            is_lastcard = 1;
-          }
-        }
+      else if (y >= gradient_background_side_deck_y1 && y <= gradient_background_side_deck_y2) {
+        this->GetHoveredCard_side_deck(x, y);
+        //~ int lx = deckManager.current_deck.side.size();
+        //~ hovered_pos = 3;
+        //~ if (lx < 10) {
+        //~ lx = 10;
+        //~ }
+        //~ if (x >= 750) {
+        //~ hovered_seq = lx - 1;
+        //~ }
+        //~ else {
+        //~ hovered_seq = (x - 314) * (lx - 1) / 436;
+        //~ }
+        //~ if (hovered_seq >= (int)deckManager.current_deck.side.size()) {
+        //~ hovered_seq = -1;
+        //~ hovered_code = 0;
+        //~ }
+        //~ else {
+        //~ hovered_code = deckManager.current_deck.side[hovered_seq]->first;
+        //~ if (x >= 772) {
+        //~ is_lastcard = 1;
+        //~ }
+        //~ }
       }
     }
     else if (x >= 810 && x <= 995 && y >= 165 && y <= 626) {
@@ -1445,27 +1471,123 @@ namespace ygo {
     }
   }
 
+  void DeckBuilder::GetHoveredCard_side_deck(int64_t x, int64_t y) {
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_xy = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+
+    int64_t gradient_background_side_deck_width = gui_xy["gradient_background_side_deck"]["width"];
+
+    int64_t gradient_background_side_deck_x1_adjust = gui_xy["gradient_background_side_deck"]["x1_adjust"];
+    int64_t gradient_background_side_deck_y1_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust"];
+    int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
+
+    int64_t row_index = (y - gradient_background_side_deck_y1_adjust) / (gradient_background_main_deck_height_adjust / Game::main_deck_max_row_capacity);
+
+    int64_t per_row_max_card_capacity = mainGame->get_side_deck_per_row_max_card_capacity();
+
+    int64_t column_index = (x - gradient_background_side_deck_x1_adjust) * ((per_row_max_card_capacity - 1) / (gradient_background_side_deck_width * 0.9));
+    if (column_index >= per_row_max_card_capacity) {
+      column_index = per_row_max_card_capacity - 1;
+    }
+
+    hovered_pos = 3;
+    hovered_seq = (row_index * per_row_max_card_capacity) + column_index;
+    if (hovered_seq >= deckManager.current_deck.side.size()) {
+      hovered_seq = -1;
+      hovered_code = 0;
+    }
+    else {
+      hovered_code = deckManager.current_deck.side[hovered_seq]->first;
+    }
+  }
+
+  //~ int64_t DeckBuilder::GetHoveredCard_side_deck_get_per_row_max_card_capacity() {
+  //~ if (showing_pack) {
+  //~ if (deckManager.current_deck.main.size() > Game::main_deck_pack_min_capacity) {
+  //~ return ((deckManager.current_deck.main.size() - (Game::main_deck_pack_min_capacity + 1)) / Game::main_deck_pack_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
+  //~ }
+  //~ }
+  //~ else {
+  //~ if (deckManager.current_deck.side.size() > mainGame->per_row_min_card_capacity) {
+  //~ return ((deckManager.current_deck.side.size() - (mainGame->per_row_min_card_capacity + 1)) / (Game::main_deck_max_row_capacity + 1)) + (mainGame->per_row_min_card_capacity + 1);
+  //~ }
+  //~ else {
+  //~ }
+  //~ return mainGame->per_row_min_card_capacity;
+  //~ }
+  //~ }
+
+  void DeckBuilder::GetHoveredCard_extra_deck(int64_t x, int64_t y) {
+    using luabridge::getGlobal;
+    using luabridge::main_thread;
+
+    auto gui_xy = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+
+    int64_t gradient_background_extra_deck_width = gui_xy["gradient_background_extra_deck"]["width"];
+
+    int64_t gradient_background_extra_deck_y1_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust"];
+    int64_t gradient_background_extra_deck_x1_adjust = gui_xy["gradient_background_extra_deck"]["x1_adjust"];
+    int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
+
+    int64_t row_index = (y - gradient_background_extra_deck_y1_adjust) / (gradient_background_main_deck_height_adjust / Game::main_deck_max_row_capacity);
+
+    int64_t per_row_max_card_capacity = mainGame->get_extra_deck_per_row_max_card_capacity();
+
+    int64_t column_index = (x - gradient_background_extra_deck_x1_adjust) * ((per_row_max_card_capacity - 1) / (gradient_background_extra_deck_width * 0.9));
+    if (column_index >= per_row_max_card_capacity) {
+      column_index = per_row_max_card_capacity - 1;
+    }
+
+    hovered_pos = 2;
+    hovered_seq = (row_index * per_row_max_card_capacity) + column_index;
+    if (hovered_seq >= deckManager.current_deck.extra.size()) {
+      hovered_seq = -1;
+      hovered_code = 0;
+    }
+    else {
+      hovered_code = deckManager.current_deck.extra[hovered_seq]->first;
+    }
+  }
+
+  //~ int64_t DeckBuilder::GetHoveredCard_extra_deck_get_per_row_max_card_capacity() {
+  //~ if (showing_pack) {
+  //~ if (deckManager.current_deck.main.size() > Game::main_deck_pack_min_capacity) {
+  //~ return ((deckManager.current_deck.main.size() - (Game::main_deck_pack_min_capacity + 1)) / Game::main_deck_pack_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
+  //~ }
+  //~ }
+  //~ else {
+  //~ if (deckManager.current_deck.extra.size() > mainGame->per_row_min_card_capacity) {
+  //~ return ((deckManager.current_deck.extra.size() - (mainGame->per_row_min_card_capacity + 1)) / (Game::main_deck_max_row_capacity + 1)) + (mainGame->per_row_min_card_capacity + 1);
+  //~ }
+  //~ else {
+  //~ }
+  //~ return mainGame->per_row_min_card_capacity;
+  //~ }
+  //~ }
+
   void DeckBuilder::GetHoveredCard_main_deck(int64_t x, int64_t y) {
     using luabridge::getGlobal;
     using luabridge::main_thread;
-  
+
     auto gui_xy = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
-    
+
     int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
 
     int64_t gradient_background_main_deck_y1_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust"];
     int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
     int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
-    
+
     int64_t row_index = (y - gradient_background_main_deck_y1_adjust) / (gradient_background_main_deck_height_adjust / Game::main_deck_max_row_capacity);
-    
-    int64_t per_row_max_card_capacity = this->GetHoveredCard_main_deck_get_per_row_max_card_capacity();
-    
+
+    int64_t per_row_max_card_capacity = mainGame->get_main_deck_per_row_max_card_capacity();
+
     int64_t column_index = (x - gradient_background_main_deck_x1_adjust) * ((per_row_max_card_capacity - 1) / (gradient_background_main_deck_width * 0.9));
     if (column_index >= per_row_max_card_capacity) {
       column_index = per_row_max_card_capacity - 1;
     }
-    
+
     hovered_pos = 1;
     hovered_seq = (row_index * per_row_max_card_capacity) + column_index;
     if (hovered_seq >= deckManager.current_deck.main.size()) {
@@ -1476,20 +1598,20 @@ namespace ygo {
       hovered_code = deckManager.current_deck.main[hovered_seq]->first;
     }
   }
-  
-  int64_t DeckBuilder::GetHoveredCard_main_deck_get_per_row_max_card_capacity() {
-    if (showing_pack) {
-      if (deckManager.current_deck.main.size() > Game::main_deck_pack_min_capacity) {
-        return ((deckManager.current_deck.main.size() - (Game::main_deck_pack_min_capacity + 1)) / Game::main_deck_pack_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
-      }
-    }
-    else {
-      if (deckManager.current_deck.main.size() > DECK_MIN_SIZE) {
-        return ((deckManager.current_deck.main.size() - (DECK_MIN_SIZE + 1)) / Game::main_deck_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
-      }
-    }
-    return mainGame->per_row_min_card_capacity;
-  }
+
+  //~ int64_t DeckBuilder::GetHoveredCard_main_deck_get_per_row_max_card_capacity() {
+  //~ if (showing_pack) {
+  //~ if (deckManager.current_deck.main.size() > Game::main_deck_pack_min_capacity) {
+  //~ return ((deckManager.current_deck.main.size() - (Game::main_deck_pack_min_capacity + 1)) / Game::main_deck_pack_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
+  //~ }
+  //~ }
+  //~ else {
+  //~ if (deckManager.current_deck.main.size() > DECK_MIN_SIZE) {
+  //~ return ((deckManager.current_deck.main.size() - (DECK_MIN_SIZE + 1)) / Game::main_deck_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
+  //~ }
+  //~ }
+  //~ return mainGame->per_row_min_card_capacity;
+  //~ }
 
   void DeckBuilder::StartFilter() {
     filter_type = mainGame->cbCardType->getSelected();
@@ -1522,61 +1644,31 @@ namespace ygo {
 
     const wchar_t *pstr = mainGame->ebCardName->getText();
     int trycode = BufferIO::GetVal(pstr);
+    std::wstring full_str;
+    if (mainGame->combo_box_search_record->getSelected() != 0) {
+      full_str = fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->combo_box_search_record->getItem(mainGame->combo_box_search_record->getSelected())), L" ", fast_io::mnp::os_c_str(pstr));
+      pstr = full_str.c_str();
+    }
     std::wstring str{pstr};
     std::vector<element_t> query_elements;
-    if (mainGame->gameConf.search_multiple_keywords) {
-      const wchar_t separator = mainGame->gameConf.search_multiple_keywords == 1 ? L' ' : L'+';
-      const wchar_t minussign = L'-';
-      const wchar_t quotation = L'\"';
-      size_t element_start = 0;
-      for (;;) {
-        element_start = str.find_first_not_of(separator, element_start);
-        if (element_start == std::wstring::npos) {
-          break;
-        }
-        element_t element;
-        if (str[element_start] == minussign) {
-          element.exclude = true;
-          element_start++;
-        }
-        if (element_start >= str.size()) {
-          break;
-        }
-        if (str[element_start] == L'$') {
-          element.type = element_t::type_t::name;
-          element_start++;
-        }
-        else if (str[element_start] == L'@') {
-          element.type = element_t::type_t::setcode;
-          element_start++;
-        }
-        if (element_start >= str.size()) {
-          break;
-        }
-        wchar_t delimiter = separator;
-        if (str[element_start] == quotation) {
-          delimiter = quotation;
-          element_start++;
-        }
-        size_t element_end = str.find_first_of(delimiter, element_start);
-        if (element_end != std::wstring::npos) {
-          size_t length = element_end - element_start;
-          element.keyword = str.substr(element_start, length);
-        }
-        else {
-          element.keyword = str.substr(element_start);
-        }
-        element.setcodes = dataManager.GetSetCodes(element.keyword);
-        query_elements.push_back(element);
-        if (element_end == std::wstring::npos) {
-          break;
-        }
-        element_start = element_end + 1;
+    //~ if (mainGame->gameConf.search_multiple_keywords) {
+    const wchar_t separator = mainGame->gameConf.search_multiple_keywords == 1 ? L' ' : L'+';
+    const wchar_t minussign = L'-';
+    const wchar_t quotation = L'\"';
+    size_t element_start = 0;
+    for (;;) {
+      element_start = str.find_first_not_of(separator, element_start);
+      if (element_start == std::wstring::npos) {
+        break;
       }
-    }
-    else {
       element_t element;
-      size_t element_start = 0;
+      if (str[element_start] == minussign) {
+        element.exclude = true;
+        element_start++;
+      }
+      if (element_start >= str.size()) {
+        break;
+      }
       if (str[element_start] == L'$') {
         element.type = element_t::type_t::name;
         element_start++;
@@ -1585,12 +1677,47 @@ namespace ygo {
         element.type = element_t::type_t::setcode;
         element_start++;
       }
-      if (element_start < str.size()) {
-        element.keyword = str.substr(element_start);
-        element.setcodes = dataManager.GetSetCodes(element.keyword);
-        query_elements.push_back(element);
+      if (element_start >= str.size()) {
+        break;
       }
+      wchar_t delimiter = separator;
+      if (str[element_start] == quotation) {
+        delimiter = quotation;
+        element_start++;
+      }
+      size_t element_end = str.find_first_of(delimiter, element_start);
+      if (element_end != std::wstring::npos) {
+        size_t length = element_end - element_start;
+        element.keyword = str.substr(element_start, length);
+      }
+      else {
+        element.keyword = str.substr(element_start);
+      }
+      element.setcodes = dataManager.GetSetCodes(element.keyword);
+      query_elements.push_back(element);
+      if (element_end == std::wstring::npos) {
+        break;
+      }
+      element_start = element_end + 1;
     }
+    //~ }
+    //~ else {
+    //~ element_t element;
+    //~ size_t element_start = 0;
+    //~ if (str[element_start] == L'$') {
+    //~ element.type = element_t::type_t::name;
+    //~ element_start++;
+    //~ }
+    //~ else if (str[element_start] == L'@') {
+    //~ element.type = element_t::type_t::setcode;
+    //~ element_start++;
+    //~ }
+    //~ if (element_start < str.size()) {
+    //~ element.keyword = str.substr(element_start);
+    //~ element.setcodes = dataManager.GetSetCodes(element.keyword);
+    //~ query_elements.push_back(element);
+    //~ }
+    //~ }
     for (auto ptr = dataManager.datas_begin(); ptr != dataManager.datas_end(); ++ptr) {
       const CardDataC &data = ptr->second;
       auto strpointer = dataManager.GetStringPointer(ptr->first);
@@ -1755,15 +1882,16 @@ namespace ygo {
     mainGame->ebDefense->setText(L"");
     mainGame->ebStar->setText(L"");
     mainGame->ebScale->setText(L"");
+    mainGame->combo_box_search_record->setSelected(0);
     filter_effect = 0;
-    for (int i = 0; i < 32; ++i) {
-      mainGame->chkCategory[i]->setChecked(false);
-    }
+    //~ for (int i = 0; i < 32; ++i) {
+    //~ mainGame->chkCategory[i]->setChecked(false);
+    //~ }
     filter_marks = 0;
     for (int i = 0; i < 8; i++) {
       mainGame->btnMark[i]->setPressed(false);
     }
-    mainGame->btnEffectFilter->setPressed(false);
+    //~ mainGame->btnEffectFilter->setPressed(false);
     mainGame->btnMarksFilter->setPressed(false);
   }
 
@@ -1824,20 +1952,20 @@ namespace ygo {
 
   void DeckBuilder::RefreshPackListScroll() {
     if (showing_pack) {
-      mainGame->scrPackCards->setPos(0);
+      //~ mainGame->scrPackCards->setPos(0);
       int mainsize = deckManager.current_deck.main.size();
-      if (mainsize <= 7 * 12) {
-        mainGame->scrPackCards->setVisible(false);
-      }
-      else {
-        mainGame->scrPackCards->setVisible(true);
-        mainGame->scrPackCards->setMax((int)ceil(((float)mainsize - 7 * 12) / 12.0f));
-      }
+      //~ if (mainsize <= 7 * 12) {
+      //~ mainGame->scrPackCards->setVisible(false);
+      //~ }
+      //~ else {
+      //~ mainGame->scrPackCards->setVisible(true);
+      //~ mainGame->scrPackCards->setMax((int)ceil(((float)mainsize - 7 * 12) / 12.0f));
+      //~ }
     }
-    else {
-      mainGame->scrPackCards->setVisible(false);
-      mainGame->scrPackCards->setPos(0);
-    }
+    //~ else {
+    //~ mainGame->scrPackCards->setVisible(false);
+    //~ mainGame->scrPackCards->setPos(0);
+    //~ }
   }
 
   void DeckBuilder::ChangeCategory(int catesel) {
@@ -1884,10 +2012,6 @@ namespace ygo {
     mainGame->imgBigCard->setRelativePosition(irr::core::recti(0, 0, size.Width, size.Height));
     mainGame->wBigCard->setRelativePosition(irr::core::recti(left, top, left + size.Width, top + size.Height));
     mainGame->gMutex.lock();
-    mainGame->btnBigCardOriginalSize->setVisible(true);
-    mainGame->btnBigCardZoomIn->setVisible(true);
-    mainGame->btnBigCardZoomOut->setVisible(true);
-    mainGame->btnBigCardClose->setVisible(true);
     mainGame->ShowElement(mainGame->wBigCard);
     mainGame->guiEnv->getRootGUIElement()->bringToFront(mainGame->wBigCard);
     mainGame->gMutex.unlock();
@@ -1918,10 +2042,10 @@ namespace ygo {
 
   void DeckBuilder::CloseBigCard() {
     mainGame->HideElement(mainGame->wBigCard);
-    mainGame->btnBigCardOriginalSize->setVisible(false);
-    mainGame->btnBigCardZoomIn->setVisible(false);
-    mainGame->btnBigCardZoomOut->setVisible(false);
-    mainGame->btnBigCardClose->setVisible(false);
+    //~ mainGame->btnBigCardOriginalSize->setVisible(false);
+    //~ mainGame->btnBigCardZoomIn->setVisible(false);
+    //~ mainGame->btnBigCardZoomOut->setVisible(false);
+    //~ mainGame->btnBigCardClose->setVisible(false);
   }
 
   static inline wchar_t NormalizeChar(wchar_t c) {

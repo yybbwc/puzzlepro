@@ -15,12 +15,13 @@ namespace ygo {
 
     should_resize_element_unordered_map_int.insert_or_assign(check_replay_window, "check_replay_window");
     should_resize_element_unordered_map_int.insert_or_assign(check_replay_table, "check_replay_table");
+    should_resize_element_unordered_map_int.insert_or_assign(check_replay_static_text, "check_replay_static_text");
 
     should_resize_element_unordered_map_int.insert_or_assign(solve_puzzle_window, "solve_puzzle_window");
-    should_resize_element_unordered_map_int.insert_or_assign(solve_puzzle_table, "solve_puzzle_table");
+    //~ should_resize_element_unordered_map_int.insert_or_assign(solve_puzzle_table, "solve_puzzle_table");
 
     should_resize_element_unordered_map_int.insert_or_assign(wReplay, "wReplay");
-    should_resize_element_unordered_map_int.insert_or_assign(lstReplayList, "lstReplayList");
+    //~ should_resize_element_unordered_map_int.insert_or_assign(lstReplayList, "lstReplayList");
     should_resize_element_unordered_map_int.insert_or_assign(stReplayTip, "stReplayTip");
     should_resize_element_unordered_map_int.insert_or_assign(stReplayInfo, "stReplayInfo");
     should_resize_element_unordered_map_int.insert_or_assign(replay_file_select_panel, "replay_file_select_panel");
@@ -101,7 +102,7 @@ namespace ygo {
     should_resize_element_unordered_map_int.insert_or_assign(ebAttack, "ebAttack");
     should_resize_element_unordered_map_int.insert_or_assign(stDefense, "stDefense");
     should_resize_element_unordered_map_int.insert_or_assign(ebDefense, "ebDefense");
-    should_resize_element_unordered_map_int.insert_or_assign(btnEffectFilter, "btnEffectFilter");
+    //~ should_resize_element_unordered_map_int.insert_or_assign(btnEffectFilter, "btnEffectFilter");
     should_resize_element_unordered_map_int.insert_or_assign(stSearch, "stSearch");
     should_resize_element_unordered_map_int.insert_or_assign(ebCardName, "ebCardName");
     should_resize_element_unordered_map_int.insert_or_assign(btnClearFilter, "btnClearFilter");
@@ -150,9 +151,15 @@ namespace ygo {
     should_resize_element_unordered_map_int.insert_or_assign(wOptions, "wOptions");
     should_resize_element_unordered_map_int.insert_or_assign(btnOptionOK, "btnOptionOK");
     should_resize_element_unordered_map_int.insert_or_assign(wOptions_combo_box_option, "wOptions_combo_box_option");
-    
+
     should_resize_element_unordered_map_int.insert_or_assign(lstLog, "lstLog");
     should_resize_element_unordered_map_int.insert_or_assign(btnClearLog, "btnClearLog");
+
+    should_resize_element_unordered_map_int.insert_or_assign(static_text_search_record, "static_text_search_record");
+    should_resize_element_unordered_map_int.insert_or_assign(combo_box_search_record, "combo_box_search_record");
+
+    should_resize_element_unordered_map_int.insert_or_assign(wANAttribute, "wANAttribute");
+    should_resize_element_unordered_map_int.insert_or_assign(smMessage, "smMessage");
 
     //~ should_resize_element_unordered_map_int.insert_or_assign($a.3, "$a.3");
     //~ cc.p
