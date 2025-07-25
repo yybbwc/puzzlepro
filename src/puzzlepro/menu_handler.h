@@ -22,10 +22,10 @@ namespace ygo {
     bool OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_EGFSPE_REAL_FILE_SELECTED();
 
     using OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_single_file_select_panel_id_function = bool (MenuHandler::*)();
-    std::unordered_map<int64_t, OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_single_file_select_panel_id_function> OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_single_file_select_panel_id_function_unordered_map;
+    boost::unordered::unordered_flat_map<int64_t, OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_single_file_select_panel_id_function> OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_single_file_select_panel_id_function_unordered_map;
 
     using OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_function = bool (MenuHandler::*)();
-    std::unordered_map<int64_t, OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_function> OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_function_unordered_map;
+    boost::unordered::unordered_flat_map<int64_t, OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_function> OnEvent_EET_GUI_EVENT_EGET_FILE_SELECTED_replay_file_select_panel_id_function_unordered_map;
 
     irr::s32 prev_operation;
     int prev_sel;

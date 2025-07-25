@@ -57,7 +57,8 @@ namespace ygo {
     mainGame->is_siding = false;
     mainGame->ClearCardInfo();
     mainGame->wInfos->setVisible(true);
-    mainGame->wCardImg->setVisible(true);
+    //~ mainGame->wCardImg->setVisible(true);
+    mainGame->imgCard->setVisible(true);
     mainGame->wDeckEdit->setVisible(true);
     mainGame->wFilter->setVisible(true);
     mainGame->wSort->setVisible(true);
@@ -84,7 +85,6 @@ namespace ygo {
       filterList = &deckManager._lfList.back();
     }
     ClearSearch();
-    rnd.reset((uint_fast32_t)std::time(nullptr));
     mouse_pos.set(0, 0);
     hovered_code = 0;
     hovered_pos = 0;
@@ -106,17 +106,12 @@ namespace ygo {
     mainGame->is_building = false;
     mainGame->ClearCardInfo();
     mainGame->wDeckEdit->setVisible(false);
-    //~ mainGame->wCategories->setVisible(false);
     mainGame->wFilter->setVisible(false);
     mainGame->wSort->setVisible(false);
-    mainGame->wCardImg->setVisible(false);
+    mainGame->imgCard->setVisible(false);
     mainGame->wInfos->setVisible(false);
     mainGame->btnLeaveGame->setVisible(false);
     mainGame->wBigCard->setVisible(false);
-    //~ mainGame->btnBigCardOriginalSize->setVisible(false);
-    //~ mainGame->btnBigCardZoomIn->setVisible(false);
-    //~ mainGame->btnBigCardZoomOut->setVisible(false);
-    //~ mainGame->btnBigCardClose->setVisible(false);
     mainGame->ResizeChatInputWindow();
     mainGame->PopupElement(mainGame->wMainMenu);
     mainGame->device->setEventReceiver(&mainGame->menuHandler);
@@ -124,8 +119,6 @@ namespace ygo {
     mainGame->ClearTextures();
     mainGame->showingcode = 0;
     mainGame->scrFilter->setVisible(false);
-    //~ mainGame->scrPackCards->setVisible(false);
-    //~ mainGame->scrPackCards->setPos(0);
     mainGame->static_text_deck_edit_main_deck_size->setVisible(false);
     mainGame->static_text_deck_edit_extra_deck_size->setVisible(false);
     mainGame->static_text_deck_edit_side_deck_size->setVisible(false);
@@ -185,7 +178,7 @@ namespace ygo {
                 break;
               }
               case BUTTON_SHUFFLE_DECK: {
-                rnd.shuffle_vector(deckManager.current_deck.main);
+                this->random_xoshiro256pp_1.shuffle_vector(deckManager.current_deck.main);
                 break;
               }
               case BUTTON_SAVE_DECK: {
@@ -718,26 +711,8 @@ namespace ygo {
 
                 break;
               }
-              //~ case BUTTON_BIG_CARD_ORIG_SIZE: {
-              //~ ShowBigCard(bigcard_code, 1);
-              //~ break;
-              //~ }
-              //~ case BUTTON_BIG_CARD_ZOOM_IN: {
-              //~ bigcard_zoom += 0.2f;
-              //~ ZoomBigCard();
-              //~ break;
-              //~ }
-              //~ case BUTTON_BIG_CARD_ZOOM_OUT: {
-              //~ bigcard_zoom -= 0.2f;
-              //~ ZoomBigCard();
-              //~ break;
-              //~ }
-              //~ case BUTTON_BIG_CARD_CLOSE: {
-              //~ CloseBigCard();
-              //~ break;
-              //~ }
               case BUTTON_MSG_OK: {
-                fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+                //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
                 mainGame->HideElement(mainGame->wMessage);
                 mainGame->actionSignal.Set();
                 break;
@@ -1368,7 +1343,7 @@ namespace ygo {
   }
 
   void DeckBuilder::GetHoveredCard() {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
     int pre_code = hovered_code;
     hovered_pos = 0;
     hovered_code = 0;
@@ -1388,7 +1363,6 @@ namespace ygo {
     int64_t gradient_background_extra_deck_y2 = gui_xy["gradient_background_extra_deck"]["y2"];
     int64_t gradient_background_side_deck_y1 = gui_xy["gradient_background_side_deck"]["y1"];
     int64_t gradient_background_side_deck_y2 = gui_xy["gradient_background_side_deck"]["y2"];
-    int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
     if (x >= gradient_background_main_deck_x1 && x <= gradient_background_main_deck_x2) {
       if (showing_pack) {
         GetHoveredCard_main_deck(x, y);
@@ -1398,56 +1372,14 @@ namespace ygo {
       }
       else if (y >= gradient_background_extra_deck_y1 && y <= gradient_background_extra_deck_y2) {
         GetHoveredCard_extra_deck(x, y);
-        //~ int lx = deckManager.current_deck.extra.size();
-        //~ hovered_pos = 2;
-        //~ if (lx < 10) {
-        //~ lx = 10;
-        //~ }
-        //~ if (x >= 750) {
-        //~ hovered_seq = lx - 1;
-        //~ }
-        //~ else {
-        //~ hovered_seq = (x - 314) * (lx - 1) / 436;
-        //~ }
-        //~ if (hovered_seq >= (int)deckManager.current_deck.extra.size()) {
-        //~ hovered_seq = -1;
-        //~ hovered_code = 0;
-        //~ }
-        //~ else {
-        //~ hovered_code = deckManager.current_deck.extra[hovered_seq]->first;
-        //~ if (x >= 772) {
-        //~ is_lastcard = 1;
-        //~ }
-        //~ }
       }
       else if (y >= gradient_background_side_deck_y1 && y <= gradient_background_side_deck_y2) {
         this->GetHoveredCard_side_deck(x, y);
-        //~ int lx = deckManager.current_deck.side.size();
-        //~ hovered_pos = 3;
-        //~ if (lx < 10) {
-        //~ lx = 10;
-        //~ }
-        //~ if (x >= 750) {
-        //~ hovered_seq = lx - 1;
-        //~ }
-        //~ else {
-        //~ hovered_seq = (x - 314) * (lx - 1) / 436;
-        //~ }
-        //~ if (hovered_seq >= (int)deckManager.current_deck.side.size()) {
-        //~ hovered_seq = -1;
-        //~ hovered_code = 0;
-        //~ }
-        //~ else {
-        //~ hovered_code = deckManager.current_deck.side[hovered_seq]->first;
-        //~ if (x >= 772) {
-        //~ is_lastcard = 1;
-        //~ }
-        //~ }
       }
     }
-    else if (x >= 810 && x <= 995 && y >= 165 && y <= 626) {
+    else if (x >= gui_xy["gradient_background_search_result"]["x1"].cast<int64_t>().value() && x <= gui_xy["gradient_background_search_result"]["x2"].cast<int64_t>().value() && y >= gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() && y <= gui_xy["gradient_background_search_result"]["y2"].cast<int64_t>().value()) {
       hovered_pos = 4;
-      hovered_seq = (y - 165) / 66;
+      hovered_seq = (y - gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value()) / gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value();
       int current_pos = mainGame->scrFilter->getPos() + hovered_seq;
       if (current_pos >= (int)results.size()) {
         hovered_seq = -1;
@@ -1472,10 +1404,7 @@ namespace ygo {
   }
 
   void DeckBuilder::GetHoveredCard_side_deck(int64_t x, int64_t y) {
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
-
-    auto gui_xy = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
 
     int64_t gradient_background_side_deck_width = gui_xy["gradient_background_side_deck"]["width"];
 
@@ -1520,10 +1449,8 @@ namespace ygo {
   //~ }
 
   void DeckBuilder::GetHoveredCard_extra_deck(int64_t x, int64_t y) {
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
 
-    auto gui_xy = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
 
     int64_t gradient_background_extra_deck_width = gui_xy["gradient_background_extra_deck"]["width"];
 
@@ -1551,43 +1478,18 @@ namespace ygo {
     }
   }
 
-  //~ int64_t DeckBuilder::GetHoveredCard_extra_deck_get_per_row_max_card_capacity() {
-  //~ if (showing_pack) {
-  //~ if (deckManager.current_deck.main.size() > Game::main_deck_pack_min_capacity) {
-  //~ return ((deckManager.current_deck.main.size() - (Game::main_deck_pack_min_capacity + 1)) / Game::main_deck_pack_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
-  //~ }
-  //~ }
-  //~ else {
-  //~ if (deckManager.current_deck.extra.size() > mainGame->per_row_min_card_capacity) {
-  //~ return ((deckManager.current_deck.extra.size() - (mainGame->per_row_min_card_capacity + 1)) / (Game::main_deck_max_row_capacity + 1)) + (mainGame->per_row_min_card_capacity + 1);
-  //~ }
-  //~ else {
-  //~ }
-  //~ return mainGame->per_row_min_card_capacity;
-  //~ }
-  //~ }
-
   void DeckBuilder::GetHoveredCard_main_deck(int64_t x, int64_t y) {
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
-
-    auto gui_xy = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
-
-    int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
-
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
     int64_t gradient_background_main_deck_y1_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust"];
     int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
     int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
-
     int64_t row_index = (y - gradient_background_main_deck_y1_adjust) / (gradient_background_main_deck_height_adjust / Game::main_deck_max_row_capacity);
-
     int64_t per_row_max_card_capacity = mainGame->get_main_deck_per_row_max_card_capacity();
-
-    int64_t column_index = (x - gradient_background_main_deck_x1_adjust) * ((per_row_max_card_capacity - 1) / (gradient_background_main_deck_width * 0.9));
+    //~ int64_t column_index = (x - gradient_background_main_deck_x1_adjust) * ((per_row_max_card_capacity - 1) / (gui_xy["gradient_background_main_deck"]["width_adjust"].cast<int64_t>().value() * mainGame->main_deck_width_adjust_radio));
+    int64_t column_index = (x - gui_xy["gradient_background_main_deck"]["x1_adjust"].cast<int64_t>().value()) * ((per_row_max_card_capacity - 1) / (gui_xy["gradient_background_main_deck"]["width_adjust"].cast<int64_t>().value() * mainGame->main_deck_width_adjust_radio));
     if (column_index >= per_row_max_card_capacity) {
       column_index = per_row_max_card_capacity - 1;
     }
-
     hovered_pos = 1;
     hovered_seq = (row_index * per_row_max_card_capacity) + column_index;
     if (hovered_seq >= deckManager.current_deck.main.size()) {
@@ -1598,20 +1500,6 @@ namespace ygo {
       hovered_code = deckManager.current_deck.main[hovered_seq]->first;
     }
   }
-
-  //~ int64_t DeckBuilder::GetHoveredCard_main_deck_get_per_row_max_card_capacity() {
-  //~ if (showing_pack) {
-  //~ if (deckManager.current_deck.main.size() > Game::main_deck_pack_min_capacity) {
-  //~ return ((deckManager.current_deck.main.size() - (Game::main_deck_pack_min_capacity + 1)) / Game::main_deck_pack_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
-  //~ }
-  //~ }
-  //~ else {
-  //~ if (deckManager.current_deck.main.size() > DECK_MIN_SIZE) {
-  //~ return ((deckManager.current_deck.main.size() - (DECK_MIN_SIZE + 1)) / Game::main_deck_max_row_capacity) + (mainGame->per_row_min_card_capacity + 1);
-  //~ }
-  //~ }
-  //~ return mainGame->per_row_min_card_capacity;
-  //~ }
 
   void DeckBuilder::StartFilter() {
     filter_type = mainGame->cbCardType->getSelected();
@@ -1629,6 +1517,7 @@ namespace ygo {
   }
 
   void DeckBuilder::FilterCards() {
+    //~ fast_io::timer t(u8"FilterCards()");
     results.clear();
 
     struct element_t {

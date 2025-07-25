@@ -13,7 +13,7 @@ namespace ygo {
     void RemoveTexture(int code);
     void ResizeTexture();
     irr::video::ITexture *GetTextureFromFile(const char *file, irr::s32 width, irr::s32 height);
-    irr::video::ITexture *GetTexture(int code, bool fit = false);
+    irr::video::ITexture *GetTexture(int code, bool fit = true);
     irr::video::ITexture *GetBigPicture(int code, float zoom);
     irr::video::ITexture *GetTextureThumb(int code);
     irr::video::ITexture *GetTextureField(int code);
@@ -23,16 +23,16 @@ namespace ygo {
 
     irr::video::ITexture *GetBigPicture(int code, irr::f32 width, irr::f32 height);
 
-    std::unordered_map<int, irr::video::ITexture *> tMap[2];
-    std::unordered_map<int, irr::video::ITexture *> tThumb;
-    std::unordered_map<int, irr::video::ITexture *> tFields;
-    std::unordered_map<int, irr::video::IImage *> tThumbLoading;
+    boost::unordered::unordered_flat_map<int, irr::video::ITexture *> tMap[2];
+    boost::unordered::unordered_flat_map<int, irr::video::ITexture *> tThumb;
+    boost::unordered::unordered_flat_map<int, irr::video::ITexture *> tFields;
+    boost::unordered::unordered_flat_map<int, irr::video::IImage *> tThumbLoading;
     std::queue<int> tThumbLoadingCodes;
     std::mutex tThumbLoadingMutex;
     bool tThumbLoadingThreadRunning;
     irr::IrrlichtDevice *device;
     irr::video::IVideoDriver *driver;
-    irr::video::ITexture *tCover[4];
+    irr::video::ITexture *tCover[2];
     irr::video::ITexture *tUnknown;
     irr::video::ITexture *tUnknownFit;
     irr::video::ITexture *tUnknownThumb;

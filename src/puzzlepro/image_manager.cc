@@ -4,12 +4,14 @@ namespace ygo {
   ImageManager imageManager;
 
   bool ImageManager::Initial() {
-    tCover[0] = nullptr;
-    tCover[1] = nullptr;
-    tCover[2] = GetTextureFromFile("textures/cover.jpg", CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
-    tCover[3] = GetTextureFromFile("textures/cover2.jpg", CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
-    if (!tCover[3]) {
-      tCover[3] = tCover[2];
+    //~ tCover[0] = nullptr;
+    //~ tCover[1] = nullptr;
+    //~ tCover[2] = GetTextureFromFile("textures/cover.jpg", CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
+    tCover[0] = driver->getTexture("textures/cover.jpg");
+    //~ tCover[3] = GetTextureFromFile("textures/cover2.jpg", CARD_IMG_WIDTH, CARD_IMG_HEIGHT);
+    tCover[1] = driver->getTexture("textures/cover2.jpg");
+    if (!tCover[1]) {
+      tCover[1] = tCover[0];
     }
     tUnknown = nullptr;
     tUnknownFit = nullptr;
@@ -112,7 +114,9 @@ namespace ygo {
     driver->removeTexture(tCover[0]);
     driver->removeTexture(tCover[1]);
     tCover[0] = GetTextureFromFile("textures/cover.jpg", imgWidth, imgHeight);
+    //~ tCover[0] = driver->getTexture("textures/cover.jpg");
     tCover[1] = GetTextureFromFile("textures/cover2.jpg", imgWidth, imgHeight);
+    //~ tCover[1] = driver->getTexture("textures/cover2.jpg");
     if (!tCover[1]) {
       tCover[1] = tCover[0];
     }
@@ -213,82 +217,8 @@ namespace ygo {
     } // end of parallel region
   }
 
-  //~ // function by Warr1024, from https://github.com/minetest/minetest/issues/2419 , modified
-  //~ void ImageManager::imageScaleNNAA(irr::video::IImage *src, irr::video::IImage *dest) {
-  //~ double sx, sy, minsx, maxsx, minsy, maxsy, area, ra, ga, ba, aa, pw, ph, pa;
-  //~ irr::u32 dy, dx;
-  //~ irr::video::SColor pxl;
-
-  //~ // Cache rectsngle boundaries.
-  //~ double sw = src->getDimension().Width * 1.0;
-  //~ double sh = src->getDimension().Height * 1.0;
-
-  //~ // Walk each destination image pixel.
-  //~ // Note: loop y around x for better cache locality.
-  //~ irr::core::dimension2d<irr::u32> dim = dest->getDimension();
-  //~ for(dy = 0; dy < dim.Height; dy++)
-  //~ for(dx = 0; dx < dim.Width; dx++) {
-
-  //~ // Calculate floating-point source rectangle bounds.
-  //~ minsx = dx * sw / dim.Width;
-  //~ maxsx = minsx + sw / dim.Width;
-  //~ minsy = dy * sh / dim.Height;
-  //~ maxsy = minsy + sh / dim.Height;
-
-  //~ // Total area, and integral of r, g, b values over that area,
-  //~ // initialized to zero, to be summed up in next loops.
-  //~ area = 0;
-  //~ ra = 0;
-  //~ ga = 0;
-  //~ ba = 0;
-  //~ aa = 0;
-
-  //~ // Loop over the integral pixel positions described by those bounds.
-  //~ for(sy = floor(minsy); sy < maxsy; sy++)
-  //~ for(sx = floor(minsx); sx < maxsx; sx++) {
-
-  //~ // Calculate width, height, then area of dest pixel
-  //~ // that's covered by this source pixel.
-  //~ pw = 1;
-  //~ if(minsx > sx)
-  //~ pw += sx - minsx;
-  //~ if(maxsx < (sx + 1))
-  //~ pw += maxsx - sx - 1;
-  //~ ph = 1;
-  //~ if(minsy > sy)
-  //~ ph += sy - minsy;
-  //~ if(maxsy < (sy + 1))
-  //~ ph += maxsy - sy - 1;
-  //~ pa = pw * ph;
-
-  //~ // Get source pixel and add it to totals, weighted
-  //~ // by covered area and alpha.
-  //~ pxl = src->getPixel((irr::u32)sx, (irr::u32)sy);
-  //~ area += pa;
-  //~ ra += pa * pxl.getRed();
-  //~ ga += pa * pxl.getGreen();
-  //~ ba += pa * pxl.getBlue();
-  //~ aa += pa * pxl.getAlpha();
-  //~ }
-
-  //~ // Set the destination image pixel to the average color.
-  //~ if(area > 0) {
-  //~ pxl.setRed(ra / area + 0.5);
-  //~ pxl.setGreen(ga / area + 0.5);
-  //~ pxl.setBlue(ba / area + 0.5);
-  //~ pxl.setAlpha(aa / area + 0.5);
-  //~ } else {
-  //~ pxl.setRed(0);
-  //~ pxl.setGreen(0);
-  //~ pxl.setBlue(0);
-  //~ pxl.setAlpha(0);
-  //~ }
-  //~ dest->setPixel(dx, dy, pxl);
-  //~ }
-  //~ }
-
   irr::video::ITexture *ImageManager::GetTextureFromFile(const char *file, irr::s32 width, irr::s32 height) {
-    if (mainGame->gameConf.use_image_scale) {
+    //~ if (mainGame->gameConf.use_image_scale) {
       irr::video::ITexture *texture = nullptr;
       irr::video::IImage *srcimg = driver->createImageFromFile(file);
       if (srcimg == nullptr) {
@@ -306,10 +236,10 @@ namespace ygo {
       }
       srcimg->drop();
       return texture;
-    }
-    else {
-      return driver->getTexture(file);
-    }
+    //~ }
+    //~ else {
+      //~ return driver->getTexture(file);
+    //~ }
   }
 
   irr::video::ITexture *ImageManager::GetTexture(int code, bool fit) {
@@ -335,10 +265,10 @@ namespace ygo {
         std::snprintf(file, sizeof file, "pics/%d.jpg", code);
         img = GetTextureFromFile(file, width, height);
       }
-      if (img == nullptr && !mainGame->gameConf.use_image_scale) {
-        tMap[fit ? 1 : 0][code] = nullptr;
-        return GetTextureThumb(code);
-      }
+      //~ if (img == nullptr && !mainGame->gameConf.use_image_scale) {
+      //~ tMap[fit ? 1 : 0][code] = nullptr;
+      //~ return GetTextureThumb(code);
+      //~ }
       tMap[fit ? 1 : 0][code] = img;
       return (img == nullptr) ? (fit ? tUnknownFit : tUnknown) : img;
     }
@@ -359,7 +289,7 @@ namespace ygo {
       tBigPicture = nullptr;
     }
     irr::video::ITexture *texture = nullptr;
-    char file[256];
+    char file[512];
     std::snprintf(file, sizeof file, "expansions/pics/%d.jpg", code);
     irr::video::IImage *srcimg = driver->createImageFromFile(file);
     if (srcimg == nullptr) {
@@ -369,16 +299,20 @@ namespace ygo {
     if (srcimg == nullptr) {
       return tUnknown;
     }
-    if (zoom == 1) {
-      texture = driver->addTexture(file, srcimg);
-    }
-    else {
+    //~ if (zoom == 1) {
+      //~ texture = driver->addTexture(file, srcimg);
+    //~ }
+    //~ else {
       auto origsize = srcimg->getDimension();
       irr::video::IImage *destimg = driver->createImage(srcimg->getColorFormat(), irr::core::dimension2d<irr::u32>(origsize.Width * zoom, origsize.Height * zoom));
+      if (!destimg) {
+    srcimg->drop();
+    return tUnknown;
+}
       imageScaleNNAA(srcimg, destimg);
       texture = driver->addTexture(file, destimg);
       destimg->drop();
-    }
+    //~ }
     srcimg->drop();
     tBigPicture = texture;
     return texture;
@@ -401,24 +335,13 @@ namespace ygo {
       srcimg = driver->createImageFromFile(file);
     }
     if (srcimg == nullptr) {
-      //~ srcimg = tUnknown;
-      //~ IImage* tmpImage = driver->createImageFromTexture(tUnknown);
-      //~ // work with tmpImage
-      //~ driver->removeTexture(tUnknown); // remove old texture
-      //~ tUnknown = driver->addTexture("new_name", tmpImage); // create new texture
-      //~ tmpImage->drop(); // release the image when done
       return tUnknown;
     }
-    //~ if (zoom == 1) {
-    //~ texture = driver->addTexture(file, srcimg);
-    //~ }
-    //~ else {
     auto origsize = srcimg->getDimension();
     irr::video::IImage *destimg = driver->createImage(srcimg->getColorFormat(), irr::core::dimension2d<irr::u32>(width, height));
     imageScaleNNAA(srcimg, destimg);
     texture = driver->addTexture(file, destimg);
     destimg->drop();
-    //~ }
     srcimg->drop();
     tBigPicture = texture;
     return texture;
@@ -431,13 +354,7 @@ namespace ygo {
       imageManager.tThumbLoadingCodes.pop();
       imageManager.tThumbLoadingMutex.unlock();
       char file[512];
-      //~ std::snprintf(file, sizeof file, "expansions/pics/thumbnail/%d.jpg", code);
-      //~ irr::video::IImage* img = imageManager.driver->createImageFromFile(file);
       irr::video::IImage *img;
-      //~ if (img == nullptr) {
-      //~ std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
-      //~ img = imageManager.driver->createImageFromFile(file);
-      //~ }
       if (img == nullptr && mainGame->gameConf.use_image_scale) {
         std::snprintf(file, sizeof file, "expansions/pics/%d.jpg", code);
         img = imageManager.driver->createImageFromFile(file);
@@ -449,18 +366,17 @@ namespace ygo {
       if (img != nullptr) {
         int width = CARD_THUMB_WIDTH * mainGame->xScale;
         int height = CARD_THUMB_HEIGHT * mainGame->yScale;
-        if (img->getDimension() == irr::core::dimension2d<irr::u32>(width, height)) {
-          img->grab();
-          imageManager.tThumbLoadingMutex.lock();
-          if (imageManager.tThumbLoadingThreadRunning) {
-            imageManager.tThumbLoading[code] = img;
-          }
-          imageManager.tThumbLoadingMutex.unlock();
-        }
-        else {
+        //~ if (img->getDimension() == irr::core::dimension2d<irr::u32>(width, height)) {
+          //~ img->grab();
+          //~ imageManager.tThumbLoadingMutex.lock();
+          //~ if (imageManager.tThumbLoadingThreadRunning) {
+            //~ imageManager.tThumbLoading[code] = img;
+          //~ }
+          //~ imageManager.tThumbLoadingMutex.unlock();
+        //~ }
+        //~ else {
           irr::video::IImage *destimg = imageManager.driver->createImage(img->getColorFormat(), irr::core::dimension2d<irr::u32>(width, height));
           imageScaleNNAA(img, destimg);
-          //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
           img->drop();
           destimg->grab();
           imageManager.tThumbLoadingMutex.lock();
@@ -468,7 +384,7 @@ namespace ygo {
             imageManager.tThumbLoading[code] = destimg;
           }
           imageManager.tThumbLoadingMutex.unlock();
-        }
+        //~ }
       }
       else {
         imageManager.tThumbLoadingMutex.lock();
@@ -496,10 +412,12 @@ namespace ygo {
     auto lit = tThumbLoading.find(code);
     if (lit != tThumbLoading.end()) {
       if (lit->second != nullptr) {
-        char file[256];
-        std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
-        irr::video::ITexture *texture = driver->addTexture(file, lit->second); // textures must be added in the main thread due
-                                                                               // to OpenGL
+        //~ char file[256];
+        //~ std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
+        //~ std::snprintf(file, sizeof file, "pics/%d.jpg", code);
+        //~ std::snprintf(file, sizeof file, "pics/%d.jp", code);
+        //~ irr::video::ITexture *texture = driver->addTexture(file, lit->second); // textures must be added in the main thread due to OpenGL
+        irr::video::ITexture *texture = driver->addTexture("ok", lit->second); // textures must be added in the main thread due to OpenGL
         lit->second->drop();
         tThumb[code] = texture;
       }

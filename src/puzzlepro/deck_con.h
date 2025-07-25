@@ -80,9 +80,9 @@ namespace ygo {
     bool is_modified{};
     bool readonly{};
     bool showing_pack{};
-    mt19937 rnd;
+    static inline random_xoshiro256pp random_xoshiro256pp_1;
 
-    //~ const std::unordered_map<int, int>* filterList;
+    //~ const boost::unordered::unordered_flat_map<int, int>* filterList;
     const LFList *filterList{};
     std::vector<code_pointer> results;
     wchar_t result_string[8]{};

@@ -9,7 +9,7 @@ namespace ygo {
   private:
     std::vector<std::wstring> BGMList[8];
     int bgm_scene;
-    mt19937 rnd;
+    static inline random_xoshiro256pp random_xoshiro256pp_1;
     ma_engine engineSound;
     ma_engine engineMusic;
     ma_sound soundBGM;

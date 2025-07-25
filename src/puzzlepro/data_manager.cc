@@ -13,27 +13,37 @@ namespace ygo {
   }
 
   bool DataManager::ReadDB(sqlite3 *pDB) {
+    //~ fast_io::timer t(u8"ReadDB()");
     sqlite3_stmt *pStmt = nullptr;
-    const char *sql = "select * from datas,texts where datas.id=texts.id";
+    const char *sql = "SELECT datas.id, datas.ot, datas.alias, datas.setcode, datas.type, datas.atk, datas.def, datas.level, datas.race, datas.attribute, datas.category, texts.name, texts.desc, texts.str1, texts.str2, texts.str3, texts.str4, texts.str5, texts.str6, texts.str7, texts.str8, texts.str9, texts.str10, texts.str11, texts.str12, texts.str13, texts.str14, texts.str15, texts.str16 FROM datas JOIN texts ON datas.id = texts.id";
     if (sqlite3_prepare_v2(pDB, sql, -1, &pStmt, nullptr) != SQLITE_OK) {
-      //~ return Error(pDB);
       return Error(pDB, pStmt);
     }
+    constexpr int64_t datas_id = 0;
+    constexpr int64_t datas_ot = 1;
+    constexpr int64_t datas_alias = 2;
+    constexpr int64_t datas_setcode = 3;
+    constexpr int64_t datas_type = 4;
+    constexpr int64_t datas_atk = 5;
+    constexpr int64_t datas_def = 6;
+    constexpr int64_t datas_level = 7;
+    constexpr int64_t datas_race = 8;
+    constexpr int64_t datas_attribute = 9;
+    constexpr int64_t datas_category = 10;
+    constexpr int64_t text_name = 11;
+    constexpr int64_t text_desc = 12;
+    constexpr int64_t text_str1 = 13;
     wchar_t strBuffer[4096];
     int step = 0;
     do {
       CardDataC cd;
       CardString cs;
       step = sqlite3_step(pStmt);
-      //~ if (step == SQLITE_BUSY || step == SQLITE_ERROR || step == SQLITE_MISUSE) {
-      //~ return Error(pDB, pStmt);
-      //~ }
-      //~ else if (step == SQLITE_ROW) {
       if (step == SQLITE_ROW) {
-        cd.code = sqlite3_column_int(pStmt, 0);
-        cd.ot = sqlite3_column_int(pStmt, 1);
-        cd.alias = sqlite3_column_int(pStmt, 2);
-        auto setcode = sqlite3_column_int64(pStmt, 3);
+        cd.code = sqlite3_column_int(pStmt, datas_id);
+        cd.ot = sqlite3_column_int(pStmt, datas_ot);
+        cd.alias = sqlite3_column_int(pStmt, datas_alias);
+        auto setcode = sqlite3_column_int64(pStmt, datas_setcode);
         if (setcode) {
           auto it = extra_setcode.find(cd.code);
           if (it != extra_setcode.end()) {
@@ -49,9 +59,9 @@ namespace ygo {
             cd.set_setcode(setcode);
           }
         }
-        cd.type = sqlite3_column_int64(pStmt, 4);
-        cd.attack = sqlite3_column_int(pStmt, 5);
-        cd.defense = sqlite3_column_int(pStmt, 6);
+        cd.type = sqlite3_column_int64(pStmt, datas_type);
+        cd.attack = sqlite3_column_int(pStmt, datas_atk);
+        cd.defense = sqlite3_column_int(pStmt, datas_def);
         if (cd.type & TYPE_LINK) {
           cd.link_marker = cd.defense;
           cd.defense = 0;
@@ -59,32 +69,31 @@ namespace ygo {
         else {
           cd.link_marker = 0;
         }
-        unsigned int level = sqlite3_column_int(pStmt, 7);
+        unsigned int level = sqlite3_column_int(pStmt, datas_level);
         cd.level = level & 0xff;
         cd.lscale = (level >> 24) & 0xff;
         cd.rscale = (level >> 16) & 0xff;
-        cd.race = sqlite3_column_int(pStmt, 8);
-        cd.attribute = sqlite3_column_int(pStmt, 9);
-        cd.category = sqlite3_column_int(pStmt, 10);
+        cd.race = sqlite3_column_int(pStmt, datas_race);
+        cd.attribute = sqlite3_column_int(pStmt, datas_attribute);
+        cd.category = sqlite3_column_int(pStmt, datas_category);
         _datas[cd.code] = cd;
-        if (const char *text = (const char *)sqlite3_column_text(pStmt, 12)) {
+        if (const char *text = (const char *)sqlite3_column_text(pStmt, text_name)) {
           BufferIO::DecodeUTF8(text, strBuffer);
           cs.name = strBuffer;
         }
-        if (const char *text = (const char *)sqlite3_column_text(pStmt, 13)) {
+        if (const char *text = (const char *)sqlite3_column_text(pStmt, text_desc)) {
           BufferIO::DecodeUTF8(text, strBuffer);
           cs.text = strBuffer;
         }
         constexpr int desc_count = sizeof cs.desc / sizeof cs.desc[0];
         for (int i = 0; i < desc_count; ++i) {
-          if (const char *text = (const char *)sqlite3_column_text(pStmt, i + 14)) {
+          if (const char *text = (const char *)sqlite3_column_text(pStmt, i + text_str1)) {
             BufferIO::DecodeUTF8(text, strBuffer);
             cs.desc[i] = strBuffer;
           }
         }
         _strings[cd.code] = cs;
       }
-      //~ } while (step != SQLITE_DONE);
       else if (step != SQLITE_DONE) {
         return Error(pDB, pStmt);
       }
@@ -96,11 +105,7 @@ namespace ygo {
   bool DataManager::LoadDB(const wchar_t *wfile) {
     char file[256];
     BufferIO::EncodeUTF8(wfile, file);
-#ifdef _WIN32
     auto *reader = FileSystem->createAndOpenFile(wfile);
-#else
-    auto reader = FileSystem->createAndOpenFile(file);
-#endif
     if (reader == nullptr) {
       return false;
     }

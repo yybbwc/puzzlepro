@@ -1130,7 +1130,7 @@ void field::shuffle(uint8_t playerid, uint8_t location) {
       s = s - (int32_t)player[playerid].extra_p_count;
     }
     if (s > 1) {
-      pduel->random.shuffle_vector(svector, 0, s - 1);
+      pduel->random_xoshiro256pp_1.shuffle_vector(svector);
       reset_sequence(playerid, location);
     }
   }
@@ -3788,8 +3788,8 @@ int32_t field::is_player_can_spsummon(effect *reason_effect, uint32_t sumtype, u
   for (effect_set::size_type i = 0; i < eset.size(); ++i) {
     //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
     //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-    //~ if (sumtype & SUMMON_TYPE_RITUAL or sumtype & SUMMON_TYPE_FUSION) {  
-      //~ return TRUE;
+    //~ if (sumtype & SUMMON_TYPE_RITUAL or sumtype & SUMMON_TYPE_FUSION) {
+    //~ return TRUE;
     //~ }
     if (!eset[i]->target) {
       return FALSE;

@@ -52,18 +52,16 @@ namespace ygo {
   }
 
   int SingleMode::SinglePlayThread() {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
     using fast_io::concat_fast_io;
     using fast_io::mnp::code_cvt_os_c_str;
     mainGame->dInfo.Clear();
     int opt = 0;
-    std::random_device rd;
-    unsigned int seed = rd();
-    mt19937 rnd((uint_fast32_t)seed);
+    int64_t seed = boost::random::random_device()();
     set_script_reader(DataManager::ScriptReaderEx);
     set_card_reader(DataManager::CardReader);
     set_message_handler(SingleMode::MessageHandler);
-    pduel = create_duel(rnd.rand());
+    pduel = ocgapi_create_duel(seed);
     DuelClient::last_replay_txt.reopen(gui_config["replay_dir"].tostring().append("_last_replay.txt"));
     set_player_info(pduel, 0, start_lp, start_hand, draw_count);
     set_player_info(pduel, 1, start_lp, start_hand, draw_count);
@@ -94,7 +92,7 @@ namespace ygo {
     mainGame->gMutex.lock();
     mainGame->HideElement(mainGame->wSinglePlay);
     mainGame->ClearCardInfo();
-    mainGame->wCardImg->setVisible(true);
+    mainGame->imgCard->setVisible(true);
     mainGame->wInfos->setVisible(true);
     mainGame->btnLeaveGame->setVisible(true);
     mainGame->btnLeaveGame->setText(dataManager.GetSysString(1210));
@@ -115,7 +113,6 @@ namespace ygo {
       is_continuing = SinglePlayAnalyze(engineBuffer.data(), len);
     }
     start_record(rh);
-    //~ last_replay.Flush();
     start_duel(pduel, opt);
     while (is_continuing) {
       unsigned int result = process(pduel);
@@ -129,9 +126,7 @@ namespace ygo {
       }
     }
     last_replay.EndRecord();
-
     save_replay();
-
     end_duel(pduel);
     DuelClient::last_replay_txt.close();
     if (!is_closing) {
@@ -168,8 +163,8 @@ namespace ygo {
   }
 
   bool SingleMode::SinglePlayAnalyze(unsigned char *msg, unsigned int len) {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
-    auto gui_message = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "message");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
+    auto gui_message = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "message");
 
     using fast_io::string;
     unsigned char *offset = nullptr;

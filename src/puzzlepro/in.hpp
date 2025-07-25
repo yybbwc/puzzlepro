@@ -27,7 +27,7 @@ extern "C" {
 #include <boost/algorithm/string_regex.hpp>
 #include <boost/algorithm/cxx11/none_of.hpp>
 #include <boost/container/deque.hpp>
-#include <boost/container/flat_set.hpp>
+//~ #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -37,14 +37,43 @@ extern "C" {
 #include <boost/range/algorithm.hpp>
 #include <boost/filesystem.hpp>
 
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/export.hpp>
+//~ #include <CGUIImageWithShimmer.h>
 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+//~ #include <boost/multi_index_container.hpp>
+//~ #include <boost/multi_index/hashed_index.hpp>
+//~ #include <boost/multi_index/sequenced_index.hpp>
+//~ #include <boost/multi_index/member.hpp>
 
+//~ #include <winternl.h> //GetRealCurrentThreadHandle
+//~ #include "mru_cache.h"
+
+//~ #include <boost/serialization/serialization.hpp>
+//~ #include <boost/serialization/nvp.hpp>
+//~ #include <boost/serialization/vector.hpp>
+//~ #include <boost/serialization/export.hpp>
+
+//~ #include <boost/assign/ptr_list_inserter.hpp>
+
+//~ #include <boost/ptr_container/ptr_container.hpp>
+//~ #include <boost/ptr_container/serialize_ptr_container.hpp>
+
+//~ #include <boost/archive/text_oarchive.hpp>
+//~ #include <boost/archive/text_woarchive.hpp>
+//~ #include <boost/archive/xml_woarchive.hpp>
+//~ #include <boost/archive/text_iarchive.hpp>
+//~ #include <boost/archive/xml_wiarchive.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
+//~ #include <boost/unordered/unordered_node_map.hpp>
+//~ #include <boost/unordered/unordered_flat_set.hpp>
+
+#include <boost/random/random_device.hpp>
+#include <boost/core/invoke_swap.hpp>
+#include <boost/random/xoshiro.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
+#include "random_xoshiro256pp.h"
+
+#include <fstream>
 
 #include <fmt/format.h>
 
@@ -63,13 +92,14 @@ extern "C" {
 
 #include <cstdint>
 #include <cwchar>
-#include "../ocgcore/buffer.h"
+#include "buffer.h"
+//~ #include "../ocgcore/buffer.h"
 #include "bufferio.h"
 
 #include <vector>
 #include "replay.h"
 
-#include "../ocgcore/ocgapi.h"
+#include "ocgapi.h"
 #include <irrlicht.h>
 #include <CGUIEnvironment.h>
 #include <CGUIScrollText.h>
@@ -88,7 +118,7 @@ extern "C" {
 #include <condition_variable>
 #include "mysignal.h"
 
-#include "../ocgcore/mtrandom.h"
+//~ #include "../ocgcore/mtrandom.h"
 #include <set>
 #include <map>
 #include "client_field.h"
@@ -96,7 +126,8 @@ extern "C" {
 #include <unordered_map>
 
 #include <sqlite3.h>
-#include "../ocgcore/card_data.h"
+#include "card_data.h"
+//~ #include "../ocgcore/card_data.h"
 #include "data_manager.h"
 #include "deck_manager.h"
 

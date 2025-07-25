@@ -4,7 +4,8 @@
 #include "CGUIScrollText.h"
 #ifdef _IRR_COMPILE_WITH_GUI_
 #include "IGUISkin.h"
-#include "IGUIEnvironment.h"
+//~ #include "IGUIEnvironment.h"
+#include "CGUIEnvironment.h"
 #include "IGUIFont.h"
 #include "IVideoDriver.h"
 #include "rect.h"

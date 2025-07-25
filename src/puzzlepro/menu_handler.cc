@@ -37,7 +37,7 @@ namespace ygo {
   }
 
   bool MenuHandler::OnEvent(const irr::SEvent &event) {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
     using fast_io::wconcat_fast_io;
     using fast_io::mnp::code_cvt_os_c_str;
     if (mainGame->dField.OnCommonEvent(event)) {
@@ -54,7 +54,7 @@ namespace ygo {
   }
 
   bool MenuHandler::OnEvent_EET_GUI_EVENT(const irr::SEvent &event) {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
     using fast_io::wconcat_fast_io;
     using fast_io::mnp::code_cvt_os_c_str;
     irr::gui::IGUIElement *caller = event.GUIEvent.Caller;
@@ -286,14 +286,13 @@ namespace ygo {
             using boost::filesystem::exists;
             using boost::filesystem::is_directory;
             using boost::filesystem::path;
-            using boost::this_thread::get_id;
             using fast_io::wconcat_std;
             using fast_io::mnp::code_cvt;
             using luabridge::getGlobal;
             using luabridge::main_thread;
             using std::string;
 
-            auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+            auto gui_config = getGlobal(main_thread(mainGame->get_lua()), "config");
             string replay_file_suffix = gui_config["replay_file_suffix"];
 
             mainGame->wReplay->setVisible(false);
@@ -321,14 +320,13 @@ namespace ygo {
             using boost::filesystem::is_directory;
             using boost::filesystem::path;
             using boost::filesystem::recursive_directory_iterator;
-            using boost::this_thread::get_id;
             using fast_io::wconcat_std;
             using fast_io::mnp::code_cvt;
             using luabridge::getGlobal;
             using luabridge::main_thread;
             using std::string;
 
-            auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+            auto gui_config = getGlobal(main_thread(mainGame->get_lua()), "config");
             string replay_file_suffix = gui_config["replay_file_suffix"];
 
             mainGame->wReplay->setVisible(false);
@@ -348,21 +346,26 @@ namespace ygo {
             boost::thread(mainGame->check_replay_vector_thread).detach();
             return false;
           }
-          case solve_puzzle_button_id: {
-            using boost::thread;
+            //~ case solve_puzzle_button_id: {
+            //~ using boost::thread;
 
-            if (!mainGame->replay_file_select_panel->isSelectedFileReal()) {
-              return false;
-            }
-            if (!ReplayMode::cur_replay.OpenReplay(mainGame->replay_file_select_panel->getSelectedFilePath().c_str())) {
-              return false;
-            }
+            //~ if (!mainGame->replay_file_select_panel->isSelectedFileReal()) {
+            //~ return false;
+            //~ }
+            //~ if (!ReplayMode::cur_replay.OpenReplay(mainGame->replay_file_select_panel->getSelectedFilePath().c_str())) {
+            //~ return false;
+            //~ }
 
-            mainGame->solve_puzzle_should = true;
-            mainGame->solve_puzzle_window->setVisible(true);
-            thread(mainGame->solve_puzzle_thread).detach();
-            return false;
-          }
+            //~ mainGame->solve_puzzle_replay_path = mainGame->replay_file_select_panel->getSelectedFilePath().c_str();
+            //~ mainGame->solve_puzzle_mcst_path = mainGame->solve_puzzle_replay_path;
+            //~ mainGame->solve_puzzle_mcst_path.replace_extension("xml");
+
+            //~ mainGame->solve_puzzle_should = true;
+            //~ mainGame->solve_puzzle_is_success = false;
+            //~ mainGame->solve_puzzle_window->setVisible(true);
+            //~ thread(mainGame->solve_puzzle_thread).detach();
+            //~ return false;
+          //~ }
           case as_puzzle_button_id: {
             mainGame->as_puzzle_should = true;
             mainGame->replay_finished = false;
@@ -777,7 +780,7 @@ namespace ygo {
       return;
     }
     ClearCardInfo();
-    wCardImg->setVisible(true);
+    imgCard->setVisible(true);
     wInfos->setVisible(true);
     //~ wReplay->setVisible(true);
     if (!mainGame->as_puzzle_should) {
@@ -858,55 +861,47 @@ namespace ygo {
     ReplayMode::start_replay(10);
   }
 
-  void Game::solve_puzzle_thread() {
-    mainGame->solve_puzzle_root_node = new Game::solve_puzzle_node();
-    mainGame->solve_puzzle_current_node = mainGame->solve_puzzle_root_node;
-    //~ mainGame->solve_puzzle_table->addRow(0);
-    //~ int64_t fail_count = 0;
-    //~ mainGame->solve_puzzle_spend_time = 0;
-    //~ mainGame->solve_puzzle_string_s1.clear();
-    //~ for (; !mainGame->solve_puzzle_success;) {
-    //~ mainGame->solve_puzzle_string.clear();
-    //~ auto t0(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-    mainGame->solve_puzzle_thread_impl();
-    //~ auto t1(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
-    //~ mainGame->solve_puzzle_spend_time += static_cast<double>(t1 - t0);
-    //~ mainGame->solve_puzzle_spend_time += t1 - t0;
-    //~ if (mainGame->solve_puzzle_success) {
-    //~ fast_io::obuf_file solve_puzzle_txt{"./replay/_solve_puzzle.txt"};
-    //~ fast_io::io::print(solve_puzzle_txt, mainGame->solve_puzzle_string);
-    //~ break;
-    //~ }
-    //~ else {
-    //~ fail_count += 1;
-    //~ mainGame->solve_puzzle_table->setCellText(0, 0, fast_io::wconcat_std(fail_count).c_str());
-    //~ mainGame->solve_puzzle_table->setCellText(0, 1, fast_io::wconcat_std(mainGame->solve_puzzle_spend_time, L"s").c_str());
-    //~ }
-    //~ }
-    mainGame->solve_puzzle_should = false;
-  }
+  //~ void Game::solve_puzzle_thread() {
+  //~ mainGame->solve_puzzle_load_mcst();
+  //~ mainGame->solve_puzzle_history = new boost::unordered_flat_map<int64_t, int64_t>();
+  //~ mainGame->solve_puzzle_history.clear();
+  //~ mainGame->solve_puzzle_max_card_move_size = 0;
+  //~ mainGame->solve_puzzle_last_depth = 0;
+  //~ mainGame->solve_puzzle_trim_node_count = 0;
+  //~ mainGame->solve_puzzle_min_depth = 0;
+  //~ while (!mainGame->solve_puzzle_is_success) {
+  //~ ReplayMode::cur_replay.OpenReplay(mainGame->solve_puzzle_replay_path.wstring().c_str());
+  //~ mainGame->solve_puzzle_current_node = mainGame->solve_puzzle_root_node;
+  //~ mainGame->solve_puzzle_thread_impl();
+  //~ }
+  //~ mainGame->solve_puzzle_save_mcst();
+  //~ delete mainGame->solve_puzzle_root_node;
+  //~ delete mainGame->solve_puzzle_history;
+  //~ mainGame->solve_puzzle_history.clear();
+  //~ mainGame->solve_puzzle_should = false;
+  //~ }
 
-  void Game::solve_puzzle_thread_impl() {
-    ClearCardInfo();
-    wCardImg->setVisible(true);
-    wInfos->setVisible(true);
-    wReplayControl->setVisible(true);
-    btnReplayStart->setVisible(false);
-    btnReplayPause->setVisible(true);
-    btnReplayStep->setVisible(false);
-    btnReplayUndo->setVisible(false);
-    wPhase->setVisible(true);
-    dField.Clear();
-    HideElement(wReplay);
-    device->setEventReceiver(&dField);
-    //~ unsigned int start_turn = std::wcstol(ebRepStartTurn->getText(), nullptr, 10);
-    //~ if (start_turn == 1) {
-    //~ start_turn = 0;
-    //~ }
-    //~ else if (mainGame->check_replay_should) {
-    //~ start_turn = 10;
-    //~ }
-    ReplayMode::start_replay(0);
-  }
+  //~ void Game::solve_puzzle_thread_impl() {
+  //~ ClearCardInfo();
+  //~ wCardImg->setVisible(true);
+  //~ wInfos->setVisible(true);
+  //~ wReplayControl->setVisible(true);
+  //~ btnReplayStart->setVisible(false);
+  //~ btnReplayPause->setVisible(true);
+  //~ btnReplayStep->setVisible(false);
+  //~ btnReplayUndo->setVisible(false);
+  //~ wPhase->setVisible(true);
+  //~ dField.Clear();
+  //~ HideElement(wReplay);
+  //~ device->setEventReceiver(&dField);
+  //~ int64_t start_turn = std::wcstol(ebRepStartTurn->getText(), nullptr, 10);
+  //~ int64_t start_turn;
+  //~ try {
+  //~ start_turn = boost::lexical_cast<int64_t>(ebRepStartTurn->getText());
+  //~ } catch (const boost::bad_lexical_cast &) {
+  //~ start_turn = 1;
+  //~ }
+  //~ ReplayMode::start_replay(start_turn);
+  //~ }
 
 } // namespace ygo

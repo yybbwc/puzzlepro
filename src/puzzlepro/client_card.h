@@ -61,8 +61,8 @@ namespace ygo {
     std::set<ClientCard *> equipped;
     std::set<ClientCard *> cardTarget;
     std::set<ClientCard *> ownerTarget;
-    std::map<int, int> counters;
-    std::map<int, int> desc_hints;
+    boost::container::flat_map<int, int> counters;
+    boost::container::flat_map<int, int> desc_hints;
     wchar_t atkstring[16]{};
     wchar_t defstring[16]{};
     wchar_t lvstring[16]{};

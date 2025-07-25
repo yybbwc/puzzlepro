@@ -31,7 +31,8 @@ public:
   std::vector<byte> message_buffer;
   interpreter *lua;
   field *game_field;
-  mt19937 random;
+  //~ mt19937 random;
+  random_xoshiro256pp random_xoshiro256pp_1;
   std::unordered_set<card *> cards;
   std::unordered_set<card *> assumes;
   std::unordered_set<group *> groups;

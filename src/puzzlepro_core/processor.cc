@@ -4005,7 +4005,7 @@ void field::calculate_battle_damage(effect **pdamchange, card **preason_card, ui
             core.battle_damage[pd] = 0;
           }
           //~ fast_io::io::perr(core.battle_damage[1 - pd], "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-          if (core.battle_damage[1 - pd] >0 and core.attack_target->is_affected_by_effect(EFFECT_NO_BATTLE_DAMAGE) || core.attacker->is_affected_by_effect(EFFECT_AVOID_BATTLE_DAMAGE, core.attack_target) || is_player_affected_by_effect(1 - pd, EFFECT_AVOID_BATTLE_DAMAGE)) {
+          if (core.battle_damage[1 - pd] > 0 and core.attack_target->is_affected_by_effect(EFFECT_NO_BATTLE_DAMAGE) || core.attacker->is_affected_by_effect(EFFECT_AVOID_BATTLE_DAMAGE, core.attack_target) || is_player_affected_by_effect(1 - pd, EFFECT_AVOID_BATTLE_DAMAGE)) {
             core.battle_damage[1 - pd] = 0;
           }
           reason_card = core.attacker;

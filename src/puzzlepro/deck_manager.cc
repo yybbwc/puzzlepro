@@ -62,7 +62,7 @@ namespace ygo {
     return dataManager.unknown_string;
   }
 
-  //~ const std::unordered_map<int, int>* DeckManager::GetLFListContent(int lfhash) {
+  //~ const boost::unordered::unordered_flat_map<int, int>* DeckManager::GetLFListContent(int lfhash) {
   const LFList *DeckManager::GetLFList(unsigned int lfhash) {
     auto lit = std::find_if(_lfList.begin(), _lfList.end(), [lfhash](const ygo::LFList &list) {
       return list.hash == lfhash;
@@ -87,7 +87,7 @@ namespace ygo {
   }
 
   unsigned int DeckManager::CheckDeck(Deck &deck, int lfhash, int rule) {
-    std::unordered_map<int, int> ccount;
+    boost::unordered::unordered_flat_map<int, int> ccount;
     // rule
     if (deck.main.size() < DECK_MIN_SIZE || deck.main.size() > DECK_MAX_SIZE) {
       return (DECKERROR_MAINCOUNT << 28) | (unsigned)deck.main.size();
@@ -247,8 +247,8 @@ namespace ygo {
   }
 
   bool DeckManager::LoadSide(Deck &deck, int *dbuf, int mainc, int sidec) {
-    std::unordered_map<int, int> pcount;
-    std::unordered_map<int, int> ncount;
+    boost::unordered::unordered_flat_map<int, int> pcount;
+    boost::unordered::unordered_flat_map<int, int> ncount;
     for (size_t i = 0; i < deck.main.size(); ++i) {
       pcount[deck.main[i]->first]++;
     }

@@ -204,12 +204,9 @@ namespace ygo {
   }
 
   bool ReplayMode::StartDuel() {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
-    //~ using fast_io::concat_fast_io;
-    //~ using fast_io::mnp::code_cvt_os_c_str;
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
     const ReplayHeader &rh = cur_replay.pheader;
-    unsigned int seed = rh.seed;
-    std::mt19937 rnd(seed);
+    int64_t seed = rh.seed;
     if (mainGame->dInfo.isTag) {
       cur_replay.ReadName(mainGame->dInfo.hostname);
       cur_replay.ReadName(mainGame->dInfo.hostname_tag);
@@ -220,8 +217,7 @@ namespace ygo {
       cur_replay.ReadName(mainGame->dInfo.hostname);
       cur_replay.ReadName(mainGame->dInfo.clientname);
     }
-    pduel = create_duel(rnd());
-    //~ DuelClient::last_replay_txt.reopen("./replay/_last_replay.txt");
+    pduel = ocgapi_create_duel(seed);
     DuelClient::last_replay_txt.reopen(gui_config["replay_dir"].tostring().append("_last_replay.txt"));
     int start_lp = cur_replay.Read<int32_t>();
     int start_hand = cur_replay.Read<int32_t>();
@@ -330,11 +326,13 @@ namespace ygo {
       mainGame->gMutex.lock();
       mainGame->HideElement(mainGame->wCardSelect);
       mainGame->smMessage->setText_1(dataManager.GetSysString(1501), dataManager.GetSysString(1216));
-      if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
+      //~ if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
+      if (!mainGame->check_replay_should) {
         mainGame->PopupElement(mainGame->smMessage);
       }
       mainGame->gMutex.unlock();
-      if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
+      //~ if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
+      if (!mainGame->check_replay_should) {
         mainGame->actionSignal.Wait();
       }
       if (mainGame->as_puzzle_should) {
@@ -393,7 +391,7 @@ namespace ygo {
   */
 
   using ReplayAnalyze_function = int64_t (*)();
-  inline std::unordered_map<int64_t, ReplayAnalyze_function> ReplayAnalyze_function_unordered_map = {
+  inline boost::unordered::unordered_flat_map<int64_t, ReplayAnalyze_function> ReplayAnalyze_function_unordered_map = {
     {MSG_RETRY,                &ReplayMode::ReplayAnalyze_MSG_RETRY               },
     {MSG_HINT,                 &ReplayMode::ReplayAnalyze_MSG_HINT                },
     {MSG_WIN,                  &ReplayMode::ReplayAnalyze_MSG_WIN                 },
@@ -517,12 +515,11 @@ namespace ygo {
   }
 
   bool ReplayMode::ReplayAnalyze(unsigned char *msg, unsigned int len) {
-    using boost::this_thread::get_id;
     using luabridge::getGlobal;
     using luabridge::main_thread;
 
-    auto gui_message = getGlobal(main_thread(mainGame->get_lua(get_id())), "message");
-    auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+    auto gui_message = getGlobal(main_thread(mainGame->get_lua()), "message");
+    auto gui_config = getGlobal(main_thread(mainGame->get_lua()), "config");
 
     ReplayMode::pbuf = msg;
     int player = 0;
@@ -595,7 +592,8 @@ cc.p
       mainGame->gMutex.unlock();
     }
     mainGame->check_replay_success = false;
-    if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
+    //~ if (!mainGame->check_replay_should and !mainGame->solve_puzzle_should) {
+    if (!mainGame->check_replay_should) {
       mainGame->gMutex.lock();
       mainGame->stMessage->setText(L"Error occurs.");
       mainGame->PopupElement(mainGame->wMessage);
@@ -622,13 +620,13 @@ cc.p
     }
     int64_t player = BufferIO::ReadUInt8(pbuf);
     pbuf += 1;
-    if (mainGame->solve_puzzle_should) {
-      if (mainGame->LocalPlayer(player) == 0) {
-      }
-      else if (mainGame->LocalPlayer(player) == 1) {
-        mainGame->solve_puzzle_string_s1.push_back(mainGame->solve_puzzle_string);
-      }
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_save_mcst_impl();
+    //~ if (mainGame->LocalPlayer(player) == 0) {
+    //~ mainGame->solve_puzzle_is_success = true;
+    //~ mainGame->chkEnableMusic->setChecked(true);
+    //~ }
+    //~ }
     DuelClient::ClientAnalyze(offset, pbuf - offset);
     return return_value_end_replay;
   }
@@ -638,93 +636,99 @@ cc.p
     //~ int64_t count;
     int64_t player = BufferIO::ReadUInt8(pbuf);
     int64_t count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_chains_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_chains_size = count;
+    //~ }
     pbuf += count * 11;
     count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_attackable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_attackable_cards_size = count;
+    //~ }
     pbuf += count * 8;
     bool can_enter_mp2 = BufferIO::ReadUInt8(pbuf) != 0;
     bool can_enter_ep = BufferIO::ReadUInt8(pbuf) != 0;
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_can_enter_mp2 = can_enter_mp2;
-      mainGame->solve_puzzle_can_enter_ep = can_enter_ep;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_can_enter_mp2 = can_enter_mp2;
+    //~ mainGame->solve_puzzle_can_enter_ep = can_enter_ep;
+    //~ }
     ReplayRefresh();
-    if (mainGame->solve_puzzle_should) {
-      return mainGame->create_solve_puzzle_behavior(MSG_SELECT_BATTLECMD);
-    }
-    else {
-      return ReadReplayResponse();
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_BATTLECMD);
+    //~ }
+    //~ else {
+    return ReadReplayResponse();
+    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_IDLECMD() {
     int64_t player = BufferIO::ReadUInt8(pbuf);
     int64_t count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_summonable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_summonable_cards_size = count;
+    //~ }
     pbuf += count * 7;
     count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_spsummonable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_spsummonable_cards_size = count;
+    //~ }
     pbuf += count * 7;
     count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_reposable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_reposable_cards_size = count;
+    //~ }
     pbuf += count * 7;
     count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_msetable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_msetable_cards_size = count;
+    //~ }
     pbuf += count * 7;
     count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_ssetable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_ssetable_cards_size = count;
+    //~ }
     pbuf += count * 7;
     count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_chains_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_chains_size = count;
+    //~ }
     pbuf += count * 11;
     bool can_enter_bp = BufferIO::ReadUInt8(pbuf) != 0;
     bool can_enter_ep = BufferIO::ReadUInt8(pbuf) != 0;
     pbuf += 1;
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_can_enter_bp = can_enter_bp;
-      mainGame->solve_puzzle_can_enter_ep = can_enter_ep;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_can_enter_bp = can_enter_bp;
+    //~ mainGame->solve_puzzle_can_enter_ep = can_enter_ep;
+    //~ }
     ReplayRefresh();
-    if (mainGame->solve_puzzle_should) {
-      return mainGame->create_solve_puzzle_behavior(MSG_SELECT_IDLECMD);
-    }
-    else {
-      return ReadReplayResponse();
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_IDLECMD);
+    //~ }
+    //~ else {
+    return ReadReplayResponse();
+    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_EFFECTYN() {
     int64_t player = BufferIO::ReadUInt8(pbuf);
     pbuf += 12;
-    if (mainGame->solve_puzzle_should) {
-      return mainGame->create_solve_puzzle_behavior(MSG_SELECT_EFFECTYN);
-    }
-    else {
-      return ReadReplayResponse();
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_EFFECTYN);
+    //~ }
+    //~ else {
+    return ReadReplayResponse();
+    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_YESNO() {
     int64_t player = BufferIO::ReadUInt8(pbuf);
     pbuf += 4;
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_YESNO);
+    //~ }
+    //~ else {
     return ReadReplayResponse();
+    //~ }
+    //~ return ReadReplayResponse();
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_OPTION() {
@@ -737,28 +741,28 @@ cc.p
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_CARD() {
     int64_t player = BufferIO::ReadUInt8(pbuf);
     int64_t select_cancelable = BufferIO::ReadUInt8(pbuf) != 0;
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_cancelable = select_cancelable;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_cancelable = select_cancelable;
+    //~ }
     int64_t select_min = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_min = select_min;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_min = select_min;
+    //~ }
     int64_t select_max = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_max = select_max;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_max = select_max;
+    //~ }
     int64_t count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_selectable_cards_size = count;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_selectable_cards_size = count;
+    //~ }
     pbuf += count * 8;
-    if (mainGame->solve_puzzle_should) {
-      return mainGame->create_solve_puzzle_behavior(MSG_SELECT_CARD);
-    }
-    else {
-      return ReadReplayResponse();
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_CARD);
+    //~ }
+    //~ else {
+    return ReadReplayResponse();
+    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_TRIBUTE() {
@@ -777,43 +781,46 @@ cc.p
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_CHAIN() {
     int64_t player = BufferIO::ReadUInt8(pbuf);
     int64_t count = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_chains_size = count;
-    }
-    pbuf += 1;
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_chains_size = count;
+    //~ }
+    //~ pbuf += 1;
+    //~ specount
+    int64_t specount = BufferIO::ReadUInt8(pbuf);
+    //~ fast_io::io::print(fast_io::win32_box_t(), specount, "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
     int64_t forced = BufferIO::ReadUInt8(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_chains_forced = forced;
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_chains_forced = forced;
+    //~ }
     pbuf += 8 + count * 13;
-    if (mainGame->solve_puzzle_should) {
-      if (mainGame->solve_puzzle_select_chains_size == 0) {
-        
-      }
-      else {
-        return mainGame->create_solve_puzzle_behavior(MSG_SELECT_CHAIN);
-      }
-    }
-    else {
-      return ReadReplayResponse();
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ if (mainGame->solve_puzzle_select_chains_size == 0) {
+    //~ return true;
+    //~ }
+    //~ else {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_CHAIN);
+    //~ }
+    //~ }
+    //~ else {
+    return ReadReplayResponse();
+    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_PLACE() {
     int64_t player = BufferIO::ReadUInt8(pbuf);
     int64_t count = BufferIO::ReadUInt8(pbuf);
     int64_t selectable_field = ~BufferIO::ReadUInt32(pbuf);
-    if (mainGame->solve_puzzle_should) {
-      mainGame->solve_puzzle_select_count = count > 0 ? count : 1;
-      mainGame->solve_puzzle_select_cancelable = count == 0;
-      mainGame->solve_puzzle_selectable_field = selectable_field;
-    }
-    if (mainGame->solve_puzzle_should) {
-      return mainGame->create_solve_puzzle_behavior(MSG_SELECT_PLACE);
-    }
-    else {
-      return ReadReplayResponse();
-    }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_select_count = count > 0 ? count : 1;
+    //~ mainGame->solve_puzzle_select_cancelable = count == 0;
+    //~ mainGame->solve_puzzle_selectable_field = selectable_field;
+    //~ }
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ return mainGame->create_solve_puzzle_behavior(MSG_SELECT_PLACE);
+    //~ }
+    //~ else {
+    return ReadReplayResponse();
+    //~ }
   }
 
   int64_t ReplayMode::ReplayAnalyze_MSG_SELECT_DISFIELD() {
@@ -1312,6 +1319,63 @@ cc.p
     DuelClient::ClientAnalyze(offset, pbuf - offset);
     ReplayReload();
     mainGame->dField.RefreshAllCards();
+    //~ if (mainGame->solve_puzzle_should) {
+    //~ mainGame->solve_puzzle_your_start_lp = mainGame->dInfo.lp[1];
+    //~ mainGame->solve_puzzle_your_start_card = mainGame->dField.hand[1].size() + mainGame->dField.mzone[1].size() + mainGame->dField.szone[1].size();
+
+    //~ auto sum_region = [&](const auto& region) {
+    //~ for (int i = 0; i < 2; ++i) {
+    //~ offset += 1;
+    //~ int64_t total = 0;
+    //~ for (const auto& card : region) {
+    //~ if (card) {
+    //~ total += 1;
+    //~ total += static_cast<int64_t>(card->code) * offset;
+    //~ fast_io::io::print(fast_io::win32_box_t(), card->code, "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+    //~ }
+    //~ }
+    //~ return total;
+    //~ }
+    //~ };
+
+    /*
+  deck
+  hand
+  mzone
+  szone
+  grave
+  remove
+  extra
+  cc.gc w a
+
+    mainGame->solve_puzzle_card_move_size_$a.1[0] = mainGame->dField.$a.1[0].size();
+    fast_io::io::perr(mainGame->solve_puzzle_card_move_size_$a.1[0], "\t mainGame->solve_puzzle_card_move_size_$a.1[0]", "\n");
+    mainGame->solve_puzzle_card_move_size_$a.1[1] = mainGame->dField.$a.1[1].size();
+    fast_io::io::perr(mainGame->solve_puzzle_card_move_size_$a.1[1], "\t mainGame->solve_puzzle_card_move_size_$a.1[1]", "\n");
+    cc.p
+
+    fast_io::io::perr(mainGame->solve_puzzle_card_move_size_$a.1[0], "\t mainGame->solve_puzzle_card_move_size_$a.1[0]", "\n");
+    fast_io::io::perr(mainGame->solve_puzzle_card_move_size_$a.1[1], "\t mainGame->solve_puzzle_card_move_size_$a.1[1]", "\n");
+
+    mainGame->solve_puzzle_card_move_size_$a.1[0] = sum_region(mainGame->dField.$a.1[0]);
+    mainGame->solve_puzzle_card_move_size_$a.1[1] = sum_region(mainGame->dField.$a.1[1]);
+    cc.p
+  */
+    //~ mainGame->solve_puzzle_card_move_size_deck[0] = sum_region(mainGame->dField.deck[0]);
+    //~ mainGame->solve_puzzle_card_move_size_deck[1] = sum_region(mainGame->dField.deck[1]);
+    //~ mainGame->solve_puzzle_card_move_size_hand[0] = sum_region(mainGame->dField.hand[0]);
+    //~ mainGame->solve_puzzle_card_move_size_hand[1] = sum_region(mainGame->dField.hand[1]);
+    //~ mainGame->solve_puzzle_card_move_size_mzone[0] = sum_region(mainGame->dField.mzone[0]);
+    //~ mainGame->solve_puzzle_card_move_size_mzone[1] = sum_region(mainGame->dField.mzone[1]);
+    //~ mainGame->solve_puzzle_card_move_size_szone[0] = sum_region(mainGame->dField.szone[0]);
+    //~ mainGame->solve_puzzle_card_move_size_szone[1] = sum_region(mainGame->dField.szone[1]);
+    //~ mainGame->solve_puzzle_card_move_size_grave[0] = sum_region(mainGame->dField.grave[0]);
+    //~ mainGame->solve_puzzle_card_move_size_grave[1] = sum_region(mainGame->dField.grave[1]);
+    //~ mainGame->solve_puzzle_card_move_size_remove[0] = sum_region(mainGame->dField.remove[0]);
+    //~ mainGame->solve_puzzle_card_move_size_remove[1] = sum_region(mainGame->dField.remove[1]);
+    //~ mainGame->solve_puzzle_card_move_size_extra[0] = sum_region(mainGame->dField.extra[0]);
+    //~ mainGame->solve_puzzle_card_move_size_extra[1] = sum_region(mainGame->dField.extra[1]);    }
+    //~ fast_io::io::print(fast_io::win32_box_t(), mainGame->solve_puzzle_your_start_lp, "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
     return return_value_further_judge;
   }
 

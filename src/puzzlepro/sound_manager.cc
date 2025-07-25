@@ -6,7 +6,6 @@ namespace ygo {
   bool SoundManager::Init() {
     bgm_scene = -1;
     RefreshBGMList();
-    rnd.reset((unsigned int)std::time(nullptr));
     ma_decoding_backend_vtable *pCustomBackendVTables[] = {ma_decoding_backend_libvorbis, ma_decoding_backend_libopus};
     resourceManagerConfig = ma_resource_manager_config_init();
     resourceManagerConfig.ppCustomDecodingBackendVTables = pCustomBackendVTables;
@@ -43,7 +42,7 @@ namespace ygo {
   void SoundManager::PlaySoundEffect(int sound) {
     using luabridge::getGlobal;
     using luabridge::main_thread;
-    auto gui_sound = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "sound");
+    auto gui_sound = getGlobal(main_thread(mainGame->get_lua()), "sound");
     if (!mainGame->chkEnableSound->isChecked()) {
       return;
     }
@@ -108,7 +107,7 @@ namespace ygo {
         return;
       }
       bgm_scene = scene;
-      int bgm = rnd.get_random_integer(0, count - 1);
+      int bgm = this->random_xoshiro256pp_1.get_random_integer(0, count - 1);
       const auto *name = BGMList[scene][bgm].c_str();
       wchar_t fname[1024];
       myswprintf(fname, L"./sound/BGM/%ls", name);

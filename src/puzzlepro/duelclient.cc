@@ -18,7 +18,7 @@ namespace ygo {
   unsigned char DuelClient::last_successful_msg[SIZE_NETWORK_BUFFER];
   size_t DuelClient::last_successful_msg_length = 0;
   wchar_t DuelClient::event_string[256];
-  mt19937 DuelClient::rnd;
+  //~ mt19937 DuelClient::rnd;
 
   bool DuelClient::is_refreshing = false;
   int DuelClient::match_kill = 0;
@@ -49,7 +49,7 @@ namespace ygo {
       return false;
     }
     connect_state = 0x1;
-    rnd.reset((uint_fast32_t)std::random_device()());
+    //~ rnd.reset((uint_fast32_t)std::random_device()());
     if (!create_game) {
       timeval timeout = {5, 0};
       event *timeout_event = event_new(client_base, 0, EV_TIMEOUT, ConnectTimeout, nullptr);
@@ -656,7 +656,7 @@ namespace ygo {
         mainGame->dInfo.time_player = 2;
         mainGame->dInfo.isReplaySwapped = false;
         mainGame->is_building = false;
-        mainGame->wCardImg->setVisible(true);
+        mainGame->imgCard->setVisible(true);
         mainGame->wInfos->setVisible(true);
         mainGame->wPhase->setVisible(true);
         mainGame->btnSideOK->setVisible(false);
@@ -1025,9 +1025,8 @@ namespace ygo {
 
   // Analyze STOC_GAME_MSG packet
   bool DuelClient::ClientAnalyze(unsigned char *msg, int len) {
-
-    auto gui_replay = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "replay");
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_replay = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "replay");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
     unsigned char *pbuf = msg;
     wchar_t textBuffer[256];
     mainGame->dInfo.curMsg = BufferIO::ReadUInt8(pbuf);
@@ -1683,7 +1682,6 @@ namespace ygo {
         int desc = BufferIO::ReadInt32(pbuf);
         mainGame->dField.highlighting_card = nullptr;
         mainGame->gMutex.lock();
-        //~ fast_io::io::print(fast_io::win32_box_t(), desc, "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
         mainGame->SetStaticText(mainGame->stQMessage, 310, mainGame->guiFont, dataManager.GetDesc(desc));
         mainGame->PopupElement(mainGame->wQuery);
         mainGame->gMutex.unlock();
@@ -1941,7 +1939,6 @@ namespace ygo {
             }
             else if (l == LOCATION_GRAVE) {
               mainGame->dField.grave_act[c] = true;
-              //~ mainGame->dField.grave_act_player = selecting_player;
             }
             else if (l == LOCATION_REMOVED) {
               mainGame->dField.remove_act[c] = true;
@@ -1958,7 +1955,7 @@ namespace ygo {
           SetResponseI(-1);
           mainGame->dField.ClearChainSelect();
           if (mainGame->chkWaitChain->isChecked() && !mainGame->ignore_chain) {
-            mainGame->WaitFrameSignal(rnd.get_random_integer(20, 40));
+            mainGame->WaitFrameSignal(random_xoshiro256pp_1.get_random_integer(20, 40));
           }
           DuelClient::SendResponse();
           return true;
@@ -2076,33 +2073,26 @@ namespace ygo {
           }
           // 确定序列号
           if (!pzone) {
-            if (mainGame->chkRandomPos->isChecked()) {
-              do {
-                respbuf[2] = rnd.get_random_integer(0, 6);
-              } while (!(filter & (1 << respbuf[2])));
+            if (filter & 0x40) {
+              respbuf[2] = 6;
             }
-            else {
-              if (filter & 0x40) {
-                respbuf[2] = 6;
-              }
-              else if (filter & 0x20) {
-                respbuf[2] = 5;
-              }
-              else if (filter & 0x4) {
-                respbuf[2] = 2;
-              }
-              else if (filter & 0x2) {
-                respbuf[2] = 1;
-              }
-              else if (filter & 0x8) {
-                respbuf[2] = 3;
-              }
-              else if (filter & 0x1) {
-                respbuf[2] = 0;
-              }
-              else if (filter & 0x10) {
-                respbuf[2] = 4;
-              }
+            else if (filter & 0x20) {
+              respbuf[2] = 5;
+            }
+            else if (filter & 0x4) {
+              respbuf[2] = 2;
+            }
+            else if (filter & 0x2) {
+              respbuf[2] = 1;
+            }
+            else if (filter & 0x8) {
+              respbuf[2] = 3;
+            }
+            else if (filter & 0x1) {
+              respbuf[2] = 0;
+            }
+            else if (filter & 0x10) {
+              respbuf[2] = 4;
             }
           }
           else {
@@ -2152,8 +2142,10 @@ namespace ygo {
         }
         if (positions & 0x1) {
           mainGame->btnPSAU->setRelativePosition(mainGame->ResizeWin(startpos, gui_xy["btnPSAU"]["y1"], startpos + gui_xy["btnPSAU"]["width"].cast<double>().value(), gui_xy["btnPSAU"]["y2"]));
+          //~ mainGame->btnPSAU->setImageSize(irr::core::dimension2di(gui_xy["btnPSAU"]["width_reduce"].cast<double>().value() * mainGame->xScale, gui_xy["btnPSAU"]["height_reduce"].cast<double>().value() * mainGame->yScale));
           mainGame->btnPSAU->setImageSize(irr::core::dimension2di(gui_xy["btnPSAU"]["width_reduce"].cast<double>().value() * mainGame->xScale, gui_xy["btnPSAU"]["height_reduce"].cast<double>().value() * mainGame->yScale));
           mainGame->imageLoading.insert_or_assign(mainGame->btnPSAU, code);
+          //~ mainGame->btnPSAU->setImage(imageManager.GetBigPicture(code, CARD_IMG_WIDTH, CARD_IMG_HEIGHT));
           mainGame->code_btnPS[BUTTON_POS_AU] = code;
           mainGame->btnPSAU->setVisible(true);
           startpos += gui_xy["btnPSAU"]["width_offset"].cast<double>().value();
@@ -2164,7 +2156,7 @@ namespace ygo {
         if (positions & 0x2) {
           mainGame->btnPSAD->setRelativePosition(mainGame->ResizeWin(startpos, gui_xy["btnPSAD"]["y1"], startpos + gui_xy["btnPSAD"]["width"].cast<double>().value(), gui_xy["btnPSAD"]["y2"]));
           mainGame->btnPSAD->setImageSize(irr::core::dimension2di(gui_xy["btnPSAD"]["width_reduce"].cast<double>().value() * mainGame->xScale, gui_xy["btnPSAD"]["height_reduce"].cast<double>().value() * mainGame->yScale));
-          mainGame->btnPSAD->setImage(imageManager.tCover[2]);
+          mainGame->btnPSAD->setImage(imageManager.tCover[0]);
           mainGame->code_btnPS[BUTTON_POS_AD] = code;
           mainGame->btnPSAD->setVisible(true);
           startpos += gui_xy["btnPSAD"]["width_offset"].cast<double>().value();
@@ -2186,7 +2178,7 @@ namespace ygo {
         if (positions & 0x8) {
           mainGame->btnPSDD->setRelativePosition(mainGame->ResizeWin(startpos, gui_xy["btnPSDD"]["y1"], startpos + gui_xy["btnPSDD"]["width"].cast<double>().value(), gui_xy["btnPSDD"]["y2"]));
           mainGame->btnPSDD->setImageSize(irr::core::dimension2di(gui_xy["btnPSDD"]["height_reduce"].cast<double>().value() * mainGame->yScale, gui_xy["btnPSDD"]["width_reduce"].cast<double>().value() * mainGame->xScale));
-          mainGame->btnPSDD->setImage(imageManager.tCover[2]);
+          mainGame->btnPSDD->setImage(imageManager.tCover[0]);
           mainGame->code_btnPS[BUTTON_POS_DD] = code;
           mainGame->btnPSDD->setVisible(true);
           startpos += gui_xy["btnPSDD"]["width_offset"].cast<double>().value();
@@ -2565,6 +2557,7 @@ namespace ygo {
         return true;
       }
       case MSG_SHUFFLE_DECK: {
+        auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
         int player = mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
         if (mainGame->dField.deck[player].size() < 2) {
           return true;
@@ -2587,7 +2580,7 @@ namespace ygo {
           soundManager.PlaySoundEffect(SOUND_SHUFFLE);
           for (int i = 0; i < 5; ++i) {
             for (auto cit = mainGame->dField.deck[player].begin(); cit != mainGame->dField.deck[player].end(); ++cit) {
-              (*cit)->dPos = irr::core::vector3df(rnd.rand() * 0.4f / rnd.rand_max - 0.2f, 0, 0);
+              (*cit)->dPos = irr::core::vector3df(random_xoshiro256pp_1.get_random_integer(0, 200) / gui_config["shuffle_deck_offset"].cast<int64_t>().value() - 0.2, 0, 0);
               (*cit)->dRot = irr::core::vector3df(0, 0, 0);
               (*cit)->is_moving = true;
               (*cit)->aniFrame = 3;
@@ -2654,6 +2647,7 @@ namespace ygo {
         return true;
       }
       case MSG_SHUFFLE_EXTRA: {
+        auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
         int player = mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
         int count = BufferIO::ReadUInt8(pbuf);
         if ((mainGame->dField.extra[player].size() - mainGame->dField.extra_p_count[player]) < 2) {
@@ -2666,7 +2660,7 @@ namespace ygo {
           for (int i = 0; i < 5; ++i) {
             for (auto cit = mainGame->dField.extra[player].begin(); cit != mainGame->dField.extra[player].end(); ++cit) {
               if (!((*cit)->position & POS_FACEUP)) {
-                (*cit)->dPos = irr::core::vector3df(rnd.rand() * 0.4f / rnd.rand_max - 0.2f, 0, 0);
+                (*cit)->dPos = irr::core::vector3df(random_xoshiro256pp_1.get_random_integer(0, 200) / gui_config["shuffle_deck_offset"].cast<int64_t>().value() - 0.2, 0, 0);
                 (*cit)->dRot = irr::core::vector3df(0, 0, 0);
                 (*cit)->is_moving = true;
                 (*cit)->aniFrame = 3;
@@ -2841,6 +2835,7 @@ namespace ygo {
           if (mainGame->gameConf.control_mode == 0) {
             mainGame->chain_timing_combo_box->setVisible(true);
             mainGame->dField.UpdateChainButtons();
+            mainGame->duel_log_button->setVisible(true);
           }
           else {
             mainGame->chain_timing_combo_box->setVisible(false);
@@ -2911,6 +2906,7 @@ namespace ygo {
             }
             mainGame->btnPhaseStatus->setText(L"\xff2d\xff11");
             mainGame->showcardcode = 6;
+            //~ mainGame->current_phase = mainGame->phase_main1;
             break;
           }
           case PHASE_BATTLE_START: {
@@ -2922,6 +2918,7 @@ namespace ygo {
             }
             mainGame->btnPhaseStatus->setText(L"\xff22\xff30");
             mainGame->showcardcode = 7;
+            //~ mainGame->current_phase = mainGame->phase_battle;
             break;
           }
           case PHASE_MAIN2: {
@@ -2931,8 +2928,9 @@ namespace ygo {
             if (gui_replay["MSG_NEW_PHASE"]) {
               print(last_replay_txt, gui_replay_string_1, gui_replay_string_2, gui_replay_string_3, "\n");
             }
-            mainGame->btnPhaseStatus->setText(L"\xff2d\xff12");
+            mainGame->btnPhaseStatus->setText(L"Ｍ２");
             mainGame->showcardcode = 8;
+            //~ mainGame->current_phase = mainGame->phase_main2;
             break;
           }
           case PHASE_END: {
@@ -2942,8 +2940,9 @@ namespace ygo {
             if (gui_replay["MSG_NEW_PHASE"]) {
               print(last_replay_txt, gui_replay_string_1, gui_replay_string_2, gui_replay_string_3, "\n");
             }
-            mainGame->btnPhaseStatus->setText(L"\xff25\xff30");
+            mainGame->btnPhaseStatus->setText(L"ＥＰ");
             mainGame->showcardcode = 9;
+            //~ mainGame->current_phase = mainGame->phase_ep;
             break;
           }
         }

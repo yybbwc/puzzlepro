@@ -1,8 +1,5 @@
 #pragma once
 
-//~ #ifndef DATAMANAGER_H
-//~ #define DATAMANAGER_H
-
 namespace irr {
   namespace io {
     class IReadFile;
@@ -39,8 +36,8 @@ namespace ygo {
     std::wstring desc[16];
   };
 
-  using code_pointer = std::unordered_map<unsigned int, CardDataC>::const_iterator;
-  using string_pointer = std::unordered_map<unsigned int, CardString>::const_iterator;
+  using code_pointer = boost::unordered::unordered_flat_map<unsigned int, CardDataC>::const_iterator;
+  using string_pointer = boost::unordered::unordered_flat_map<unsigned int, CardString>::const_iterator;
 
   class DataManager {
   public:
@@ -76,10 +73,10 @@ namespace ygo {
     std::wstring FormatSetName(const uint16_t setcode[]) const;
     std::wstring FormatLinkMarker(unsigned int link_marker) const;
 
-    std::unordered_map<unsigned int, std::wstring> _counterStrings;
-    std::unordered_map<unsigned int, std::wstring> _victoryStrings;
-    std::unordered_map<unsigned int, std::wstring> _setnameStrings;
-    std::unordered_map<unsigned int, std::wstring> _sysStrings;
+    boost::unordered::unordered_flat_map<unsigned int, std::wstring> _counterStrings;
+    boost::unordered::unordered_flat_map<unsigned int, std::wstring> _victoryStrings;
+    boost::unordered::unordered_flat_map<unsigned int, std::wstring> _setnameStrings;
+    boost::unordered::unordered_flat_map<unsigned int, std::wstring> _sysStrings;
     char errmsg[512]{};
 
     static unsigned char scriptBuffer[0x100000];
@@ -100,9 +97,9 @@ namespace ygo {
     static bool deck_sort_name(code_pointer l1, code_pointer l2);
 
   private:
-    std::unordered_map<unsigned int, CardDataC> _datas;
-    std::unordered_map<unsigned int, CardString> _strings;
-    std::unordered_map<unsigned int, std::vector<uint16_t>> extra_setcode;
+    boost::unordered::unordered_flat_map<unsigned int, CardDataC> _datas;
+    boost::unordered::unordered_flat_map<unsigned int, CardString> _strings;
+    boost::unordered::unordered_flat_map<unsigned int, std::vector<uint16_t>> extra_setcode;
   };
 
   extern DataManager dataManager;

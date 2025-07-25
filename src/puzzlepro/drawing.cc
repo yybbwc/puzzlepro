@@ -648,44 +648,36 @@ namespace ygo {
     if (dInfo.duel_rule < 4) {
       pcard = dField.szone[0][6];
       if (pcard) {
-        //~ DrawShadowText(adFont, pcard->lscstring, Resize(427, 395, 439, 415), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->lscstring, ResizeWin(427, 395, 439, 415), 0xffffffff);
       }
       pcard = dField.szone[0][7];
       if (pcard) {
-        //~ DrawShadowText(adFont, pcard->rscstring, Resize(881, 395, 913, 415), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->rscstring, ResizeWin(881, 395, 913, 415), 0xffffffff);
       }
       pcard = dField.szone[1][6];
       if (pcard) {
-        //~ DrawShadowText(adFont, pcard->lscstring, Resize(840, 246, 872, 266), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->lscstring, ResizeWin(840, 246, 872, 266), 0xffffffff);
       }
       pcard = dField.szone[1][7];
       if (pcard) {
-        //~ DrawShadowText(adFont, pcard->rscstring, Resize(464, 246, 496, 266), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->rscstring, ResizeWin(464, 246, 496, 266), 0xffffffff);
       }
     }
     else {
       pcard = dField.szone[0][0];
       if (pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
-        //~ DrawShadowText(adFont, pcard->lscstring, Resize(455, 431, 467, 451), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->lscstring, ResizeWin(455, 431, 467, 451), 0xffffffff);
       }
       pcard = dField.szone[0][4];
       if (pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
-        //~ DrawShadowText(adFont, pcard->rscstring, Resize(851, 431, 883, 451), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->rscstring, ResizeWin(851, 431, 883, 451), 0xffffffff);
       }
       pcard = dField.szone[1][0];
       if (pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
-        //~ DrawShadowText(adFont, pcard->lscstring, Resize(807, 223, 839, 243), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->lscstring, ResizeWin(807, 223, 839, 243), 0xffffffff);
       }
       pcard = dField.szone[1][4];
       if (pcard && (pcard->type & TYPE_PENDULUM) && !pcard->equipTarget) {
-        //~ DrawShadowText(adFont, pcard->rscstring, Resize(499, 223, 531, 243), Resize(1, 1, 1, 1), 0xffffffff, 0xff000000, true, false, nullptr);
         adFont->draw(pcard->rscstring, ResizeWin(499, 223, 531, 243), 0xffffffff);
       }
     }
@@ -1120,9 +1112,8 @@ namespace ygo {
   }
 
   irr::core::rect<int32_t> Game::draw_gradient_background_size_text(irr::gui::IGUIElement *o1, const char *o2, int64_t o3, const wchar_t *o4) {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
     fast_io::wstring wstr = fast_io::wconcat_fast_io(L" ", fast_io::mnp::os_c_str(dataManager.GetSysString(o3)), fast_io::mnp::os_c_str(o4), L" ");
-    //~ fast_io::io::perr(fast_io::mnp::code_cvt(wstr), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__, "\n");
     o1->setText(wstr.c_str());
     auto wh = guiFont->getDimension(wstr.c_str());
     auto rp = ResizeWin(gui_xy[o2]["x1"], gui_xy[o2]["y1"], gui_xy[o2]["x2"], gui_xy[o2]["y2"]);
@@ -1133,8 +1124,9 @@ namespace ygo {
   }
 
   void Game::DrawDeckBd() {
-    auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "color");
-    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "skin");
+    auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "color");
+    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
     int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
     int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
     int64_t gui_color_gradient_left_down = gui_color["gradient"]["left_down"];
@@ -1163,20 +1155,23 @@ namespace ygo {
     }
     int64_t EGDC_BUTTON_TEXT = irr::gui::EGDC_BUTTON_TEXT;
     int64_t gui_color_EGDC_BUTTON_TEXT = gui_skin[EGDC_BUTTON_TEXT];
-    for (int i = 0; i < 9 && i + scrFilter->getPos() < (int)deckBuilder.results.size(); ++i) {
+    for (int i = 0; i < (gui_xy["deck_edit_search_result_show_number"].cast<int64_t>().value() + 2) && i + scrFilter->getPos() < (int)deckBuilder.results.size(); ++i) {
       auto ptr = deckBuilder.results[i + scrFilter->getPos()];
-      if (i >= 7) {
+      if (i >= gui_xy["deck_edit_search_result_show_number"].cast<int64_t>().value()) {
         imageManager.GetTextureThumb(ptr->second.code);
         break;
       }
       if (deckBuilder.hovered_pos == 4 && deckBuilder.hovered_seq == i) {
-        driver->draw2DRectangle(0x80000000, Resize(806, 164 + i * 66, 1019, 230 + i * 66));
+        driver->draw2DRectangle(0x80000000, ResizeWin(gui_xy["gradient_background_search_result"]["x1"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["gradient_background_search_result"]["x2"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + (i + 1) * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value()));
       }
-      DrawThumb(ptr, irr::core::vector2di(810, 165 + i * 66), deckBuilder.filterList);
+      DrawThumb(ptr, irr::core::vector2di(gui_xy["gradient_background_search_result"]["x1"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value()), deckBuilder.filterList);
       const auto *availBuffer = get_avail_tag_text(ptr->second.ot);
+      auto rp_text_row_1 = ResizeWin(gui_xy["deck_edit_search_result_text_row_1"]["x1"], gui_xy["deck_edit_search_result_text_row_1"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["deck_edit_search_result_text_row_1"]["x2"], gui_xy["deck_edit_search_result_text_row_1"]["y2"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value());
+      auto rp_text_row_2 = ResizeWin(gui_xy["deck_edit_search_result_text_row_2"]["x1"], gui_xy["deck_edit_search_result_text_row_2"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["deck_edit_search_result_text_row_2"]["x2"], gui_xy["deck_edit_search_result_text_row_2"]["y2"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value());
+      auto rp_text_row_3 = ResizeWin(gui_xy["deck_edit_search_result_text_row_3"]["x1"], gui_xy["deck_edit_search_result_text_row_3"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["deck_edit_search_result_text_row_3"]["x2"], gui_xy["deck_edit_search_result_text_row_3"]["y2"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value());
       if (ptr->second.type & TYPE_MONSTER) {
         myswprintf(textBuffer, L"%ls", dataManager.GetName(ptr->first));
-        textFont->draw(textBuffer, ResizeWin(860, 165 + i * 66, 955, 185 + i * 66), gui_color_EGDC_BUTTON_TEXT);
+        textFont->draw(textBuffer, rp_text_row_1, gui_color_EGDC_BUTTON_TEXT);
         const wchar_t *form = L"\u2605";
         wchar_t adBuffer[32]{};
         wchar_t scaleBuffer[16]{};
@@ -1207,20 +1202,20 @@ namespace ygo {
           }
         }
         myswprintf(textBuffer, L"%ls/%ls %ls%d", dataManager.FormatAttribute(ptr->second.attribute).c_str(), dataManager.FormatRace(ptr->second.race).c_str(), form, ptr->second.level);
-        textFont->draw(textBuffer, ResizeWin(860, 187 + i * 66, 955, 207 + i * 66), gui_color_EGDC_BUTTON_TEXT);
+        textFont->draw(textBuffer, rp_text_row_2, gui_color_EGDC_BUTTON_TEXT);
         if (ptr->second.type & TYPE_PENDULUM) {
           myswprintf(scaleBuffer, L" %d/%d", ptr->second.lscale, ptr->second.rscale);
         }
         myswprintf(textBuffer, L"%ls%ls%ls", adBuffer, scaleBuffer, availBuffer);
-        textFont->draw(textBuffer, ResizeWin(860, 209 + i * 66, 955, 229 + i * 66), gui_color_EGDC_BUTTON_TEXT);
+        textFont->draw(textBuffer, rp_text_row_3, gui_color_EGDC_BUTTON_TEXT);
       }
       else {
         myswprintf(textBuffer, L"%ls", dataManager.GetName(ptr->first));
-        textFont->draw(textBuffer, ResizeWin(860, 165 + i * 66, 955, 185 + i * 66), gui_color_EGDC_BUTTON_TEXT);
+        textFont->draw(textBuffer, rp_text_row_1, gui_color_EGDC_BUTTON_TEXT);
         myswprintf(textBuffer, L"%ls", dataManager.FormatType(ptr->second.type).c_str());
-        textFont->draw(textBuffer, ResizeWin(860, 187 + i * 66, 955, 207 + i * 66), gui_color_EGDC_BUTTON_TEXT);
+        textFont->draw(textBuffer, rp_text_row_2, gui_color_EGDC_BUTTON_TEXT);
         myswprintf(textBuffer, L"%ls", availBuffer);
-        textFont->draw(textBuffer, ResizeWin(860, 209 + i * 66, 955, 229 + i * 66), gui_color_EGDC_BUTTON_TEXT);
+        textFont->draw(textBuffer, rp_text_row_3, gui_color_EGDC_BUTTON_TEXT);
       }
     }
     if (deckBuilder.is_draging) {
@@ -1229,12 +1224,9 @@ namespace ygo {
   }
 
   void Game::DrawDeckBd_side_deck() {
-    using boost::this_thread::get_id;
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
-
-    auto gui_color = getGlobal(main_thread(this->get_lua(get_id())), "color");
-    auto gui_xy = getGlobal(main_thread(this->get_lua(get_id())), "xy");
+    auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "color");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
+    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin");
 
     int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
     int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
@@ -1256,7 +1248,7 @@ namespace ygo {
 
     int64_t per_row_max_card_capacity = this->get_side_deck_per_row_max_card_capacity();
 
-    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
+    auto card_spacing_x = (gui_xy["gradient_background_main_deck"]["width_adjust"].cast<int64_t>().value() * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
     auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
 
     for (size_t i = 0; i < deckManager.current_deck.side.size(); ++i) {
@@ -1268,18 +1260,15 @@ namespace ygo {
         auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
         auto y2 = gradient_background_side_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
         auto r = this->ResizeWin(x1, y1, x2, y2);
-        driver->draw2DRectangleOutline(r);
+        driver->draw2DRectangleOutline(r, gui_skin[static_cast<int64_t>(irr::gui::EGDC_BUTTON_TEXT)].cast<int64_t>().value());
       }
     }
   }
 
   void Game::DrawDeckBd_extra_deck() {
-    using boost::this_thread::get_id;
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
-
-    auto gui_color = getGlobal(main_thread(this->get_lua(get_id())), "color");
-    auto gui_xy = getGlobal(main_thread(this->get_lua(get_id())), "xy");
+    auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "color");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
+    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin");
 
     int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
     int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
@@ -1301,7 +1290,7 @@ namespace ygo {
 
     int64_t per_row_max_card_capacity = this->get_extra_deck_per_row_max_card_capacity();
 
-    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
+    auto card_spacing_x = (gui_xy["gradient_background_main_deck"]["width_adjust"].cast<int64_t>().value() * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
     auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
 
     for (size_t i = 0; i < deckManager.current_deck.extra.size(); ++i) {
@@ -1313,18 +1302,15 @@ namespace ygo {
         auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
         auto y2 = gradient_background_extra_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
         auto r = this->ResizeWin(x1, y1, x2, y2);
-        driver->draw2DRectangleOutline(r);
+        driver->draw2DRectangleOutline(r, gui_skin[static_cast<int64_t>(irr::gui::EGDC_BUTTON_TEXT)].cast<int64_t>().value());
       }
     }
   }
 
   void Game::DrawDeckBd_main_deck() {
-    using boost::this_thread::get_id;
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
-
-    auto gui_color = getGlobal(main_thread(this->get_lua(get_id())), "color");
-    auto gui_xy = getGlobal(main_thread(this->get_lua(get_id())), "xy");
+    auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "color");
+    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
 
     int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
     int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
@@ -1347,19 +1333,21 @@ namespace ygo {
 
     int64_t per_row_max_card_capacity = get_main_deck_per_row_max_card_capacity();
 
-    auto card_spacing_x = (gradient_background_main_deck_width * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
+    auto card_spacing_x = (gui_xy["gradient_background_main_deck"]["width_adjust"].cast<int64_t>().value() * this->main_deck_width_adjust_radio) / (per_row_max_card_capacity - 1);
     auto card_spacing_y = (gradient_background_main_deck_height_adjust * this->main_deck_height_adjust_radio) / (this->main_deck_max_row_capacity - 1);
 
     for (int i = 0; i < main_deck_card_count and i < Game::main_deck_pack_max_row_capacity * per_row_max_card_capacity; ++i) {
-      auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_main_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
+      auto x_offset = (i % per_row_max_card_capacity) * card_spacing_x;
+      auto y_offset = (i / per_row_max_card_capacity) * card_spacing_y;
+      auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + x_offset, gradient_background_main_deck_y1_adjust + y_offset);
       DrawThumb(deckManager.current_deck.main[i], vec, deckBuilder.filterList);
       if (deckBuilder.hovered_pos == 1 && deckBuilder.hovered_seq == i) {
-        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y1 = gradient_background_main_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y2 = gradient_background_main_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
+        auto x1 = gradient_background_main_deck_x1_adjust_adjust + x_offset;
+        auto y1 = gradient_background_main_deck_y1_adjust_adjust + y_offset;
+        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + x_offset;
+        auto y2 = gradient_background_main_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + y_offset;
         auto r = this->ResizeWin(x1, y1, x2, y2);
-        this->driver->draw2DRectangleOutline(r);
+        this->driver->draw2DRectangleOutline(r, gui_skin[static_cast<int64_t>(irr::gui::EGDC_BUTTON_TEXT)].cast<int64_t>().value());
       }
     }
   }
@@ -1385,7 +1373,6 @@ namespace ygo {
   int64_t Game::get_main_deck_per_row_max_card_capacity() {
     if (deckBuilder.showing_pack) {
       if (deckManager.current_deck.main.size() > this->main_deck_pack_min_capacity) {
-        //~ return ((deckManager.current_deck.main.size() - (this->main_deck_pack_min_capacity + 1)) / (this->main_deck_pack_max_row_capacity + 1)) + (this->per_row_min_card_capacity + 1);
         return ((deckManager.current_deck.main.size() - (this->main_deck_pack_min_capacity + 1)) / this->main_deck_pack_max_row_capacity) + (this->per_row_min_card_capacity + 1);
       }
     }

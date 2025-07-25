@@ -1,0 +1,4 @@
+
+clang-tidy puzzlepro/*.cpp > clang-tidy_puzzlepro.txt
+
+clang-tidy puzzlepro/*.cpp -checks='-*,modernize-use-auto,readability-qualified-auto,readability-container-size-empty,readability-simplify-boolean-expr,readability-braces-around-statements,' -fix

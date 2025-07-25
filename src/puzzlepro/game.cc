@@ -35,7 +35,7 @@ namespace ygo {
     time_left[1] = 0;
   }
 
-  static int my_lua_panic(lua_State *L) {
+  int32_t Game::my_lua_panic(lua_State *L) {
     const char *error = lua_tostring(L, -1);
     fast_io::io::perrln("PuzzlePro Error running script: ", fast_io::mnp::os_c_str(error));
     auto debug = luabridge::getGlobal(luabridge::main_thread(L), "debug");
@@ -56,39 +56,39 @@ namespace ygo {
     return k1;
   }
 
-  lua_State *Game::get_lua(boost::thread::id thread_id) {
-    using boost::lock_guard;
-    using boost::mutex;
-    using id = boost::thread::id;
-
-    lock_guard<mutex> mutex_guard(this->lua_mutex);
-
-    if (this->new_lua_sup1[thread_id]) {
-      return this->new_lua_sup1[thread_id];
+  lua_State *Game::get_lua() {
+    boost::lock_guard<boost::mutex> mutex_guard(this->lua_mutex);
+    auto id = GetCurrentThreadId();
+    if (this->new_lua_sup1[id]) {
+      return this->new_lua_sup1[id];
     }
-
     for (auto &pair : this->new_lua_sup1) {
-      if (pair.first == this->dead_thread_id) {
-        pair.first = thread_id;
-        return pair.second;
+      if (!this->is_thread_alive(pair.first)) {
+        this->new_lua_sup1[id] = pair.second;
+        this->new_lua_sup1.erase(pair.first);
+        return this->new_lua_sup1[id];
       }
     }
+    this->new_lua_sup1[id] = this->create_lua_state("./lua/main.lua");
+    return this->new_lua_sup1[id];
+  }
 
-    this->new_lua_sup1[thread_id] = this->create_lua_state("./lua/main.lua");
-    return this->new_lua_sup1[thread_id];
+  bool Game::is_thread_alive(DWORD id) {
+    HANDLE hThread = OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, id);
+    if (hThread == NULL) {
+      return false;
+    }
+    DWORD waitResult = WaitForSingleObject(hThread, 0);
+    CloseHandle(hThread);
+    return (waitResult != WAIT_OBJECT_0);
   }
 
   void Game::replace_new_lua_sup1() {
-    using boost::lock_guard;
-    using boost::mutex;
-
-    lock_guard<mutex> mutex_guard(this->lua_mutex);
-
+    boost::lock_guard<boost::mutex> mutex_guard(this->lua_mutex);
     for (auto &pair : this->new_lua_sup1) {
       this->old_lua_sup1.push_back(pair.second);
       pair.second = this->create_lua_state("./lua/main.lua");
     }
-
     int64_t size = 128;
     if (this->old_lua_sup1.size() > size) {
       size = this->old_lua_sup1.size() - size;
@@ -97,17 +97,17 @@ namespace ygo {
         this->old_lua_sup1.pop_front();
       }
     }
+    //~ fast_io::io::print(fast_io::win32_box_t(), this->new_lua_sup1.size(), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+    //~ fast_io::perr(this->old_lua_sup1.size(), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__, "\n");
+    //~ fast_io::perr(this->old_lua_sup1.size(), "\n");
   }
 
   bool Game::Initialize() {
     using fast_io::concat_fast_io;
     LoadConfig();
 
-    //~ create_lua();
-    //~ update_lua();
-
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
 
     irr::SIrrlichtCreationParameters params{};
     params.AntiAlias = gameConf.antialias;
@@ -379,17 +379,20 @@ namespace ygo {
     btnHostPrepStart = guiEnv->addButton(irr::core::rect<irr::s32>(230, 280, 340, 305), wHostPrepare, BUTTON_HP_START, dataManager.GetSysString(1215));
     btnHostPrepCancel = guiEnv->addButton(irr::core::rect<irr::s32>(350, 280, 460, 305), wHostPrepare, BUTTON_HP_CANCEL, dataManager.GetSysString(1210));
     // img
-    wCardImg = guiEnv->addStaticText(L"", get_origin_rect<int32_t>("wCardImg"), true, false, nullptr, -1, true);
+    //~ wCardImg = guiEnv->addStaticText(L"", get_origin_rect<int32_t>("wCardImg"), true, false, nullptr, -1, true);
     //~ wCardImg->setBackgroundColor(0xc0c0c0c0);
-    wCardImg->setVisible(false);
-    imgCard = guiEnv->addImage(get_origin_rect<int32_t>("imgCard"), wCardImg);
-    imgCard->setImage(imageManager.tCover[0]);
-    showingcode = 0;
+    //~ wCardImg->setVisible(false);
+    //~ imgCard = guiEnv->addImage(get_origin_rect<int32_t>("imgCard"), wCardImg);
+    //~ imgCard->setImage(imageManager.tCover[0]);
+    //~ showingcode = 0;
     //~ imgCard->setRelativePositionProportional(get_origin_rect_impl<float>("imgCard"));
     //~ imgCard->setRelativePositionProportional(irr::core::rect<float>(0,0,1,1));
     //~ 避免背面卡图的宽高不对
     //~ imgCard->setScaleImage(true);
-
+    
+    imgCard = irr::gui::CGUIImageButton::addImageButton(guiEnv, get_origin_rect<int32_t>("imgCard"), nullptr, -1);
+    
+imgCard->setVisible(false);
     //~ imgCard->setUseAlphaChannel(true);
 
     //~ should_resize_element_unordered_map_int.insert_or_assign(wCardImg, "wCardImg");
@@ -424,12 +427,16 @@ namespace ygo {
 
     //~ should_resize_element_unordered_map_int.insert_or_assign(stDataInfo, "stDataInfo");
     //~ should_resize_element_unordered_map_int.insert_or_assign(stText, "stText");
+    
+    //~ wLanWindow = guiEnv->addWindow(irr::core::rect<irr::s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
+    
+    this->init_duel_log();
 
     // log
-    irr::gui::IGUITab *tabLog = wInfos->addTab(dataManager.GetSysString(1271));
-    lstLog = guiEnv->addListBox(get_origin_rect<int32_t>("lstLog"), tabLog, LISTBOX_LOG, false);
-    //~ lstLog->setItemHeight(18);
-    btnClearLog = guiEnv->addButton(get_origin_rect<int32_t>("btnClearLog"), tabLog, BUTTON_CLEAR_LOG, dataManager.GetSysString(1272));
+    //~ irr::gui::IGUITab *tabLog = wInfos->addTab(dataManager.GetSysString(1271));
+    //~ lstLog = guiEnv->addListBox(get_origin_rect<int32_t>("lstLog"), tabLog, LISTBOX_LOG, false);
+    //~ btnClearLog = guiEnv->addButton(get_origin_rect<int32_t>("btnClearLog"), tabLog, BUTTON_CLEAR_LOG, dataManager.GetSysString(1272));
+    
     // helper
     irr::gui::IGUITab *_tabHelper = wInfos->addTab(dataManager.GetSysString(1298));
     _tabHelper->setRelativePosition(irr::core::recti(16, 49, 299, 362));
@@ -490,87 +497,109 @@ namespace ygo {
     //~ scrTabSystem->setVisible(false);
     //~ system_setting_tab = new irr::gui::CGUIPanel(guiEnv, dynamic_cast<irr::gui::CGUIEnvironment*>(guiEnv), -1, irr::core::rect<irr::s32>(0, 0, 250, 300));
     //~ system_setting_tab = new irr::gui::CGUIPanel(guiEnv, _tabSystem, -1, irr::core::rect<irr::s32>(0, 0, 250, 300));
-    system_setting_tab = addCGUIPanel(guiEnv, _tabSystem, -1, get_origin_rect<int32_t>("system_setting_tab"), false, irr::gui::ESBM_AUTOMATIC, irr::gui::ESBM_AUTOMATIC);
+    system_setting_tab = new irr::gui::CGUIPanel(guiEnv, _tabSystem, -1, get_origin_rect<int32_t>("system_setting_tab"), false, irr::gui::ESBM_AUTOMATIC, irr::gui::ESBM_AUTOMATIC);
+    should_resize_element_unordered_map_int.insert_or_assign(system_setting_tab, "system_setting_tab");
     //~ system_setting_tab->addChild(tabSystem);
     posY = 0;
     //~ chkIgnore1 = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
-    chkIgnore1 = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
+    chkIgnore1 = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkIgnore1"), system_setting_tab, CHECKBOX_DISABLE_CHAT, dataManager.GetSysString(1290));
     system_setting_tab->addChild(chkIgnore1);
+    should_resize_element_unordered_map_int.insert_or_assign(chkIgnore1, "chkIgnore1");
     chkIgnore1->setChecked(gameConf.chkIgnore1 != 0);
     posY += 30;
-    chkIgnore2 = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, -1, dataManager.GetSysString(1291));
+    chkIgnore2 = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkIgnore2"), system_setting_tab, -1, dataManager.GetSysString(1291));
     system_setting_tab->addChild(chkIgnore2);
+    should_resize_element_unordered_map_int.insert_or_assign(chkIgnore2, "chkIgnore2");
     chkIgnore2->setChecked(gameConf.chkIgnore2 != 0);
     posY += 30;
-    chkHidePlayerName = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, CHECKBOX_HIDE_PLAYER_NAME, dataManager.GetSysString(1289));
+    chkHidePlayerName = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkHidePlayerName"), system_setting_tab, CHECKBOX_HIDE_PLAYER_NAME, dataManager.GetSysString(1289));
     system_setting_tab->addChild(chkHidePlayerName);
+    should_resize_element_unordered_map_int.insert_or_assign(chkHidePlayerName, "chkHidePlayerName");
     chkHidePlayerName->setChecked(gameConf.hide_player_name != 0);
     posY += 30;
-    chkIgnoreDeckChanges = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, -1, dataManager.GetSysString(1357));
+    chkIgnoreDeckChanges = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkIgnoreDeckChanges"), system_setting_tab, -1, dataManager.GetSysString(1357));
     system_setting_tab->addChild(chkIgnoreDeckChanges);
+    should_resize_element_unordered_map_int.insert_or_assign(chkIgnoreDeckChanges, "chkIgnoreDeckChanges");
     chkIgnoreDeckChanges->setChecked(gameConf.chkIgnoreDeckChanges != 0);
     posY += 30;
-    chkAutoSearch = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
+    chkAutoSearch = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkAutoSearch"), system_setting_tab, CHECKBOX_AUTO_SEARCH, dataManager.GetSysString(1358));
     system_setting_tab->addChild(chkAutoSearch);
+    should_resize_element_unordered_map_int.insert_or_assign(chkAutoSearch, "chkAutoSearch");
     chkAutoSearch->setChecked(gameConf.auto_search_limit >= 0);
     posY += 30;
-    chkMultiKeywords = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1378));
+    chkMultiKeywords = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkMultiKeywords"), system_setting_tab, CHECKBOX_MULTI_KEYWORDS, dataManager.GetSysString(1378));
     system_setting_tab->addChild(chkMultiKeywords);
+    should_resize_element_unordered_map_int.insert_or_assign(chkMultiKeywords, "chkMultiKeywords");
     chkMultiKeywords->setChecked(gameConf.search_multiple_keywords > 0);
     posY += 30;
-    chkPreferExpansionScript = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, CHECKBOX_PREFER_EXPANSION, dataManager.GetSysString(1379));
+    chkPreferExpansionScript = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkPreferExpansionScript"), system_setting_tab, CHECKBOX_PREFER_EXPANSION, dataManager.GetSysString(1379));
     system_setting_tab->addChild(chkPreferExpansionScript);
+    should_resize_element_unordered_map_int.insert_or_assign(chkPreferExpansionScript, "chkPreferExpansionScript");
     chkPreferExpansionScript->setChecked(gameConf.prefer_expansion_script != 0);
     posY += 30;
-    static_text_window_size = guiEnv->addStaticText(dataManager.GetSysString(1282), irr::core::rect<irr::s32>(posX + 23, posY + 3, posX + 110, posY + 28), false, false, system_setting_tab);
+    static_text_window_size = guiEnv->addStaticText(dataManager.GetSysString(1282), this->get_origin_rect<int32_t>("static_text_window_size"), false, false, system_setting_tab);
     system_setting_tab->addChild(static_text_window_size);
-    btnWinResizeS = guiEnv->addButton(irr::core::rect<irr::s32>(posX + 115, posY, posX + 145, posY + 25), system_setting_tab, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
+    should_resize_element_unordered_map_int.insert_or_assign(static_text_window_size, "static_text_window_size");
+    btnWinResizeS = guiEnv->addButton(this->get_origin_rect<int32_t>("btnWinResizeS"), system_setting_tab, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
     system_setting_tab->addChild(btnWinResizeS);
-    btnWinResizeM = guiEnv->addButton(irr::core::rect<irr::s32>(posX + 150, posY, posX + 180, posY + 25), system_setting_tab, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
+    should_resize_element_unordered_map_int.insert_or_assign(btnWinResizeS, "btnWinResizeS");
+    btnWinResizeM = guiEnv->addButton(this->get_origin_rect<int32_t>("btnWinResizeM"), system_setting_tab, BUTTON_WINDOW_RESIZE_M, dataManager.GetSysString(1284));
     system_setting_tab->addChild(btnWinResizeM);
-    btnWinResizeL = guiEnv->addButton(irr::core::rect<irr::s32>(posX + 185, posY, posX + 215, posY + 25), system_setting_tab, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
+    should_resize_element_unordered_map_int.insert_or_assign(btnWinResizeM, "btnWinResizeM");
+    btnWinResizeL = guiEnv->addButton(this->get_origin_rect<int32_t>("btnWinResizeL"), system_setting_tab, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
     system_setting_tab->addChild(btnWinResizeL);
-    btnWinResizeXL = guiEnv->addButton(irr::core::rect<irr::s32>(posX + 220, posY, posX + 250, posY + 25), system_setting_tab, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
+    should_resize_element_unordered_map_int.insert_or_assign(btnWinResizeL, "btnWinResizeL");
+    btnWinResizeXL = guiEnv->addButton(this->get_origin_rect<int32_t>("btnWinResizeXL"), system_setting_tab, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
     system_setting_tab->addChild(btnWinResizeXL);
+    should_resize_element_unordered_map_int.insert_or_assign(btnWinResizeXL, "btnWinResizeXL");
     posY += 30;
-    chkLFlist = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 110, posY + 25), system_setting_tab, CHECKBOX_LFLIST, dataManager.GetSysString(1288));
+    chkLFlist = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkLFlist"), system_setting_tab, CHECKBOX_LFLIST, dataManager.GetSysString(1288));
     system_setting_tab->addChild(chkLFlist);
+    should_resize_element_unordered_map_int.insert_or_assign(chkLFlist, "chkLFlist");
     chkLFlist->setChecked(gameConf.use_lflist);
-    cbLFlist = guiEnv->addComboBox(irr::core::rect<irr::s32>(posX + 115, posY, posX + 250, posY + 25), system_setting_tab, COMBOBOX_LFLIST);
-    system_setting_tab->addChild(cbLFlist);
-    cbLFlist->setMaxSelectionRows(6);
-    for (unsigned int i = 0; i < deckManager._lfList.size(); ++i) {
-      cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
-    }
-    cbLFlist->setEnabled(gameConf.use_lflist);
-    cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
     posY += 30;
-    chkEnableSound = guiEnv->addCheckBox(gameConf.enable_sound, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), system_setting_tab, -1, dataManager.GetSysString(1279));
+    chkEnableSound = guiEnv->addCheckBox(gameConf.enable_sound, this->get_origin_rect<int32_t>("chkEnableSound"), system_setting_tab, -1, dataManager.GetSysString(1279));
     system_setting_tab->addChild(chkEnableSound);
+    should_resize_element_unordered_map_int.insert_or_assign(chkEnableSound, "chkEnableSound");
     chkEnableSound->setChecked(gameConf.enable_sound);
-    scrSoundVolume = guiEnv->addScrollBar(true, irr::core::rect<irr::s32>(posX + 116, posY + 4, posX + 250, posY + 21), system_setting_tab, SCROLL_VOLUME);
+    scrSoundVolume = guiEnv->addScrollBar(true, this->get_origin_rect<int32_t>("scrSoundVolume"), system_setting_tab, SCROLL_VOLUME);
     system_setting_tab->addChild(scrSoundVolume);
+    should_resize_element_unordered_map_int.insert_or_assign(scrSoundVolume, "scrSoundVolume");
     scrSoundVolume->setMax(100);
     scrSoundVolume->setMin(0);
     scrSoundVolume->setPos(gameConf.sound_volume * 100);
     scrSoundVolume->setLargeStep(1);
     scrSoundVolume->setSmallStep(1);
     posY += 30;
-    chkEnableMusic = guiEnv->addCheckBox(gameConf.enable_music, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), system_setting_tab, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1280));
+    chkEnableMusic = guiEnv->addCheckBox(gameConf.enable_music, this->get_origin_rect<int32_t>("chkEnableMusic"), system_setting_tab, CHECKBOX_ENABLE_MUSIC, dataManager.GetSysString(1280));
     system_setting_tab->addChild(chkEnableMusic);
+    should_resize_element_unordered_map_int.insert_or_assign(chkEnableMusic, "chkEnableMusic");
     chkEnableMusic->setChecked(gameConf.enable_music);
-    scrMusicVolume = guiEnv->addScrollBar(true, irr::core::rect<irr::s32>(posX + 116, posY + 4, posX + 250, posY + 21), system_setting_tab, SCROLL_VOLUME);
+    scrMusicVolume = guiEnv->addScrollBar(true, this->get_origin_rect<int32_t>("scrMusicVolume"), system_setting_tab, SCROLL_VOLUME);
     system_setting_tab->addChild(scrMusicVolume);
+    should_resize_element_unordered_map_int.insert_or_assign(scrMusicVolume, "scrMusicVolume");
     scrMusicVolume->setMax(100);
     scrMusicVolume->setMin(0);
     scrMusicVolume->setPos(gameConf.music_volume * 100);
     scrMusicVolume->setLargeStep(1);
     scrMusicVolume->setSmallStep(1);
     posY += 30;
-    chkMusicMode = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), system_setting_tab, -1, dataManager.GetSysString(1281));
+    chkMusicMode = guiEnv->addCheckBox(false, this->get_origin_rect<int32_t>("chkMusicMode"), system_setting_tab, -1, dataManager.GetSysString(1281));
     system_setting_tab->addChild(chkMusicMode);
+    should_resize_element_unordered_map_int.insert_or_assign(chkMusicMode, "chkMusicMode");
     chkMusicMode->setChecked(gameConf.music_mode != 0);
     elmTabSystemLast = chkMusicMode;
+
+    cbLFlist = guiEnv->addComboBox(this->get_origin_rect<int32_t>("cbLFlist"), system_setting_tab, COMBOBOX_LFLIST);
+    //~ system_setting_tab->addChild(cbLFlist);
+    should_resize_element_unordered_map_int.insert_or_assign(cbLFlist, "cbLFlist");
+    cbLFlist->setMaxSelectionRows(6);
+    for (unsigned int i = 0; i < deckManager._lfList.size(); ++i) {
+      cbLFlist->addItem(deckManager._lfList[i].listName.c_str());
+    }
+    cbLFlist->setEnabled(gameConf.use_lflist);
+    cbLFlist->setSelected(gameConf.use_lflist ? gameConf.default_lflist : cbLFlist->getItemCount() - 1);
+    system_setting_tab->addChild(cbLFlist);
 
     //~ tabSystem = new irr::gui::CGUIPanel(guiEnv, dynamic_cast<irr::gui::CGUIEnvironment*>(guiEnv), -1, irr::core::rect<irr::s32>(0, 0, 250, 300));
 
@@ -946,13 +975,13 @@ namespace ygo {
     check_single_replay_button = guiEnv->addButton(get_origin_rect<int32_t>("check_single_replay_button"), replay_panel, check_single_replay_button_id, dataManager.GetSysString(4000));
     check_single_layer_replay_button = guiEnv->addButton(get_origin_rect<int32_t>("check_single_layer_replay_button"), replay_panel, check_single_layer_replay_button_id, dataManager.GetSysString(4001));
     check_multi_layer_replay_button = guiEnv->addButton(get_origin_rect<int32_t>("check_multi_layer_replay_button"), replay_panel, check_multi_layer_replay_button_id, dataManager.GetSysString(4002));
-    solve_puzzle_button = guiEnv->addButton(get_origin_rect<int32_t>("solve_puzzle_button"), replay_panel, solve_puzzle_button_id, dataManager.GetSysString(4009));
+    //~ solve_puzzle_button = guiEnv->addButton(get_origin_rect<int32_t>("solve_puzzle_button"), replay_panel, solve_puzzle_button_id, dataManager.GetSysString(4009));
     as_puzzle_button = guiEnv->addButton(get_origin_rect<int32_t>("as_puzzle_button"), replay_panel, as_puzzle_button_id, dataManager.GetSysString(4010));
 
     replay_panel->addChild(check_single_replay_button);
     replay_panel->addChild(check_single_layer_replay_button);
     replay_panel->addChild(check_multi_layer_replay_button);
-    replay_panel->addChild(solve_puzzle_button);
+    //~ replay_panel->addChild(solve_puzzle_button);
     replay_panel->addChild(as_puzzle_button);
 
     check_replay_window = guiEnv->addWindow(get_origin_rect<int32_t>("check_replay_window"), false, dataManager.GetSysString(4003));
@@ -971,13 +1000,13 @@ namespace ygo {
     //~ check_replay_window->getMinimizeButton()->setVisible(true);
     check_replay_static_text = guiEnv->addStaticText(L"", get_origin_rect<int32_t>("check_replay_static_text"), false, false, check_replay_window);
 
-    solve_puzzle_window = guiEnv->addWindow(get_origin_rect<int32_t>("solve_puzzle_window"), false, dataManager.GetSysString(4009));
+    //~ solve_puzzle_window = guiEnv->addWindow(get_origin_rect<int32_t>("solve_puzzle_window"), false, dataManager.GetSysString(4009));
     //~ solve_puzzle_table = guiEnv->addTable(get_origin_rect<int32_t>("solve_puzzle_table"), solve_puzzle_window);
     //~ solve_puzzle_table->addColumn(dataManager.GetSysString(4004));
     //~ solve_puzzle_table->addColumn(dataManager.GetSysString(4005));
     //~ solve_puzzle_table->addColumn(dataManager.GetSysString(4006));
 
-    solve_puzzle_window->setVisible(false);
+    //~ solve_puzzle_window->setVisible(false);
 
     // single play window
     wSinglePlay = guiEnv->addWindow(irr::core::rect<irr::s32>(gui_xy["wSinglePlay"]["x1"], gui_xy["wSinglePlay"]["y1"], gui_xy["wSinglePlay"]["x2"], gui_xy["wSinglePlay"]["y2"]), false, dataManager.GetSysString(1201));
@@ -1081,14 +1110,6 @@ namespace ygo {
     imgBigCard = guiEnv->addImage(irr::core::rect<irr::s32>(0, 0, 0, 0), wBigCard);
     imgBigCard->setScaleImage(false);
     imgBigCard->setUseAlphaChannel(true);
-    //~ btnBigCardOriginalSize = guiEnv->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), nullptr, BUTTON_BIG_CARD_ORIG_SIZE, dataManager.GetSysString(1443));
-    //~ btnBigCardZoomIn = guiEnv->addButton(irr::core::rect<irr::s32>(205, 140, 295, 175), nullptr, BUTTON_BIG_CARD_ZOOM_IN, dataManager.GetSysString(1441));
-    //~ btnBigCardZoomOut = guiEnv->addButton(irr::core::rect<irr::s32>(205, 180, 295, 215), nullptr, BUTTON_BIG_CARD_ZOOM_OUT, dataManager.GetSysString(1442));
-    //~ btnBigCardClose = guiEnv->addButton(irr::core::rect<irr::s32>(205, 230, 295, 265), nullptr, BUTTON_BIG_CARD_CLOSE, dataManager.GetSysString(1440));
-    //~ btnBigCardOriginalSize->setVisible(false);
-    //~ btnBigCardZoomIn->setVisible(false);
-    //~ btnBigCardZoomOut->setVisible(false);
-    //~ btnBigCardClose->setVisible(false);
     // leave/surrender/exit
     btnLeaveGame = guiEnv->addButton(get_origin_rect<int32_t>("btnLeaveGame"), nullptr, BUTTON_LEAVE_GAME, L"");
     btnLeaveGame->setVisible(false);
@@ -1127,13 +1148,37 @@ namespace ygo {
       yScale = window_size.Height / 640.0;
       OnResize();
     }
+    
+//~ // 使用新的流光图像类  
+//~ irr::gui::CGUIImageWithShimmer* imgCard_ = new irr::gui::CGUIImageWithShimmer(  
+    //~ guiEnvironment, parent, -1,   
+    //~ get_origin_rect<int32_t>("imgCard")
+//~ );  
+  
+//~ // 设置图像  
+//~ imgCard_->setImage(imageManager.GetBigPicture(code, gui_xy["imgCard"]["width_reduce"].cast<double>().value() * xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * yScale));
+  
+//~ // 启用流光特效  
+//~ imgCard_->setShimmerEnabled(true);  
+//~ imgCard_->setShimmerColor(video::SColor(100, 255, 255, 255)); // 半透明白色  
+//~ imgCard_->setShimmerSpeed(1.5f); // 流光速度  
+//~ imgCard_->setShimmerWidth(0.2f); // 流光宽度（相对于图像宽度）  
+//~ imgCard_->setShimmerAngle(45.0f); // 流光角度
 
     return true;
   }
+  
+  void Game::init_duel_log() {
+    duel_log_button = this->addButton("duel_log_button", 0, duel_log_button_id, dataManager.GetSysString(1271));
+    duel_log_window = this->addWindow("duel_log_window", false, dataManager.GetSysString(1271));
+    lstLog = guiEnv->addListBox(get_origin_rect<int32_t>("lstLog"), duel_log_window, LISTBOX_LOG, false);
+    btnClearLog = this->addButton("btnClearLog", duel_log_window, BUTTON_CLEAR_LOG, dataManager.GetSysString(1272));
+    this->btnClearLog->setVisible(true);
+  }
 
   void Game::resize_skin() {
-    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "skin");
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
 
     for (int64_t i = 0, n = irr::gui::EGDC_COUNT; i != n; ++i) {
       auto col = static_cast<int64_t>(gui_skin[i]);
@@ -1153,7 +1198,6 @@ namespace ygo {
     irr::core::matrix4 mProjection;
     BuildProjectionMatrix(mProjection, -0.90f, 0.45f, -0.42f, 0.42f, 1.0f, 100.0f);
     camera->setProjectionMatrix(mProjection);
-
     mProjection.buildCameraLookAtMatrixLH(irr::core::vector3df(4.2f, 8.0f, 7.8f), irr::core::vector3df(4.2f, 0, 0), irr::core::vector3df(0, 0, 1));
     camera->setViewMatrixAffector(mProjection);
     smgr->setAmbientLight(irr::video::SColorf(1.0f, 1.0f, 1.0f));
@@ -1244,7 +1288,9 @@ namespace ygo {
       }
       if (cur_time >= 1000) {
         myswprintf(cap, L"EDOPro FPS: %d", fps);
+        //~ auto t0(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
         device->setWindowCaption(cap);
+        //~ fast_io::perr(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw) - t0);
         fps = 0;
         cur_time -= 1000;
         timer->setTime(0);
@@ -1282,9 +1328,18 @@ namespace ygo {
     format_text = SetStaticText(pControl, cWidth, font, text);
   }
 
-  irr::gui::IGUIWindow *Game::addWindow(const irr::core::rect<irr::s32> &rectangle, bool modal, const wchar_t *text, irr::gui::IGUIElement *parent, irr::s32 id) {
-    auto *k1 = guiEnv->addWindow(rectangle, modal, text, parent, id);
-    no_scale_elements.insert(k1->getCloseButton());
+  irr::gui::IGUIWindow *Game::addWindow(const char *name, bool modal, const wchar_t *text, irr::gui::IGUIElement *parent, irr::s32 id) {
+    auto *k1 = this->guiEnv->addWindow(this->get_origin_rect<int32_t>(name), modal, text, parent, id);
+    k1->getCloseButton()->setVisible(false);
+    k1->setVisible(false);
+    should_resize_element_unordered_map_int.insert_or_assign(k1, name);
+    return k1;
+  }
+  
+  irr::gui::IGUIButton *Game::addButton(const char *name, irr::gui::IGUIElement* parent, irr::s32 id, const wchar_t* text, const wchar_t* tooltiptext) {
+    auto *k1 = this->guiEnv->addButton(this->get_origin_rect<int32_t>(name), parent, id, text, tooltiptext);
+    k1->setVisible(false);
+    should_resize_element_unordered_map_int.insert_or_assign(k1, name);
     return k1;
   }
 
@@ -1450,20 +1505,15 @@ namespace ygo {
   }
 
   void Game::RefreshReplay() {
-    using fast_io::wconcat_std;
-    using fast_io::mnp::code_cvt;
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
-
-    auto gui_config = getGlobal(main_thread(this->get_lua(boost::this_thread::get_id())), "config");
-    auto replay_dir = wconcat_std(code_cvt(gui_config["replay_dir"].tostring()));
-    auto replay_file_suffix = wconcat_std(L".", code_cvt(gui_config["replay_file_suffix"].tostring()));
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
+    auto replay_dir = fast_io::wconcat_std(fast_io::mnp::code_cvt(gui_config["replay_dir"].tostring()));
+    auto replay_file_suffix = fast_io::wconcat_std(L".", fast_io::mnp::code_cvt(gui_config["replay_file_suffix"].tostring()));
 
     mainGame->replay_file_select_panel->setWorkingDir(replay_dir.c_str(), replay_file_suffix.c_str());
   }
 
   void Game::RefreshSingleplay() {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
     stSinglePlayInfo->setText(L"");
     fast_io::wstring str = fast_io::wconcat_fast_io(fast_io::mnp::code_cvt(gui_config["single_dir"].tostring()));
     single_file_select_panel->setWorkingDir(str.c_str(), L"lua");
@@ -1820,18 +1870,17 @@ namespace ygo {
     std::fclose(fp);
   }
 
-  //~ int32_t my_count = 0;
-
   void Game::ShowCardInfo(int code, bool resize) {
-    imgCard->setScaleImage(false);
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
+    //~ imgCard->setScaleImage(false);
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
     fast_io::string str;
     if (showingcode == code && !resize) {
       return;
     }
     auto cit = dataManager.GetCodePointer(code);
     bool is_valid = (cit != dataManager.datas_end());
-    imgCard->setImage(imageManager.GetBigPicture(code, gui_xy["imgCard"]["width"].cast<double>().value() * xScale, gui_xy["imgCard"]["height"].cast<double>().value() * yScale));
+    imgCard->setImage(imageManager.GetBigPicture(code, gui_xy["imgCard"]["width_reduce"].cast<double>().value() * xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * yScale));
+    //~ imgCard->setRotation(90.0f);
     if (is_valid) {
       const auto &cd = cit->second;
       if (cd.is_alternative()) {
@@ -1922,8 +1971,8 @@ namespace ygo {
     irr::s32 y;
     stDataInfo->setText(fast_io::wconcat_fast_io(fast_io::mnp::code_cvt(str.trim_right()), L"\n　").c_str());
     stText->setText(showingtext);
-    stDataInfo->setRelativePosition(ResizeWin(gui_xy["stDataInfo"]["x1"], gui_xy["stDataInfo"]["y1"], gui_xy["stDataInfo"]["x2"], gui_xy["stDataInfo"]["y1"].cast<double>().value() + stDataInfo->getTextHeight()));
-    stText->setRelativePosition(ResizeWin(gui_xy["stText"]["x1"], gui_xy["stDataInfo"]["y1"].cast<double>().value() + stDataInfo->getTextHeight(), gui_xy["stText"]["x2"], gui_xy["stText"]["y2"]));
+    stDataInfo->setRelativePosition(ResizeWin(gui_xy["stDataInfo"]["x1"], gui_xy["stDataInfo"]["y1"], gui_xy["stDataInfo"]["x2"], gui_xy["stDataInfo"]["y1"].cast<int64_t>().value() + stDataInfo->getTextHeight()));
+    stText->setRelativePosition(ResizeWin(gui_xy["stText"]["x1"], gui_xy["stDataInfo"]["y1"].cast<int64_t>().value() + stDataInfo->getTextHeight(), gui_xy["stText"]["x2"], gui_xy["stText"]["y2"]));
     x = stDataInfo->getRelativePosition().UpperLeftCorner.X;
     y = stDataInfo->getRelativePosition().UpperLeftCorner.Y;
     stDataInfo->setRelativePosition(irr::core::rect<irr::s32>(x, y, stDataInfo->getRelativePosition().LowerRightCorner.X, y + stDataInfo->getTextHeight()));
@@ -1932,8 +1981,12 @@ namespace ygo {
   }
 
   void Game::ClearCardInfo(int player) {
-    imgCard->setScaleImage(true);
-    imgCard->setImage(imageManager.tCover[player]);
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
+    //~ imgCard->setScaleImage(true);
+    //~ fast_io::io::print(fast_io::win32_box_t(), player, "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+    this->imgCard->setImage(imageManager.tCover[player]);
+    //~ mainGame->btnPSAU->setRelativePosition(mainGame->ResizeWin(startpos, gui_xy["btnPSAU"]["y1"], startpos + gui_xy["btnPSAU"]["width"].cast<double>().value(), gui_xy["btnPSAU"]["y2"]));
+    this->imgCard->setImageSize(irr::core::dimension2di(gui_xy["imgCard"]["width_reduce"].cast<double>().value() * mainGame->xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * mainGame->yScale));
     showingcode = 0;
     stDataInfo->setText(L"");
     stText->setText(L"");
@@ -2052,6 +2105,8 @@ namespace ygo {
     btnShuffle->setVisible(false);
     wSurrender->setVisible(false);
     chain_timing_combo_box->setVisible(false);
+    this->duel_log_button->setVisible(false);
+    this->duel_log_window->setVisible(false);
   }
 
   void Game::CloseGameWindow() {
@@ -2085,7 +2140,7 @@ namespace ygo {
 
   void Game::CloseDuelWindow() {
     CloseGameWindow();
-    wCardImg->setVisible(false);
+    imgCard->setVisible(false);
     wInfos->setVisible(false);
     wChat->setVisible(false);
     btnSideOK->setVisible(false);
@@ -2154,7 +2209,7 @@ namespace ygo {
     return local_player == 0 ? dInfo.hostname : dInfo.clientname;
   }
 
-  void Game::recursive_scale_element(irr::gui::IGUIElement *element, std::unordered_map<irr::gui::IGUIElement *, irr::core::rect<irr::s32>> &origin_rects) {
+  void Game::recursive_scale_element(irr::gui::IGUIElement *element, boost::unordered::unordered_flat_map<irr::gui::IGUIElement *, irr::core::rect<irr::s32>> &origin_rects) {
     if (!element) {
       return;
     }
@@ -2162,35 +2217,28 @@ namespace ygo {
       origin_rects[element] = element->getRelativePosition();
     }
     const irr::core::rect<irr::s32> &origin = origin_rects[element];
-    //~ auto rp = element->getRelativePosition();
     if (!no_scale_elements.contains(element)) {
-      //~ element->setRelativePosition(ResizeWin(origin.UpperLeftCorner.X, origin.UpperLeftCorner.Y, origin.LowerRightCorner.X, origin.LowerRightCorner.Y));
-      //~ auto rp1 = InverseResizeWin(rp.UpperLeftCorner.X, rp.UpperLeftCorner.Y, rp.LowerRightCorner.X, rp.LowerRightCorner.Y);
       element->setRelativePosition(ResizeWin(origin.UpperLeftCorner.X, origin.UpperLeftCorner.Y, origin.LowerRightCorner.X, origin.LowerRightCorner.Y));
     }
-    //~ fast_io::perrln(fast_io::mnp::os_c_str(element->getName()));
     for (auto it = element->getChildren().begin(); it != element->getChildren().end(); ++it) {
       recursive_scale_element(*it, origin_rects);
     }
   }
 
   void Game::scale_whole_gui(irr::gui::IGUIEnvironment *gui_environment) {
-    static std::unordered_map<irr::gui::IGUIElement *, irr::core::rect<irr::s32>> origin_rects;
+    static boost::unordered::unordered_flat_map<irr::gui::IGUIElement *, irr::core::rect<irr::s32>> origin_rects;
     recursive_scale_element(gui_environment->getRootGUIElement(), origin_rects);
   }
 
   void Game::resize_element_int(irr::gui::IGUIElement *o1, const char *o2) {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
     o1->setRelativePosition(ResizeWin(gui_xy[o2]["x1"], gui_xy[o2]["y1"], gui_xy[o2]["x2"], gui_xy[o2]["y2"]));
   }
 
   void Game::resize_font() {
-    using boost::this_thread::get_id;
     using irr::gui::CGUITTFont;
-    using luabridge::getGlobal;
-    using luabridge::main_thread;
 
-    auto gui_config = getGlobal(main_thread(this->get_lua(get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
 
     CGUITTFont *old_numFont = numFont;
     CGUITTFont *old_adFont = adFont;
@@ -2222,8 +2270,8 @@ namespace ygo {
 
   void Game::OnResize() {
     this->replace_new_lua_sup1();
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
 
     WINDOWPLACEMENT plc;
     plc.length = sizeof(WINDOWPLACEMENT);
@@ -2241,218 +2289,6 @@ namespace ygo {
     imageManager.ClearTexture();
     imageManager.ResizeTexture();
 
-    //~ wDeckEdit->setRelativePosition(Resize(309, 5, 605, 130));
-    //~ cbDBDecks->setRelativePosition(Resize(80, 35, 220, 60));
-    //~ btnClearDeck->setRelativePosition(Resize(115, 99, 165, 120));
-    //~ btnSortDeck->setRelativePosition(Resize(60, 99, 110, 120));
-    //~ btnShuffleDeck->setRelativePosition(Resize(5, 99, 55, 120));
-    //~ btnSaveDeck->setRelativePosition(Resize(225, 35, 290, 60));
-    //~ btnSaveDeckAs->setRelativePosition(Resize(225, 65, 290, 90));
-    //~ ebDeckname->setRelativePosition(Resize(80, 65, 220, 90));
-    //~ cbDBCategory->setRelativePosition(Resize(80, 5, 220, 30));
-    //~ btnManageDeck->setRelativePosition(Resize(225, 5, 290, 30));
-    //~ wDeckManage->setRelativePosition(ResizeWin(310, 135, 800, 465));
-    //~ scrPackCards->setRelativePosition(Resize(775, 161, 795, 629));
-
-    //~ wSort->setRelativePosition(Resize(930, 132, 1020, 156));
-    //~ cbSortType->setRelativePosition(Resize(10, 2, 85, 22));
-    //~ wFilter->setRelativePosition(Resize(610, 5, 1020, 130));
-    //~ scrFilter->setRelativePosition(Resize(999, 161, 1019, 629));
-    //~ cbCardType->setRelativePosition(Resize(60, 25 / 6, 120, 20 + 25 / 6));
-    //~ cbCardType2->setRelativePosition(Resize(125, 25 / 6, 195, 20 + 25 / 6));
-    //~ cbRace->setRelativePosition(Resize(60, 40 + 75 / 6, 195, 60 + 75 / 6));
-    //~ cbAttribute->setRelativePosition(Resize(60, 20 + 50 / 6, 195, 40 + 50 / 6));
-    //~ cbLimit->setRelativePosition(Resize(260, 25 / 6, 390, 20 + 25 / 6));
-    //~ ebStar->setRelativePosition(Resize(60, 60 + 100 / 6, 95, 80 + 100 / 6));
-    //~ ebScale->setRelativePosition(Resize(155, 60 + 100 / 6, 195, 80 + 100 / 6));
-    //~ ebAttack->setRelativePosition(Resize(260, 20 + 50 / 6, 340, 40 + 50 / 6));
-    //~ ebDefense->setRelativePosition(Resize(260, 40 + 75 / 6, 340, 60 + 75 / 6));
-    //~ ebCardName->setRelativePosition(Resize(260, 60 + 100 / 6, 390, 80 + 100 / 6));
-    //~ btnEffectFilter->setRelativePosition(Resize(345, 20 + 50 / 6, 390, 60 + 75 / 6));
-    //~ btnStartFilter->setRelativePosition(Resize(260, 80 + 125 / 6, 390, 100 + 125 / 6));
-    //~ if (btnClearFilter) {
-    //~ btnClearFilter->setRelativePosition(Resize(205, 80 + 125 / 6, 255, 100 + 125 / 6));
-    //~ }
-    //~ btnMarksFilter->setRelativePosition(Resize(60, 80 + 125 / 6, 195, 100 + 125 / 6));
-
-    //~ irr::core::recti btncatepos = btnEffectFilter->getAbsolutePosition();
-    //~ wCategories->setRelativePosition(irr::core::recti(btncatepos.LowerRightCorner.X - wCategories->getRelativePosition().getWidth(), btncatepos.LowerRightCorner.Y - btncatepos.getHeight() / 2, btncatepos.LowerRightCorner.X, btncatepos.LowerRightCorner.Y - btncatepos.getHeight() / 2 + 245));
-
-    //~ wLinkMarks->setRelativePosition(ResizeWin(700, 30, 820, 150));
-    //~ stDBCategory->setRelativePosition(Resize(10, 9, 100, 29));
-    //~ stDeck->setRelativePosition(Resize(10, 39, 100, 59));
-    //~ stCategory->setRelativePosition(Resize(10, 2 + 25 / 6, 70, 22 + 25 / 6));
-    //~ stLimit->setRelativePosition(Resize(205, 2 + 25 / 6, 280, 22 + 25 / 6));
-    //~ stAttribute->setRelativePosition(Resize(10, 22 + 50 / 6, 70, 42 + 50 / 6));
-    //~ stRace->setRelativePosition(Resize(10, 42 + 75 / 6, 70, 62 + 75 / 6));
-    //~ stAttack->setRelativePosition(Resize(205, 22 + 50 / 6, 280, 42 + 50 / 6));
-    //~ stDefense->setRelativePosition(Resize(205, 42 + 75 / 6, 280, 62 + 75 / 6));
-    //~ stStar->setRelativePosition(Resize(10, 62 + 100 / 6, 70, 82 + 100 / 6));
-    //~ stSearch->setRelativePosition(Resize(205, 62 + 100 / 6, 280, 82 + 100 / 6));
-    //~ stScale->setRelativePosition(Resize(105, 62 + 100 / 6, 165, 82 + 100 / 6));
-    //~ btnSideOK->setRelativePosition(Resize(400, 40, 710, 80));
-    //~ btnSideShuffle->setRelativePosition(Resize(310, 100, 370, 130));
-    //~ btnSideSort->setRelativePosition(Resize(375, 100, 435, 130));
-    //~ btnSideReload->setRelativePosition(Resize(440, 100, 500, 130));
-    //~ btnDeleteDeck->setRelativePosition(Resize(225, 95, 290, 120));
-
-    //~ wLanWindow->setRelativePosition(ResizeWin(220, 100, 800, 520));
-    //~ wCreateHost->setRelativePosition(ResizeWin(320, 100, 700, 520));
-    //~ wHostPrepare->setRelativePosition(ResizeWin(270, 120, 750, 440));
-    //~ wReplay->setRelativePosition(ResizeWin(220, 100, 800, 520));
-
-    //~ wHand->setRelativePosition(ResizeWin(500, 450, 825, 605));
-    //~ wFTSelect->setRelativePosition(ResizeWin(550, 240, 780, 340));
-    //~ wMessage->setRelativePosition(ResizeWin(490, 200, 840, 340));
-    //~ wACMessage->setRelativePosition(ResizeWin(490, 240, 840, 300));
-    //~ wQuery->setRelativePosition(ResizeWin(490, 200, 840, 340));
-    //~ wSurrender->setRelativePosition(ResizeWin(490, 200, 840, 340));
-    //~ wOptions->setRelativePosition(ResizeWin(490, 200, 840, 340));
-    //~ wPosSelect->setRelativePosition(ResizeWin(340, 200, 935, 410));
-    //~ wCardSelect->setRelativePosition(ResizeWin(320, 100, 1000, 400));
-    //~ wANNumber->setRelativePosition(ResizeWin(550, 180, 780, 430));
-    //~ wANCard->setRelativePosition(ResizeWin(510, 120, 820, 420));
-    //~ wANAttribute->setRelativePosition(ResizeWin(500, 200, 830, 285));
-    //~ wANRace->setRelativePosition(ResizeWin(480, 200, 850, 410));
-    //~ wReplaySave->setRelativePosition(ResizeWin(510, 200, 820, 320));
-    //~ wDMQuery->setRelativePosition(ResizeWin(400, 200, 710, 320));
-
-    //~ stHintMsg->setRelativePosition(ResizeWin(660 - 160 * xScale, 60, 660 + 160 * xScale, 90));
-
-    // sound / music volume bar
-    //~ scrSoundVolume->setRelativePosition(irr::core::recti(scrSoundVolume->getRelativePosition().UpperLeftCorner.X, scrSoundVolume->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, scrSoundVolume->getRelativePosition().LowerRightCorner.Y));
-    //~ scrMusicVolume->setRelativePosition(irr::core::recti(scrMusicVolume->getRelativePosition().UpperLeftCorner.X, scrMusicVolume->getRelativePosition().UpperLeftCorner.Y, 20 + (300 * xScale) - 70, scrMusicVolume->getRelativePosition().LowerRightCorner.Y));
-
-    //~ irr::core::recti tabHelperPos = irr::core::recti(0, 0, 300 * xScale - 50, 365 * yScale - 65);
-    //~ tabHelper->setRelativePosition(tabHelperPos);
-    //~ scrTabHelper->setRelativePosition(irr::core::recti(tabHelperPos.LowerRightCorner.X + 2, 0, tabHelperPos.LowerRightCorner.X + 22, tabHelperPos.LowerRightCorner.Y));
-    //~ irr::s32 tabHelperLastY = elmTabHelperLast->getRelativePosition().LowerRightCorner.Y;
-    //~ if (tabHelperLastY > tabHelperPos.LowerRightCorner.Y) {
-    //~ scrTabHelper->setMax(tabHelperLastY - tabHelperPos.LowerRightCorner.Y + 5);
-    //~ scrTabHelper->setPos(0);
-    //~ scrTabHelper->setVisible(true);
-    //~ }
-    //~ else {
-    //~ scrTabHelper->setVisible(false);
-    //~ }
-
-    //~ irr::core::recti tabSystemPos = irr::core::recti(0, 0, 300 * xScale - 50, 365 * yScale - 65);
-    //~ tabSystem->setRelativePosition(tabSystemPos);
-    //~ scrTabSystem->setRelativePosition(irr::core::recti(tabSystemPos.LowerRightCorner.X + 2, 0, tabSystemPos.LowerRightCorner.X + 22, tabSystemPos.LowerRightCorner.Y));
-    //~ irr::s32 tabSystemLastY = elmTabSystemLast->getRelativePosition().LowerRightCorner.Y;
-    //~ if (tabSystemLastY > tabSystemPos.LowerRightCorner.Y) {
-    //~ scrTabSystem->setMax(tabSystemLastY - tabSystemPos.LowerRightCorner.Y + 5);
-    //~ scrTabSystem->setPos(0);
-    //~ scrTabSystem->setVisible(true);
-    //~ }
-    //~ else {
-    //~ scrTabSystem->setVisible(false);
-    //~ }
-
-    //~ lstLog->setRelativePosition(Resize(10, 10, 290, 290));
-    //~ if (showingcode) {
-    //~ ShowCardInfo(showingcode, true);
-    //~ }
-    //~ else {
-    //~ ClearCardInfo();
-    //~ }
-    //~ btnClearLog->setRelativePosition(Resize(160, 300, 260, 325));
-
-    //~ wPhase->setRelativePosition(Resize(480, 310, 855, 330));
-    //~ btnPhaseStatus->setRelativePosition(Resize(0, 0, 50, 20));
-    //~ btnBP->setRelativePosition(Resize(160, 0, 210, 20));
-    //~ btnM2->setRelativePosition(Resize(160, 0, 210, 20));
-    //~ btnEP->setRelativePosition(Resize(320, 0, 370, 20));
-
-    //~ ResizeChatInputWindow();
-
-    //~ btnLeaveGame->setRelativePosition(Resize(205, 5, 295, 80));
-    //~ wReplayControl->setRelativePosition(Resize(205, 143, 295, 273));
-    //~ btnReplayStart->setRelativePosition(Resize(5, 5, 85, 25));
-    //~ btnReplayPause->setRelativePosition(Resize(5, 5, 85, 25));
-    //~ btnReplayStep->setRelativePosition(Resize(5, 55, 85, 75));
-    //~ btnReplayUndo->setRelativePosition(Resize(5, 80, 85, 100));
-    //~ btnReplaySwap->setRelativePosition(Resize(5, 30, 85, 50));
-    //~ btnReplayExit->setRelativePosition(Resize(5, 105, 85, 125));
-
-    //~ btnSpectatorSwap->setRelativePosition(Resize(205, 100, 295, 135));
-    //~ btnChainAlways->setRelativePosition(Resize(205, 140, 295, 175));
-    //~ btnChainIgnore->setRelativePosition(Resize(205, 100, 295, 135));
-    //~ btnChainWhenAvail->setRelativePosition(Resize(205, 180, 295, 215));
-    //~ btnShuffle->setRelativePosition(Resize(205, 230, 295, 265));
-    //~ btnCancelOrFinish->setRelativePosition(Resize(205, 230, 295, 265));
-
-    //~ btnBigCardOriginalSize->setRelativePosition(Resize(205, 100, 295, 135));
-    //~ btnBigCardZoomIn->setRelativePosition(Resize(205, 140, 295, 175));
-    //~ btnBigCardZoomOut->setRelativePosition(Resize(205, 180, 295, 215));
-    //~ btnBigCardClose->setRelativePosition(Resize(205, 230, 295, 265));
-
-    //~ for (int i = 0; i < 5; ++i) {
-    //~ stCardPos[i]->setRelativePosition(ResizeWin(gui_xy["stCardPos"]["x1"].cast<int32_t>().value() + gui_xy["stCardPos"]["width_offset"].cast<int32_t>().value() * i, gui_xy["stCardPos"]["y1"], gui_xy["stCardPos"]["x2"].cast<int32_t>().value() + gui_xy["stCardPos"]["width_offset"].cast<int32_t>().value() * i, gui_xy["stCardPos"]["y2"]));
-    //~ btnCardSelect[i]->setRelativePosition(ResizeWin(gui_xy["btnCardSelect"]["x1"].cast<double>().value() + gui_xy["btnCardSelect"]["width_offset"].cast<double>().value() * i, gui_xy["btnCardSelect"]["y1"], gui_xy["btnCardSelect"]["x2"].cast<double>().value() + gui_xy["btnCardSelect"]["width_offset"].cast<double>().value() * i, gui_xy["btnCardSelect"]["y2"]));
-    //~ btnCardSelect[i]->setImageSize(irr::core::dimension2di(gui_xy["btnCardSelect"]["width_reduce"].cast<double>().value() * xScale, gui_xy["btnCardSelect"]["height_reduce"].cast<double>().value() * yScale));
-    //~ btnCardSelect[i]->setImageSize(irr::core::dimension2di(btnCardSelect[i]->getRelativePosition().getWidth() * xScale, btnCardSelect[i]->getRelativePosition().getHeight() * yScale));
-    //~ btnCardSelect[i]->draw();
-    //~ }
-    //~ for (int filter = 0x1, i = 0; i < RACES_COUNT; filter <<= 1, ++i) {
-    //~ chkRace[i]->setRelativePosition(ResizeWin(gui_xy["chkRace"]["x1"].cast<double>().value() + (i % 4) * (gui_xy["chkRace"]["x2"].cast<double>().value() - gui_xy["chkRace"]["x1"].cast<double>().value()), gui_xy["chkRace"]["y1"].cast<double>().value() + (i / 4) * (gui_xy["chkRace"]["y2"].cast<double>().value() - gui_xy["chkRace"]["y1"].cast<double>().value()), gui_xy["chkRace"]["x2"].cast<double>().value() + (i % 4) * (gui_xy["chkRace"]["x2"].cast<double>().value() - gui_xy["chkRace"]["x1"].cast<double>().value()), gui_xy["chkRace"]["y2"].cast<double>().value() + (i / 4) * (gui_xy["chkRace"]["y2"].cast<double>().value() -
-    // gui_xy["chkRace"]["y1"].cast<double>().value())));
-    //~ }
-
-    //~ guiEnv->getSkin()->setSize(irr::gui::EGDS_SCROLLBAR_SIZE, static_cast<irr::s32>(gui_config["scrollbar_witdh"].cast<irr::f32>().valueOr(15) * xScale));
-    //~ guiEnv->getSkin()->setSize(irr::gui::EGDS_WINDOW_BUTTON_WIDTH, static_cast<irr::s32>(15 * xScale));
-
-    //~ resize_element(wMainMenu, "wMainMenu");
-    //~ resize_element(btnLanMode, "btnLanMode");
-    //~ resize_element(btnSingleMode, "btnSingleMode");
-    //~ resize_element(btnReplayMode, "btnReplayMode");
-    //~ resize_element(btnDeckEdit, "btnDeckEdit");
-    //~ resize_element(btnModeExit, "btnModeExit");
-
-    //~ resize_element(wReplay, "wReplay");
-    //~ resize_element(lstReplayList, "lstReplayList");
-    //~ resize_element(stReplayTip, "stReplayTip");
-    //~ resize_element(stReplayInfo, "stReplayInfo");
-    //~ resize_element(replay_file_select_panel, "replay_file_select_panel");
-    //~ resize_element(replay_panel, "replay_panel");
-    //~ resize_element(stReplayTurnTip, "stReplayTurnTip");
-    //~ resize_element(ebRepStartTurn, "ebRepStartTurn");
-    //~ resize_element(btnLoadReplay, "btnLoadReplay");
-    //~ resize_element(btnReplayCancel, "btnReplayCancel");
-    //~ resize_element(btnExportDeck, "btnExportDeck");
-    //~ resize_element(btnDeleteReplay, "btnDeleteReplay");
-    //~ resize_element(btnRenameReplay, "btnRenameReplay");
-    //~ resize_element(check_single_replay_button, "check_single_replay_button");
-    //~ resize_element(check_single_layer_replay_button, "check_single_layer_replay_button");
-    //~ resize_element(check_multi_layer_replay_button, "check_multi_layer_replay_button");
-
-    //~ resize_element(check_replay_window, "check_replay_window");
-    //~ resize_element(check_replay_table, "check_replay_table");
-
-    //~ resize_element(wCardImg, "wCardImg");
-    //~ resize_element(imgCard, "imgCard");
-
-    //~ resize_element(wInfos, "wInfos");
-    //~ resize_element(stDataInfo, "stDataInfo");
-    //~ resize_element(stText, "stText");
-    //~ resize_element(lstLog, "lstLog");
-    //~ resize_element(btnClearLog, "btnClearLog");
-    //~ resize_element(system_setting_tab, "system_setting_tab");
-
-    //~ resize_element($a.3, "$a.3");
-    //~ cc.p
-
-    //~ for (int64_t i = 0, n = should_resize_element_vector.size(); i != n; ++i) {
-
-    //~ for (int64_t i = 0; i < btnOption_count; ++i) {
-    //~ should_resize_element_unordered_map_int.insert_or_assign(btnOption[i], "btnOption");
-    //~ auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->gui_xy_4), "xy");
-    //~ int64_t btnOption_y1 = gui_xy["btnOption"]["y1"];
-    //~ int64_t btnOption_y2 = gui_xy["btnOption"]["y2"];
-    //~ int64_t btnOption_height_offset = gui_xy["btnOption"]["height_offset"];
-    //~ btnOption[i]->setRelativePosition(ResizeWin(gui_xy["btnOption"]["x1"], btnOption_y1 + btnOption_height_offset * i, gui_xy["btnOption"]["x2"], btnOption_y2 + btnOption_height_offset * i));
-    //~ }
-
     for (int64_t filter = 0x1, i = 0; i < 7; filter <<= 1, ++i) {
       int64_t gui_xy_chkAttribute_x1 = gui_xy["chkAttribute"]["x1"];
       int64_t gui_xy_chkAttribute_y1 = gui_xy["chkAttribute"]["y1"];
@@ -2466,20 +2302,8 @@ namespace ygo {
     for (const auto &i : should_resize_element_unordered_map_int) {
       resize_element_int(i.first, i.second);
     }
-    //~ for (const auto &i : should_resize_element_unordered_map_float) {
-    //~ resize_element_float(i.first, i.second);
-    //~ }
-
-    //~ double check_replay_table_column_width_1 = gui_config["check_replay_table_column_width"][1];
-    //~ double check_replay_table_column_width_2 = gui_config["check_replay_table_column_width"][2];
-    //~ double check_replay_table_column_width_3 = gui_config["check_replay_table_column_width"][3];
-
-    //~ check_replay_table->setColumnWidth(0, check_replay_table_column_width_1 * xScale);
-    //~ check_replay_table->setColumnWidth(1, check_replay_table_column_width_2 * xScale);
-    //~ check_replay_table->setColumnWidth(2, check_replay_table_column_width_3 * xScale);
 
     resize_item_height();
-    //~ scale_whole_gui(guiEnv);
     if (showingcode) {
       ShowCardInfo(showingcode, true);
     }
@@ -2489,12 +2313,11 @@ namespace ygo {
   }
 
   void Game::resize_item_height() {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "config");
 
     int64_t item_height = gui_config["item_height"].cast<double>().value() * yScale;
     lstHostList->setItemHeight(item_height);
     lstLog->setItemHeight(item_height);
-    //~ lstReplayList->setItemHeight(item_height);
     lstBotList->setItemHeight(item_height);
     single_file_select_panel->setItemHeight(item_height);
     replay_file_select_panel->setItemHeight(item_height);

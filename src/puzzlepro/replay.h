@@ -18,7 +18,7 @@ namespace ygo {
     uint32_t id{};
     uint32_t version{};
     uint32_t flag{};
-    uint32_t seed{};
+    int64_t seed;
     uint32_t datasize{};
     uint32_t start_time{};
     uint32_t msg_count = 0;

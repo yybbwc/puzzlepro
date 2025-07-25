@@ -238,9 +238,6 @@ static const struct luaL_Reg debuglib[] = {
 void scriptlib::open_debuglib(lua_State *L) {
   luaL_newlib(L, debuglib);
   lua_setglobal(L, "Debug");
-  
-luabridge::getGlobalNamespace(L)
-  .beginNamespace("Debug")
-    .addFunction("print_cpp_stack", scriptlib::debug_print_cpp_stack)
-  .endNamespace();
+
+  luabridge::getGlobalNamespace(L).beginNamespace("Debug").addFunction("print_cpp_stack", scriptlib::debug_print_cpp_stack).endNamespace();
 }

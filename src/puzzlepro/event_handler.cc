@@ -3,7 +3,7 @@
 namespace ygo {
 
   bool ClientField::OnEvent(const irr::SEvent &event) {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
     if (OnCommonEvent(event)) {
       return false;
     }
@@ -81,6 +81,9 @@ namespace ygo {
                 }
                 soundManager.PlaySoundEffect(SOUND_BUTTON);
                 ReplayMode::StopReplay();
+                //~ if () {
+                //~ }
+                //~ mainGame->solve_puzzle_is_success = true;
                 break;
               }
               case BUTTON_REPLAY_SWAP: {
@@ -1262,7 +1265,7 @@ namespace ygo {
                     mainGame->btnCardSelect[i]->setImage(imageManager.GetTexture(selectable_cards[i + pos]->chain_code));
                   }
                   else {
-                    mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i + pos]->controler + 2]);
+                    mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i + pos]->controler]);
                   }
                   mainGame->btnCardSelect[i]->setRelativePosition(mainGame->ResizeWin(gui_xy["btnCardSelect"]["x1"].cast<int64_t>().value() + i * gui_xy["btnCardSelect"]["width_offset"].cast<int64_t>().value(), gui_xy["btnCardSelect"]["y1"], gui_xy["btnCardSelect"]["x2"].cast<int64_t>().value() + i * gui_xy["btnCardSelect"]["width_offset"].cast<int64_t>().value(), gui_xy["btnCardSelect"]["y2"]));
                   // text
@@ -1346,7 +1349,7 @@ namespace ygo {
                     mainGame->btnCardDisplay[i]->setImage(imageManager.GetTexture(display_cards[i + pos]->code));
                   }
                   else {
-                    mainGame->btnCardDisplay[i]->setImage(imageManager.tCover[display_cards[i + pos]->controler + 2]);
+                    mainGame->btnCardDisplay[i]->setImage(imageManager.tCover[display_cards[i + pos]->controler]);
                   }
                   mainGame->btnCardDisplay[i]->setRelativePosition(irr::core::rect<irr::s32>(30 + i * 125, 55, 30 + 120 + i * 125, 225));
                   wchar_t formatBuffer[2048];
@@ -2387,6 +2390,17 @@ namespace ygo {
           case irr::gui::EGET_BUTTON_CLICKED: {
             //~ mainGame->ErrorLog(fast_io::concat(__LINE__).c_str());
             switch (id) {
+              case duel_log_button_id: {
+                if (mainGame->duel_log_window->isVisible()) {
+                  mainGame->duel_log_window->setVisible(false);
+                }
+                else {
+                  //~ mainGame->duel_log_window->setVisible(true);
+                  mainGame->PopupElement(mainGame->duel_log_window);
+                }
+                return true;
+                break;
+              }
               case BUTTON_CLEAR_LOG: {
                 soundManager.PlaySoundEffect(SOUND_BUTTON);
                 mainGame->lstLog->clear();
@@ -2961,7 +2975,7 @@ namespace ygo {
   }
 
   void ClientField::ShowMenu(int flag, int x, int y) {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
 
     if (!flag) {
       HideMenu();

@@ -175,7 +175,7 @@ void field::mset(uint32_t setplayer, card *target, effect *proc, uint32_t ignore
 }
 
 void field::special_summon_rule(uint32_t sumplayer, card *target, uint32_t summon_type, uint32_t action_type) {
-  
+
   add_process(PROCESSOR_SPSUMMON_RULE, 0, 0, (group *)target, sumplayer, summon_type, action_type);
 }
 
@@ -200,7 +200,7 @@ void field::special_summon(const card_set &target, uint32_t sumtype, uint32_t su
 }
 
 void field::special_summon_step(card *target, uint32_t sumtype, uint32_t sumplayer, uint32_t playerid, uint32_t nocheck, uint32_t nolimit, uint32_t positions, uint32_t zone) {
-//~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+  //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   if ((positions & POS_FACEDOWN) && is_player_affected_by_effect(sumplayer, EFFECT_DIVINE_LIGHT)) {
     positions = (positions & POS_FACEUP) | ((positions & POS_FACEDOWN) >> 1);
   }
@@ -217,7 +217,7 @@ void field::special_summon_step(card *target, uint32_t sumtype, uint32_t sumplay
 }
 
 void field::special_summon_complete(effect *reason_effect, uint8_t reason_player) {
-    //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+  //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   group *ng = pduel->new_group();
   ng->container.swap(core.special_summoning);
   ng->is_readonly = GTYPE_READ_ONLY;
@@ -1181,7 +1181,7 @@ int32_t field::get_control(uint16_t step, effect *reason_effect, uint8_t reason_
 }
 
 int32_t field::swap_control(uint16_t step, effect *reason_effect, uint8_t reason_player, group *targets1, group *targets2, uint16_t reset_phase, uint8_t reset_count) {
-  fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+  //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   switch (step) {
     case 0: {
       core.units.begin()->step = 9;
@@ -3622,20 +3622,18 @@ int32_t field::special_summon_step(uint16_t step, group *targets, card *target, 
   switch (step) {
     case 0: {
       effect_set eset;
-      
-  // 检查融合召唤和仪式召唤特权  
-  uint32_t summon_type = target->summon_info & (SUMMON_VALUE_MAIN_TYPE | SUMMON_VALUE_SUB_TYPE);  
-  bool has_fusion_ritual_privilege = (summon_type == SUMMON_TYPE_FUSION) ||   
-                                    (summon_type == SUMMON_TYPE_RITUAL);  
-    
-  if (target->is_affected_by_effect(EFFECT_REVIVE_LIMIT) && !target->is_status(STATUS_PROC_COMPLETE)) {  
-    if ((!nolimit && (target->current.location & 0x38)) || (!nocheck && !nolimit && (target->current.location & 0x3))) {  
-      core.units.begin()->step = 4;  
-      return FALSE;  
-    }  
-  }  
-      
-      
+
+      // 检查融合召唤和仪式召唤特权
+      uint32_t summon_type = target->summon_info & (SUMMON_VALUE_MAIN_TYPE | SUMMON_VALUE_SUB_TYPE);
+      bool has_fusion_ritual_privilege = (summon_type == SUMMON_TYPE_FUSION) || (summon_type == SUMMON_TYPE_RITUAL);
+
+      if (target->is_affected_by_effect(EFFECT_REVIVE_LIMIT) && !target->is_status(STATUS_PROC_COMPLETE)) {
+        if ((!nolimit && (target->current.location & 0x38)) || (!nocheck && !nolimit && (target->current.location & 0x3))) {
+          core.units.begin()->step = 4;
+          return FALSE;
+        }
+      }
+
       if (target->is_affected_by_effect(EFFECT_REVIVE_LIMIT) && !target->is_status(STATUS_PROC_COMPLETE)) {
         if ((!nolimit && (target->current.location & 0x38)) || (!nocheck && !nolimit && (target->current.location & 0x3))) {
           core.units.begin()->step = 4;
@@ -3643,17 +3641,14 @@ int32_t field::special_summon_step(uint16_t step, group *targets, card *target, 
         }
       }
       //~ if ((target->current.location == LOCATION_MZONE) || !(positions & POS_FACEDOWN) && check_unique_onfield(target, playerid, LOCATION_MZONE) || !is_player_can_spsummon(core.reason_effect, target->summon_info & DEFAULT_SUMMON_TYPE, positions, target->summon_player, playerid, target) || (!nocheck && !(target->data.type & TYPE_MONSTER))) {
-        //~ core.units.begin()->step = 4;
-        //~ return FALSE;
+      //~ core.units.begin()->step = 4;
+      //~ return FALSE;
       //~ }
-  // 修改特殊召唤检查逻辑，为融合召唤和仪式召唤添加特权  
-  if ((target->current.location == LOCATION_MZONE) ||   
-      !(positions & POS_FACEDOWN) && check_unique_onfield(target, playerid, LOCATION_MZONE) ||   
-      (!has_fusion_ritual_privilege && !is_player_can_spsummon(core.reason_effect, target->summon_info & DEFAULT_SUMMON_TYPE, positions, target->summon_player, playerid, target)) ||   
-      (!nocheck && !(target->data.type & TYPE_MONSTER))) {  
-    core.units.begin()->step = 4;  
-    return FALSE;  
-  }  
+      // 修改特殊召唤检查逻辑，为融合召唤和仪式召唤添加特权
+      if ((target->current.location == LOCATION_MZONE) || !(positions & POS_FACEDOWN) && check_unique_onfield(target, playerid, LOCATION_MZONE) || (!has_fusion_ritual_privilege && !is_player_can_spsummon(core.reason_effect, target->summon_info & DEFAULT_SUMMON_TYPE, positions, target->summon_player, playerid, target)) || (!nocheck && !(target->data.type & TYPE_MONSTER))) {
+        core.units.begin()->step = 4;
+        return FALSE;
+      }
       if (get_useable_count(target, playerid, LOCATION_MZONE, target->summon_player, LOCATION_REASON_TOFIELD, zone) <= 0) {
         if (target->current.location != LOCATION_GRAVE) {
           core.unable_tofield_set.insert(target);
@@ -3759,7 +3754,7 @@ int32_t field::special_summon_step(uint16_t step, group *targets, card *target, 
 }
 
 int32_t field::special_summon(uint16_t step, effect *reason_effect, uint8_t reason_player, group *targets, uint32_t zone) {
-//~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+  //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
   switch (step) {
     case 0: {
       card_vector cvs, cvo;
@@ -5951,7 +5946,6 @@ int32_t field::operation_replace(uint16_t step, effect *replace_effect, group *t
 }
 
 int32_t field::activate_effect(uint16_t step, effect *peffect) {
-
 
   switch (step) {
     case 0: {

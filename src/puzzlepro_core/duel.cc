@@ -177,5 +177,6 @@ void duel::set_responseb(byte *resp) {
 }
 
 int32_t duel::get_next_integer(int32_t l, int32_t h) {
-  return random.get_random_integer(l, h);
+  //~ return random.get_random_integer(l, h);
+  return random_xoshiro256pp_1.get_random_integer(l, h);
 }

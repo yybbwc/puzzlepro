@@ -167,7 +167,7 @@ namespace ygo {
     void HideElement(irr::gui::IGUIElement *element, bool set_action = false);
     void PopupElement(irr::gui::IGUIElement *element, int hideframe = 0);
     void WaitFrameSignal(int frame);
-    //~ void DrawThumb(code_pointer cp, irr::core::vector2di pos, const std::unordered_map<int, int>* lflist, bool drag = false);
+    //~ void DrawThumb(code_pointer cp, irr::core::vector2di pos, const boost::unordered::unordered_flat_map<int, int>* lflist, bool drag = false);
     void DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList *lflist, bool drag = false);
     void DrawDeckBd();
     void DrawDeckBd_main_deck();
@@ -231,44 +231,44 @@ namespace ygo {
 
 
 
-    std::map<int64_t, int64_t> code_btnPS;
+    boost::container::flat_map<int64_t, int64_t> code_btnPS;
 
     bool check_replay_success;
 
     //~ void scaleEntireGUI(irr::gui::IGUIEnvironment* guiEnv);
     void scale_whole_gui(irr::gui::IGUIEnvironment *gui_environment);
     //~ void scaleElementRecursive(irr::gui::IGUIElement* element,irr::core::map<irr::gui::IGUIElement*, irr::core::rect<irr::s32>>& originalRects) ;
-    void recursive_scale_element(irr::gui::IGUIElement *element, std::unordered_map<irr::gui::IGUIElement *, irr::core::rect<irr::s32>> &origin_rects);
+    void recursive_scale_element(irr::gui::IGUIElement *element, boost::unordered::unordered_flat_map<irr::gui::IGUIElement *, irr::core::rect<irr::s32>> &origin_rects);
 
     void resize_item_height();
 
-    lua_State *gui_sound_1;
-    lua_State *gui_replay_1;
-    lua_State *gui_skin_1;
-    lua_State *gui_skin_2;
-    lua_State *gui_color_1;
-    lua_State *gui_message_1;
-    lua_State *gui_message_2;
-    lua_State *gui_config_1;
-    lua_State *gui_config_2;
-    lua_State *gui_config_3;
-    lua_State *gui_config_4;
-    lua_State *gui_config_5;
-    lua_State *gui_config_6;
-    lua_State *gui_config_7;
-    lua_State *gui_xy_1;
-    lua_State *gui_xy_2;
-    lua_State *gui_xy_3;
-    lua_State *gui_xy_4;
-    lua_State *gui_xy_5;
-    lua_State *gui_xy_6;
+    //~ lua_State *gui_sound_1;
+    //~ lua_State *gui_replay_1;
+    //~ lua_State *gui_skin_1;
+    //~ lua_State *gui_skin_2;
+    //~ lua_State *gui_color_1;
+    //~ lua_State *gui_message_1;
+    //~ lua_State *gui_message_2;
+    //~ lua_State *gui_config_1;
+    //~ lua_State *gui_config_2;
+    //~ lua_State *gui_config_3;
+    //~ lua_State *gui_config_4;
+    //~ lua_State *gui_config_5;
+    //~ lua_State *gui_config_6;
+    //~ lua_State *gui_config_7;
+    //~ lua_State *gui_xy_1;
+    //~ lua_State *gui_xy_2;
+    //~ lua_State *gui_xy_3;
+    //~ lua_State *gui_xy_4;
+    //~ lua_State *gui_xy_5;
+    //~ lua_State *gui_xy_6;
     
-    inline static constexpr int64_t main_deck_max_row_capacity = 4;
-    inline static constexpr int64_t main_deck_pack_max_row_capacity = 7;
-    inline static constexpr int64_t per_row_min_card_capacity = 10;
-    inline static constexpr int64_t main_deck_pack_min_capacity = main_deck_pack_max_row_capacity * per_row_min_card_capacity;
-    inline static constexpr double main_deck_width_adjust_radio = (per_row_min_card_capacity - 1) / static_cast<double>(per_row_min_card_capacity);
-    inline static constexpr double main_deck_height_adjust_radio = (main_deck_max_row_capacity - 1) / static_cast<double>(main_deck_max_row_capacity);
+    static constexpr int64_t main_deck_max_row_capacity = 4;
+    static constexpr int64_t main_deck_pack_max_row_capacity = 7;
+    static constexpr int64_t per_row_min_card_capacity = 10;
+    static constexpr int64_t main_deck_pack_min_capacity = main_deck_pack_max_row_capacity * per_row_min_card_capacity;
+    static constexpr double main_deck_width_adjust_radio = (per_row_min_card_capacity - 1) / static_cast<double>(per_row_min_card_capacity);
+    static constexpr double main_deck_height_adjust_radio = (main_deck_max_row_capacity - 1) / static_cast<double>(main_deck_max_row_capacity);
     
     int64_t get_main_deck_per_row_max_card_capacity();
     int64_t get_extra_deck_per_row_max_card_capacity();
@@ -277,22 +277,32 @@ namespace ygo {
     void update_lua();
     
     //~ boost::unordered::unordered_flat_map<boost::thread::id, lua_State *> new_lua_sup1;
-    boost::container::flat_map<boost::thread::id, lua_State *> new_lua_sup1;
+    //~ boost::container::flat_map<boost::thread::id, lua_State *> new_lua_sup1;
+    //~ mru_cache<HANDLE, lua_State *> new_lua_sup1{128};
+    boost::unordered::unordered_flat_map<DWORD, lua_State *> new_lua_sup1;
+    //~ boost::container::flat_map<DWORD, lua_State *> new_lua_sup1;
+    
     boost::container::deque<lua_State *> old_lua_sup1;
     boost::mutex lua_mutex;
-    inline static boost::thread::id dead_thread_id{};
+    inline static boost::thread::id dead_thread_id;
     //~ void delete_old_lua_sup1();
     void replace_new_lua_sup1();
     lua_State *create_lua_state(const char *o1);
-    lua_State *get_lua(boost::thread::id thread_id);
+    lua_State *get_lua();
 
     void resize_skin();
     void resize_font();
+    
+    void init_duel_log();
+    
+    bool is_thread_alive(DWORD id);
+    
+    static int32_t my_lua_panic(lua_State *L);
 
     void load_replay();
 
     std::vector<lua_State *> new_lua_state;
-    std::unordered_map<const char *, fast_io::unix_timestamp> lua_file_registry;
+    boost::unordered::unordered_flat_map<const char *, fast_io::unix_timestamp> lua_file_registry;
 
 
     fast_io::string get_location_string(int32_t o1, int32_t o2);
@@ -310,8 +320,8 @@ namespace ygo {
     Config gameConf;
     DuelInfo dInfo;
 
-    irr::gui::IGUIButton *solve_puzzle_button;
-    bool solve_puzzle_should;
+    //~ irr::gui::IGUIButton *solve_puzzle_button;
+    //~ bool solve_puzzle_should;
     //~ bool solve_puzzle_success;
 
     irr::gui::IGUIButton *as_puzzle_button;
@@ -322,66 +332,67 @@ namespace ygo {
 
     int64_t duel_core_current_message;
 
-    bool create_solve_puzzle_behavior(int64_t o1);
+    //~ bool create_solve_puzzle_behavior(int64_t o1);
     //~ bool create_solve_puzzle_behavior_MSG_SELECT_IDLECMD(int64_t o1);
     //~ bool create_solve_puzzle_behavior_MSG_SELECT_BATTLECMD();
     //~ bool create_solve_puzzle_behavior_MSG_SELECT_CHAIN();
 
-    std::string solve_puzzle_string;
-    std::vector<std::string> solve_puzzle_string_s1;
+    //~ std::string solve_puzzle_string;
+    //~ std::vector<std::string> solve_puzzle_string_s1;
     //~ double solve_puzzle_spend_time;
-    std::string solve_puzzle_last_msg;
+    //~ std::string solve_puzzle_last_msg;
 
-    bool solve_puzzle_select_cancelable_last_MSG_SELECT_PLACE;
-    bool solve_puzzle_select_cancelable_last_MSG_SELECT_CARD;
+    //~ bool solve_puzzle_select_cancelable_last_MSG_SELECT_PLACE;
+    //~ bool solve_puzzle_select_cancelable_last_MSG_SELECT_CARD;
 
     //~ std::vector<std::string> create_usable_solve_puzzle_behavior(int64_t o1);
 
-    std::vector<std::string> create_usable_solve_puzzle_behavior(int64_t o1);
-    std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_IDLECMD();
-    std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_BATTLECMD();
-    std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_CHAIN();
-    std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_CARD();
-    std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_PLACE();
-    std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_EFFECTYN();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior(int64_t o1);
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_IDLECMD();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_BATTLECMD();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_CHAIN();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_CARD();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_PLACE();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_EFFECTYN();
+    //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_YESNO();
 
-    std::vector<std::vector<int64_t>> get_combo(int64_t o1, int64_t o2);
+    //~ std::vector<std::vector<int64_t>> get_combo(int64_t o1, int64_t o2);
 
     //~ std::vector<std::string> create_usable_solve_puzzle_behavior_MSG_SELECT_IDLECMD(int64_t o1);
-    std::vector<std::string> remove_unusable_solve_puzzle_behavior(std::vector<std::string> o1);
-    std::vector<int64_t> get_unusable_solve_puzzle_behavior_index(std::vector<std::string> o1);
-    bool solve_puzzle_can_enter_bp;
-    bool solve_puzzle_can_enter_mp2;
-    bool solve_puzzle_can_enter_ep;
+    //~ std::vector<std::string> remove_unusable_solve_puzzle_behavior(std::vector<std::string> o1);
+    //~ std::vector<int64_t> get_unusable_solve_puzzle_behavior_index(std::vector<std::string> o1);
+    //~ bool solve_puzzle_can_enter_bp;
+    //~ bool solve_puzzle_can_enter_mp2;
+    //~ bool solve_puzzle_can_enter_ep;
 
-    int64_t solve_puzzle_attackable_cards_size;
-    int64_t solve_puzzle_activatable_cards_size;
-    int64_t solve_puzzle_selectable_cards_size;
-    int64_t solve_puzzle_summonable_cards_size;
-    int64_t solve_puzzle_spsummonable_cards_size;
-    int64_t solve_puzzle_reposable_cards_size;
-    int64_t solve_puzzle_msetable_cards_size;
-    int64_t solve_puzzle_ssetable_cards_size;
+    //~ int64_t solve_puzzle_attackable_cards_size;
     //~ int64_t solve_puzzle_activatable_cards_size;
-    int64_t solve_puzzle_select_chains_size;
+    //~ int64_t solve_puzzle_selectable_cards_size;
+    //~ int64_t solve_puzzle_summonable_cards_size;
+    //~ int64_t solve_puzzle_spsummonable_cards_size;
+    //~ int64_t solve_puzzle_reposable_cards_size;
+    //~ int64_t solve_puzzle_msetable_cards_size;
+    //~ int64_t solve_puzzle_ssetable_cards_size;
+    //~ int64_t solve_puzzle_activatable_cards_size;
+    //~ int64_t solve_puzzle_select_chains_size;
 
-    int64_t solve_puzzle_selectable_field;
-    int64_t solve_puzzle_select_chains_forced;
-    int64_t solve_puzzle_select_cancelable;
-    int64_t solve_puzzle_select_min;
-    int64_t solve_puzzle_select_max;
-    int64_t solve_puzzle_select_count;
+    //~ int64_t solve_puzzle_selectable_field;
+    //~ int64_t solve_puzzle_select_chains_forced;
+    //~ int64_t solve_puzzle_select_cancelable;
+    //~ int64_t solve_puzzle_select_min;
+    //~ int64_t solve_puzzle_select_max;
+    //~ int64_t solve_puzzle_select_count;
 
-    void send_solve_puzzle_behavior(int64_t o1, std::string o2);
-    void send_solve_puzzle_behavior_MSG_SELECT_IDLECMD(std::string o1);
-    void send_solve_puzzle_behavior_MSG_SELECT_BATTLECMD(std::string o1);
-    void send_solve_puzzle_behavior_MSG_SELECT_CHAIN(std::string o1);
-    void send_solve_puzzle_behavior_MSG_SELECT_CARD(std::string o1);
-    void send_solve_puzzle_behavior_MSG_SELECT_PLACE(std::string o1);
-    void send_solve_puzzle_behavior_MSG_SELECT_EFFECTYN(std::string o1);
+    //~ void send_solve_puzzle_behavior(int64_t o1, std::string o2);
+    //~ void send_solve_puzzle_behavior_MSG_SELECT_IDLECMD(std::string o1);
+    //~ void send_solve_puzzle_behavior_MSG_SELECT_BATTLECMD(std::string o1);
+    //~ void send_solve_puzzle_behavior_MSG_SELECT_CHAIN(std::string o1);
+    //~ void send_solve_puzzle_behavior_MSG_SELECT_CARD(std::string o1);
+    //~ void send_solve_puzzle_behavior_MSG_SELECT_PLACE(std::string o1);
+    //~ void send_solve_puzzle_behavior_MSG_SELECT_EFFECTYN(std::string o1);
 
-    static void solve_puzzle_thread();
-    void solve_puzzle_thread_impl();
+    //~ static void solve_puzzle_thread();
+    //~ void solve_puzzle_thread_impl();
 
     double font_outline = 0.5;
 
@@ -452,7 +463,8 @@ namespace ygo {
 
     irr::gui::IGUIElement *focus_element;
 
-    irr::gui::IGUIWindow *addWindow(const irr::core::rect<irr::s32> &rectangle, bool modal = false, const wchar_t *text = 0, irr::gui::IGUIElement *parent = 0, irr::s32 id = -1);
+    irr::gui::IGUIWindow *addWindow(const char *name, bool modal = false, const wchar_t *text = 0, irr::gui::IGUIElement *parent = 0, irr::s32 id = -1);
+    irr::gui::IGUIButton* addButton(const char *name, irr::gui::IGUIElement* parent=0, irr::s32 id=-1, const wchar_t* text=0, const wchar_t* tooltiptext = 0);
 
     irr::gui::CGUIPanel *addCGUIPanel(irr::gui::IGUIEnvironment *environment, irr::gui::IGUIElement *parent, irr::s32 id = -1, const irr::core::rect<irr::s32> &rectangle = irr::core::rect<irr::s32>(0, 0, 100, 100), bool border = false, irr::gui::E_SCROLL_BAR_MODE vMode = irr::gui::ESBM_AUTOMATIC, irr::gui::E_SCROLL_BAR_MODE hMode = irr::gui::ESBM_ALWAYS_INVISIBLE);
 
@@ -467,7 +479,7 @@ namespace ygo {
     
     bool can_button;
 
-    irr::gui::IGUIWindow *solve_puzzle_window;
+    //~ irr::gui::IGUIWindow *solve_puzzle_window;
     //~ irr::gui::IGUITable *solve_puzzle_table;
 
     irr::core::rect<int32_t> draw_gradient_background_size_text(irr::gui::IGUIElement *o1, const char *o2, int64_t o3, const wchar_t *o4);
@@ -480,8 +492,8 @@ namespace ygo {
     static void check_replay_vector_thread();
     void check_replay_vector_thread_impl();
 
-    std::unordered_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_int;
-    //~ std::unordered_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_float;
+    boost::unordered::unordered_flat_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_int;
+    //~ boost::unordered::unordered_flat_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_float;
 
     void init_resize_element_unordered_map();
     
@@ -498,14 +510,18 @@ namespace ygo {
     irr::gui::CGUITTFont *numFont;
     irr::gui::CGUITTFont *adFont;
     irr::gui::CGUITTFont *lpcFont;
-    std::map<irr::gui::CGUIImageButton *, int> imageLoading;
+    boost::container::flat_map<irr::gui::CGUIImageButton *, int> imageLoading;
     // card image
-    irr::gui::IGUIStaticText *wCardImg;
-    irr::gui::IGUIImage *imgCard;
+    //~ irr::gui::IGUIStaticText *wCardImg;
+    //~ irr::gui::IGUIImage *imgCard;
+    irr::gui::CGUIImageButton *imgCard;
     // hint text
     irr::gui::IGUIStaticText *stHintMsg;
     irr::gui::IGUIStaticText *stTip;
     irr::gui::IGUIStaticText *stCardListTip;
+    
+    irr::gui::IGUIWindow *duel_log_window;
+    irr::gui::IGUIButton *duel_log_button;
     // infos
     irr::gui::IGUITabControl *wInfos;
     //~ irr::gui::IGUIStaticText* stName;
@@ -682,6 +698,8 @@ namespace ygo {
     irr::gui::IGUIComboBox *wOptions_combo_box_option;
     // pos selection
     irr::gui::IGUIWindow *wPosSelect;
+    //~ irr::gui::IGUIStaticText *btnPSAU;
+    //~ irr::gui::IGUIImage *btnPSAU_image;
     irr::gui::CGUIImageButton *btnPSAU;
     irr::gui::CGUIImageButton *btnPSAD;
     irr::gui::CGUIImageButton *btnPSDU;
@@ -849,41 +867,127 @@ namespace ygo {
     // big picture
     irr::gui::IGUIWindow *wBigCard;
     irr::gui::IGUIImage *imgBigCard;
-    //~ irr::gui::IGUIButton *btnBigCardOriginalSize;
-    //~ irr::gui::IGUIButton *btnBigCardZoomIn;
-    //~ irr::gui::IGUIButton *btnBigCardZoomOut;
-    //~ irr::gui::IGUIButton *btnBigCardClose;
     
     template <typename T> irr::core::rect<T> get_origin_rect(const char *o1) {
-      auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua(boost::this_thread::get_id())), "xy");
+      auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
       return irr::core::rect<T>(gui_xy[o1]["x1"], gui_xy[o1]["y1"], gui_xy[o1]["x2"], gui_xy[o1]["y2"]);
     }
     
-    struct solve_puzzle_node {
-      double reward;
-      int64_t reward_count;
-      int64_t visit_count;
-      solve_puzzle_node *parent;
-      boost::container::vector<solve_puzzle_node> children;
-      std::string action;
-
-      solve_puzzle_node() = default;
+    random_xoshiro256pp random_xoshiro256pp_1;
+    
+    //~ struct solve_puzzle_node {
+      //~ double reward;
+      //~ int64_t reward;
+      //~ int64_t reward_count;
+      //~ int64_t visit_count;
+      //~ solve_puzzle_node *parent;
+      //~ boost::ptr_vector<solve_puzzle_node> children;
+      //~ std::string action;
+      //~ bool is_end;
+      //~ int64_t punish;
       
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int version) {
-        ar & BOOST_SERIALIZATION_NVP(reward);
-        ar & BOOST_SERIALIZATION_NVP(reward_count);
-        ar & BOOST_SERIALIZATION_NVP(visit_count);
-        ar & BOOST_SERIALIZATION_NVP(parent);
-        ar & BOOST_SERIALIZATION_NVP(children);
-        ar & BOOST_SERIALIZATION_NVP(action);
-      }
-    };
+      //~ int64_t your_lp_decrease_reward;
+      //~ int64_t your_lp_decrease_reward_count;
+      //my_deck_decrease_reward
+      //my_deck_decrease_reward_count
+      //~ bool bool_mp2;
+      //~ int64_t ep_reward_count;
+      //~ int64_t your_card_decrease_reward;
+      //~ int64_t your_card_decrease_reward_count;
+      //reward_count_last
+      //~ int64_t depth;
+      //~ int64_t hash;
+      //~ std::string hash;
+
+      //~ solve_puzzle_node() = default;
+      
+      //~ template<class Archive>
+      //~ void serialize(Archive& ar, const unsigned int version) {
+        //~ ar & BOOST_SERIALIZATION_NVP(reward);
+        //~ ar & BOOST_SERIALIZATION_NVP(reward_count);
+        //~ ar & BOOST_SERIALIZATION_NVP(your_lp_decrease_reward);
+        //~ ar & BOOST_SERIALIZATION_NVP(your_lp_decrease_reward_count);
+        //~ ar & BOOST_SERIALIZATION_NVP(visit_count);
+        //~ ar & BOOST_SERIALIZATION_NVP(parent);
+        //~ ar & BOOST_SERIALIZATION_NVP(children);
+        //~ ar & BOOST_SERIALIZATION_NVP(action);
+        //~ ar & BOOST_SERIALIZATION_NVP(is_end);
+        //~ ar & BOOST_SERIALIZATION_NVP(depth);
+        //~ ar & BOOST_SERIALIZATION_NVP(hash);
+        //~ ar & BOOST_SERIALIZATION_NVP(punish);
+        //~ ar & BOOST_SERIALIZATION_NVP(bool_mp2);
+        //~ ar & BOOST_SERIALIZATION_NVP(your_card_decrease_reward);
+        //~ ar & BOOST_SERIALIZATION_NVP(your_card_decrease_reward_count);
+        //~ ar & BOOST_SERIALIZATION_NVP(ep_reward_count);
+      //~ }
+    //~ };
     
-    solve_puzzle_node *solve_puzzle_root_node;
-    solve_puzzle_node *solve_puzzle_current_node;
+    //~ struct solve_puzzle_node {
+      
+    //~ };
     
-    void solve_puzzle_select_node();
+    //~ solve_puzzle_node *solve_puzzle_root_node;
+    //~ solve_puzzle_node *solve_puzzle_current_node;
+    
+    //~ boost::unordered_flat_map<int64_t, int64_t> solve_puzzle_history;
+    //~ boost::unordered_flat_set<int64_t> solve_puzzle_history;
+    //~ boost::unordered_flat_set<std::string> solve_puzzle_history;
+    
+    //~ void solve_puzzle_select_node();
+    //~ bool solve_puzzle_select_node_reward_count();
+    //~ bool solve_puzzle_select_node_your_lp_decrease_reward();
+    //~ bool solve_puzzle_select_node_your_card_decrease_reward();
+    //~ bool solve_puzzle_select_node_your_lp_decrease_reward_count();
+    //~ bool solve_puzzle_select_node_your_card_decrease_reward_count();
+    //~ bool solve_puzzle_select_node_visit_count();
+    //~ bool solve_puzzle_select_node_punish();
+    //~ bool solve_puzzle_select_node_reward();
+    //~ bool solve_puzzle_select_node_visit_count_0();
+    //~ bool solve_puzzle_select_node_bool_mp2();
+    //~ bool solve_puzzle_select_node_ep_reward_count();
+    //~ void solve_puzzle_trim_node();
+    //~ bool solve_puzzle_hash_node();
+    //~ bool solve_puzzle_detect_duplicate();
+    //~ bool solve_puzzle_increase_history();
+    //~ void solve_puzzle_set_parent();
+    //~ void solve_puzzle_update_last_node();
+    //~ void solve_puzzle_save_mcst();
+    //~ void solve_puzzle_save_mcst_impl();
+    //~ void solve_puzzle_load_mcst();
+    //~ void solve_puzzle_trim_node_impl();
+    //~ void solve_puzzle_show_progress();
+    //~ void solve_puzzle_backpropagate();
+    //~ void solve_puzzle_forwardpropagate();
+    //~ int64_t solve_puzzle_max_card_move_size;
+    //~ int64_t solve_puzzle_card_move_size_deck[2];
+    //~ int64_t solve_puzzle_card_move_size_hand[2];
+    //~ int64_t solve_puzzle_card_move_size_mzone[2];
+    //~ int64_t solve_puzzle_card_move_size_szone[2];
+    //~ int64_t solve_puzzle_card_move_size_grave[2];
+    //~ int64_t solve_puzzle_card_move_size_remove[2];
+    //~ int64_t solve_puzzle_card_move_size_extra[2];
+    //~ int64_t solve_puzzle_your_start_lp;
+    //~ int64_t solve_puzzle_your_end_lp;
+    //~ int64_t solve_puzzle_last_depth;
+    //~ int64_t solve_puzzle_min_depth;
+    //~ int64_t solve_puzzle_explore_factor_stable = 2;
+    //~ int64_t solve_puzzle_explore_factor_change = 1;
+    //~ int64_t solve_puzzle_your_start_card;
+    //~ int64_t solve_puzzle_your_end_card;
+    //~ int64_t solve_puzzle_trim_node_count;
+    //~ int64_t solve_puzzle_explore_factor = 1;
+    //~ boost::filesystem::path solve_puzzle_lua_path;
+    //~ boost::filesystem::path solve_puzzle_replay_path;
+    //~ boost::filesystem::path solve_puzzle_mcst_path;
+    
+    //~ bool solve_puzzle_is_success;
+    
+    //~ static constexpr int64_t phase_main1 = 0;
+    //~ static constexpr int64_t phase_battle = 1;
+    //~ static constexpr int64_t phase_main2 = 2;
+    //~ static constexpr int64_t phase_ep = 3;
+    
+    //~ int64_t current_phase;
   };
   
 
@@ -1110,11 +1214,14 @@ inline constexpr int64_t replay_file_select_panel_id = 1001;
 inline constexpr int64_t check_single_replay_button_id = 1002;
 inline constexpr int64_t check_single_layer_replay_button_id = 1003;
 inline constexpr int64_t check_multi_layer_replay_button_id = 1004;
-inline constexpr int64_t solve_puzzle_button_id = 1005;
+//~ inline constexpr int64_t solve_puzzle_button_id = 1005;
 inline constexpr int64_t chain_timing_combo_box_id = 1006;
 inline constexpr int64_t as_puzzle_button_id = 1007;
 inline constexpr int64_t wOptions_combo_box_option_id = 1008;
 inline constexpr int64_t combo_box_search_record_id = 1009;
+constexpr int64_t duel_log_button_id = 1010;
+
+//~ constexpr int64_t imgCard_id = 1010;
 
 #define AVAIL_OCG 0x1
 #define AVAIL_TCG 0x2

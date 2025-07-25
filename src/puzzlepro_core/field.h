@@ -504,6 +504,8 @@ public:
 
   void restore_lp_cost() {
   }
+  
+  std::string generate_chain_state();
 
   int32_t pay_lp_cost(uint32_t step, uint8_t playerid, uint32_t cost, uint32_t must_pay);
 

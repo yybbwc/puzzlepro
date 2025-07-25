@@ -17,7 +17,7 @@ namespace ygo {
     using luabridge::getGlobal;
     using luabridge::main_thread;
 
-    auto gui_config = getGlobal(main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = getGlobal(main_thread(mainGame->get_lua()), "config");
     auto replay_dir = wconcat_std(code_cvt(gui_config["replay_dir"].tostring()));
     auto replay_file_suffix = wconcat_std(L".", code_cvt(gui_config["replay_file_suffix"].tostring()));
 
@@ -78,7 +78,6 @@ namespace ygo {
   }
 
   void Replay::SaveReplay(const wchar_t *name) {
-    using boost::this_thread::get_id;
     using fast_io::at_fdcwd;
     using fast_io::concat_std;
     using fast_io::native_mkdirat;
@@ -89,7 +88,7 @@ namespace ygo {
     using luabridge::main_thread;
     using std::byte;
 
-    auto gui_config = getGlobal(main_thread(mainGame->get_lua(get_id())), "config");
+    auto gui_config = getGlobal(main_thread(mainGame->get_lua()), "config");
     auto replay_dir = gui_config["replay_dir"].tostring();
     auto replay_file_suffix = gui_config["replay_file_suffix"].tostring();
 
@@ -100,7 +99,7 @@ namespace ygo {
   }
 
   bool Replay::OpenReplay(const wchar_t *name) {
-    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "config");
+    auto gui_config = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "config");
     using fast_io::concat_std;
     using fast_io::wconcat_std;
     using fast_io::mnp::code_cvt;

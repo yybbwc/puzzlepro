@@ -1,0 +1,23 @@
+clang++ trim_right_fast_io.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1
+trim_right_string:0.5298509s
+trim_right_u16string:0.8799341s
+
+clang++ trim_right_std.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1
+trim_right_string:0.9627281s
+trim_right_u16string:0.7154792s
+
+clang++ trim_right_copy_std.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1
+trim_right_string:1.0642557s
+trim_right_u16string:0.8477671s
+
+clang++ trim_std.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1
+
+clang++ trim_right_boost_fast_io.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1 -I ../../../lib/boost
+trim_right string:1.3558273s
+trim_right wstring:8.7359471s
+
+clang++ trim_right_boost_std.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1 -I ../../../lib/boost
+trim_right string:1.8646449s
+trim_right wstring:9.1395757s
+
+clang++ trim_right_std.cpp -I ../../../lib/fast_io/include -std=gnu++23 -I ../include -l ntdll -O1 -I ../../../lib/simde -w

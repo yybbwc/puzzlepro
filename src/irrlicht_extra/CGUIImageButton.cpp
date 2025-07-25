@@ -8,63 +8,94 @@
 #include <IGUISpriteBank.h>
 #include <IGUISkin.h>
 #include <IGUIEnvironment.h>
+#include <CGUIEnvironment.h>
 #include <IVideoDriver.h>
 #include <IGUIFont.h>
 
 namespace irr {
   namespace gui {
+    
+void Draw2DImageRotation(
+    video::IVideoDriver* driver,
+    video::ITexture* image,
+    core::rect<s32> sourceRect,
+    core::position2d<s32> position,
+    core::position2d<s32> rotationPoint,
+    f32 rotation,
+    core::vector2df scale,
+    bool useAlphaChannel,
+    video::SColor color)
+{
+    // 参数检查
+    if (!driver || !image)
+        return;
 
-    void Draw2DImageRotation(video::IVideoDriver *driver, video::ITexture *image, core::rect<s32> sourceRect, core::position2d<s32> position, core::position2d<s32> rotationPoint, f32 rotation, core::vector2df scale, bool useAlphaChannel, video::SColor color) {
-      irr::video::SMaterial material;
-      irr::core::matrix4 oldProjMat = driver->getTransform(irr::video::ETS_PROJECTION);
-      driver->setTransform(irr::video::ETS_PROJECTION, irr::core::matrix4());
-      irr::core::matrix4 oldViewMat = driver->getTransform(irr::video::ETS_VIEW);
-      driver->setTransform(irr::video::ETS_VIEW, irr::core::matrix4());
-      irr::core::vector2df corner[4];
-      corner[0] = irr::core::vector2df(position.X, position.Y);
-      corner[1] = irr::core::vector2df(position.X + sourceRect.getWidth() * scale.X, position.Y);
-      corner[2] = irr::core::vector2df(position.X, position.Y + sourceRect.getHeight() * scale.Y);
-      corner[3] = irr::core::vector2df(position.X + sourceRect.getWidth() * scale.X, position.Y + sourceRect.getHeight() * scale.Y);
-      if (rotation != 0.0f) {
+    // 保存并重置变换矩阵
+    core::matrix4 oldProjMat = driver->getTransform(video::ETS_PROJECTION);
+    core::matrix4 oldViewMat = driver->getTransform(video::ETS_VIEW);
+    driver->setTransform(video::ETS_PROJECTION, core::matrix4());
+    driver->setTransform(video::ETS_VIEW, core::matrix4());
+
+    // 计算屏幕和图像尺寸
+    core::dimension2d<u32> screenSize = driver->getScreenSize();
+    core::dimension2d<u32> imgSize = image->getOriginalSize();
+    f32 screenWidth = (f32)screenSize.Width;
+    f32 screenHeight = (f32)screenSize.Height;
+    f32 imgWidth = (f32)imgSize.Width;
+    f32 imgHeight = (f32)imgSize.Height;
+
+    // 计算基础顶点位置
+    f32 width = sourceRect.getWidth() * scale.X;
+    f32 height = sourceRect.getHeight() * scale.Y;
+    
+    core::vector2df corner[4];
+    corner[0] = core::vector2df((f32)position.X, (f32)position.Y);
+    corner[1] = core::vector2df((f32)position.X + width, (f32)position.Y);
+    corner[2] = core::vector2df((f32)position.X, (f32)position.Y + height);
+    corner[3] = core::vector2df((f32)position.X + width, (f32)position.Y + height);
+
+    // 应用旋转
+    if (rotation != 0.0f) {
+        core::vector2df rotPoint((f32)rotationPoint.X, (f32)rotationPoint.Y);
         for (int x = 0; x < 4; x++) {
-          corner[x].rotateBy(rotation, irr::core::vector2df(rotationPoint.X, rotationPoint.Y));
+            corner[x].rotateBy(rotation, rotPoint);
         }
-      }
-      irr::core::vector2df uvCorner[4];
-      uvCorner[0] = irr::core::vector2df(sourceRect.UpperLeftCorner.X, sourceRect.UpperLeftCorner.Y);
-      uvCorner[1] = irr::core::vector2df(sourceRect.LowerRightCorner.X, sourceRect.UpperLeftCorner.Y);
-      uvCorner[2] = irr::core::vector2df(sourceRect.UpperLeftCorner.X, sourceRect.LowerRightCorner.Y);
-      uvCorner[3] = irr::core::vector2df(sourceRect.LowerRightCorner.X, sourceRect.LowerRightCorner.Y);
-      for (int x = 0; x < 4; x++) {
-        float uvX = uvCorner[x].X / (float)image->getOriginalSize().Width;
-        float uvY = uvCorner[x].Y / (float)image->getOriginalSize().Height;
-        uvCorner[x] = irr::core::vector2df(uvX, uvY);
-      }
-      irr::video::S3DVertex vertices[4];
-      irr::u16 indices[6] = {0, 1, 2, 3, 2, 1};
-      float screenWidth = driver->getScreenSize().Width;
-      float screenHeight = driver->getScreenSize().Height;
-      for (int x = 0; x < 4; x++) {
-        float screenPosX = ((corner[x].X / screenWidth) - 0.5f) * 2.0f;
-        float screenPosY = ((corner[x].Y / screenHeight) - 0.5f) * -2.0f;
-        vertices[x].Pos = irr::core::vector3df(screenPosX, screenPosY, 1);
+    }
+
+    // 计算UV坐标
+    core::vector2df uvCorner[4];
+    uvCorner[0] = core::vector2df(sourceRect.UpperLeftCorner.X / imgWidth, sourceRect.UpperLeftCorner.Y / imgHeight);
+    uvCorner[1] = core::vector2df(sourceRect.LowerRightCorner.X / imgWidth, sourceRect.UpperLeftCorner.Y / imgHeight);
+    uvCorner[2] = core::vector2df(sourceRect.UpperLeftCorner.X / imgWidth, sourceRect.LowerRightCorner.Y / imgHeight);
+    uvCorner[3] = core::vector2df(sourceRect.LowerRightCorner.X / imgWidth, sourceRect.LowerRightCorner.Y / imgHeight);
+
+    // 构建顶点数据
+    video::S3DVertex vertices[4];
+    u16 indices[6] = {0, 1, 2, 3, 2, 1};
+
+    for (int x = 0; x < 4; x++) {
+        f32 screenPosX = ((corner[x].X / screenWidth) - 0.5f) * 2.0f;
+        f32 screenPosY = ((corner[x].Y / screenHeight) - 0.5f) * -2.0f;
+        vertices[x].Pos = core::vector3df(screenPosX, screenPosY, 1);
         vertices[x].TCoords = uvCorner[x];
         vertices[x].Color = color;
-      }
-      material.Lighting = false;
-      material.ZWriteEnable = video::EZW_OFF;
-      material.TextureLayer[0].Texture = image;
-      if (useAlphaChannel) {
-        material.MaterialType = irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL;
-      }
-      else {
-        material.MaterialType = irr::video::EMT_SOLID;
-      }
-      driver->setMaterial(material);
-      driver->drawIndexedTriangleList(&vertices[0], 4, &indices[0], 2);
-      driver->setTransform(irr::video::ETS_PROJECTION, oldProjMat);
-      driver->setTransform(irr::video::ETS_VIEW, oldViewMat);
     }
+
+    // 设置材质
+    video::SMaterial material;
+    material.Lighting = false;
+    material.ZWriteEnable = video::EZW_OFF;
+    material.TextureLayer[0].Texture = image;
+    material.MaterialType = useAlphaChannel ? video::EMT_TRANSPARENT_ALPHA_CHANNEL : video::EMT_SOLID;
+
+    // 绘制
+    driver->setMaterial(material);
+    driver->drawIndexedTriangleList(&vertices[0], 4, &indices[0], 2);
+
+    // 恢复变换矩阵
+    driver->setTransform(video::ETS_PROJECTION, oldProjMat);
+    driver->setTransform(video::ETS_VIEW, oldViewMat);
+}
 
     void Draw2DImageQuad(video::IVideoDriver *driver, video::ITexture *image, core::rect<s32> sourceRect, core::position2d<s32> corner[4], bool useAlphaChannel, video::SColor color) {
       irr::video::SMaterial material;
@@ -109,7 +140,7 @@ namespace irr {
     }
 
     CGUIImageButton *CGUIImageButton::addImageButton(IGUIEnvironment *env, const core::rect<s32> &rectangle, IGUIElement *parent, s32 id) {
-      CGUIImageButton *button = new CGUIImageButton(env, parent ? parent : 0, id, rectangle);
+      CGUIImageButton *button = new CGUIImageButton(env, parent ? parent : dynamic_cast<CGUIEnvironment *>(env), id, rectangle);
       button->drop();
       return button;
     }

@@ -23,7 +23,7 @@ namespace ygo {
     static unsigned char last_successful_msg[SIZE_NETWORK_BUFFER];
     static size_t last_successful_msg_length;
     static wchar_t event_string[256];
-    static mt19937 rnd;
+    static inline random_xoshiro256pp random_xoshiro256pp_1;
     static bool is_refreshing;
     static int match_kill;
     static event *resp_event;

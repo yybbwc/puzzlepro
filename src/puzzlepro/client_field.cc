@@ -6,7 +6,6 @@ namespace ygo {
       mzone[p].resize(7, nullptr);
       szone[p].resize(8, nullptr);
     }
-    rnd.reset((uint_fast32_t)std::random_device()());
   }
 
   ClientField::~ClientField() {
@@ -450,7 +449,7 @@ namespace ygo {
 
   // needs to be synchronized with EGET_SCROLL_BAR_CHANGED
   void ClientField::ShowSelectCard(bool buttonok, bool chain) {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
     if (cant_check_grave) {
       bool has_card_in_grave = false;
       for (auto &pcard : selectable_cards) {
@@ -460,7 +459,7 @@ namespace ygo {
         }
       }
       if (has_card_in_grave) {
-        rnd.shuffle_vector(selectable_cards);
+        this->random_xoshiro256pp_1.shuffle_vector(selectable_cards);
       }
     }
     int startpos = 0;
@@ -470,7 +469,7 @@ namespace ygo {
       ct = selectable_cards.size();
     }
     else {
-      startpos = gui_xy["btnCardSelect"]["x1"].cast<double>().value();
+      startpos = gui_xy["btnCardSelect"]["x1"];
       ct = 5;
     }
     for (int i = 0; i < ct; ++i) {
@@ -485,7 +484,7 @@ namespace ygo {
         mainGame->imageLoading.insert_or_assign(mainGame->btnCardSelect[i], selectable_cards[i]->chain_code);
       }
       else {
-        mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler + 2]);
+        mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler]);
       }
       mainGame->btnCardSelect[i]->setRelativePosition(mainGame->ResizeWin(startpos + i * gui_xy["btnCardSelect"]["width_offset"].cast<double>().value(), gui_xy["btnCardSelect"]["y1"], startpos + gui_xy["btnCardSelect"]["width"].cast<double>().value() + i * gui_xy["btnCardSelect"]["width_offset"].cast<double>().value(), gui_xy["btnCardSelect"]["y2"]));
       mainGame->btnCardSelect[i]->setPressed(false);
@@ -580,7 +579,7 @@ namespace ygo {
   }
 
   void ClientField::ShowChainCard() {
-    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua(boost::this_thread::get_id())), "xy");
+    auto gui_xy = luabridge::getGlobal(luabridge::main_thread(mainGame->get_lua()), "xy");
 
     int startpos = 0;
     int ct = 0;
@@ -597,7 +596,7 @@ namespace ygo {
         mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardSelect[i], selectable_cards[i]->code));
       }
       else {
-        mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler + 2]);
+        mainGame->btnCardSelect[i]->setImage(imageManager.tCover[selectable_cards[i]->controler]);
       }
       mainGame->btnCardSelect[i]->setRelativePosition(mainGame->ResizeWin(startpos + i * gui_xy["btnCardSelect"]["width_offset"].cast<double>().value(), gui_xy["btnCardSelect"]["y1"], gui_xy["btnCardSelect"]["x2"].cast<double>().value() + i * gui_xy["btnCardSelect"]["width_offset"].cast<double>().value(), gui_xy["btnCardSelect"]["y2"]));
       mainGame->btnCardSelect[i]->setPressed(false);
@@ -667,7 +666,7 @@ namespace ygo {
         mainGame->imageLoading.insert(std::make_pair(mainGame->btnCardDisplay[i], display_cards[i]->code));
       }
       else {
-        mainGame->btnCardDisplay[i]->setImage(imageManager.tCover[display_cards[i]->controler + 2]);
+        mainGame->btnCardDisplay[i]->setImage(imageManager.tCover[display_cards[i]->controler]);
       }
       mainGame->btnCardDisplay[i]->setRelativePosition(irr::core::rect<irr::s32>(startpos + i * 125, 55, startpos + 120 + i * 125, 225));
       mainGame->btnCardDisplay[i]->setPressed(false);

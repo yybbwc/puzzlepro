@@ -69,10 +69,11 @@ uint32_t default_message_handler(intptr_t pduel, uint32_t message_type) {
   return 0;
 }
 
-extern "C" DECL_DLLEXPORT intptr_t create_duel(uint_fast32_t seed) {
+extern "C" DECL_DLLEXPORT intptr_t ocgapi_create_duel(int64_t seed) {
   duel* pduel = new duel();
   duel_set.insert(pduel);
-  pduel->random.reset(seed);
+  //~ pduel->random.reset(seed);
+  pduel->random_xoshiro256pp_1.reset(seed);
   return (intptr_t)pduel;
 }
 

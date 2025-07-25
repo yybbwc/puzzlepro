@@ -1,5 +1,7 @@
-#ifndef CLIENT_FIELD_H
-#define CLIENT_FIELD_H
+
+#pragma once
+//~ #ifndef CLIENT_FIELD_H
+//~ #define CLIENT_FIELD_H
 
 namespace ygo {
 
@@ -69,9 +71,8 @@ namespace ygo {
     std::vector<unsigned int> declare_opcodes;
     std::vector<ClientCard *> display_cards;
     std::vector<int> sort_list;
-    std::map<int, int> player_desc_hints[2];
+    boost::container::flat_map<int, int> player_desc_hints[2];
     bool grave_act[2]{false};
-    //~ int32_t grave_act_player{0};
     bool remove_act[2]{false};
     bool deck_act[2]{false};
     bool extra_act[2]{false};
@@ -85,7 +86,7 @@ namespace ygo {
     bool cant_check_grave{false};
     bool tag_surrender{false};
     bool tag_teammate_surrender{false};
-    mt19937 rnd;
+    static inline random_xoshiro256pp random_xoshiro256pp_1;
 
     ClientField();
     ~ClientField();
@@ -159,4 +160,4 @@ namespace ygo {
 // special cards
 #define CARD_QUESTION 38723936
 
-#endif // CLIENT_FIELD_H
+//~ #endif // CLIENT_FIELD_H

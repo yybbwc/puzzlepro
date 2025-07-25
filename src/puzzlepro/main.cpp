@@ -24,4 +24,4 @@
 //~ #include "tag_duel.cc"
 #include "single_mode.cc"
 #include "resize.cc"
-#include "solve_puzzle.cc"
+//~ #include "solve_puzzle.cc"
