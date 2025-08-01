@@ -38,13 +38,16 @@ namespace ygo {
     static void ClientEvent(bufferevent *bev, short events, void *ctx);
     static int ClientThread();
     static void HandleSTOCPacketLan(unsigned char *data, int len);
+    
     static bool ClientAnalyze(unsigned char *msg, int len);
+    static bool ClientAnalyze_MSG_RETRY();
+    
     static void SwapField();
     static void SetResponseI(int32_t respI);
     static void SetResponseB(void *respB, size_t len);
     static void SendResponse();
 
-    inline static fast_io::obuf_file last_replay_txt{"./keep"};
+    static inline fast_io::obuf_file last_replay_txt{"./keep"};
 
     static void SendPacketToServer(unsigned char proto) {
       auto *p = duel_client_write;

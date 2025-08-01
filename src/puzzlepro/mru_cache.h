@@ -1,6 +1,7 @@
 template <typename Key, typename Value> struct mru_cache_item {
   Key key;
   Value value;
+
   mru_cache_item(const Key &k, const Value &v) : key(k), value(v) {
   }
 };
@@ -52,7 +53,7 @@ public:
     const auto &key_index = cache_.template get<0>();
     return key_index.find(key) != key_index.end();
   }
-  
+
   bool remove(const Key &key) {
     auto &key_index = cache_.template get<0>();
     auto it = key_index.find(key);
@@ -70,12 +71,20 @@ public:
   void clear() {
     cache_.clear();
   }
-  
+
   typename mru_cache_define<Key, Value>::template nth_index<1>::type::const_iterator begin() const {
     return cache_.template get<1>().begin();
   }
 
   typename mru_cache_define<Key, Value>::template nth_index<1>::type::const_iterator end() const {
     return cache_.template get<1>().end();
+  }
+
+  typename mru_cache_define<Key, Value>::template nth_index<1>::type::const_reverse_iterator rbegin() const {
+    return cache_.template get<1>().rbegin();
+  }
+
+  typename mru_cache_define<Key, Value>::template nth_index<1>::type::const_reverse_iterator rend() const {
+    return cache_.template get<1>().rend();
   }
 };

@@ -22,12 +22,12 @@ bool effect_sort_id(const effect *e1, const effect *e2) {
 
 // return: code is an event reserved for EFFECT_TYPE_CONTINUOUS or not
 bool is_continuous_event(uint32_t code) {
-  if (code & EVENT_CUSTOM) {
+  if (code & EVENT_CUSTOM or code & 0xf0000) {
     return false;
   }
-  else if (code & 0xf0000) { // EVENT_ADD_COUNTER, EVENT_REMOVE_COUNTER
-    return false;
-  }
+  //~ else if (code & 0xf0000) { // EVENT_ADD_COUNTER, EVENT_REMOVE_COUNTER
+    //~ return false;
+  //~ }
   else if (code & 0xf000) { // EVENT_PHASE_START must be continuous, but other EVENT_PHASE must not be
     return !!(code & EVENT_PHASE_START);
   }
@@ -269,7 +269,7 @@ int32_t effect::get_required_handorset_effects(effect_set *eset, uint8_t playeri
   int32_t available = 0;
   effect_set tmp_eset;
   handler->filter_effect(ecode, &tmp_eset);
-  if (!tmp_eset.size()) {
+  if (tmp_eset.empty()) {
     return available;
   }
   effect *oreason = pduel->game_field->core.reason_effect;
@@ -277,7 +277,7 @@ int32_t effect::get_required_handorset_effects(effect_set *eset, uint8_t playeri
   pduel->game_field->core.reason_player = playerid;
   pduel->game_field->save_lp_cost();
   for (int32_t i = 0; i < tmp_eset.size(); ++i) {
-    auto peffect = tmp_eset[i];
+    auto *peffect = tmp_eset[i];
     if (peffect->check_count_limit(playerid)) {
       pduel->game_field->core.reason_effect = peffect;
       pduel->lua->add_param(peffect, PARAM_TYPE_EFFECT);
@@ -727,7 +727,7 @@ int32_t effect::is_chainable(uint8_t tp) {
   if ((type & EFFECT_TYPE_ACTIVATE) && (sp <= 1) && !is_flag(EFFECT_FLAG2_COF)) {
     return FALSE;
   }
-  if (pduel->game_field->core.current_chain.size()) {
+  if (!pduel->game_field->core.current_chain.empty()) {
     if (!is_flag(EFFECT_FLAG_FIELD_ONLY) && (type & EFFECT_TYPE_TRIGGER_O) && (get_handler()->current.location == LOCATION_HAND)) {
       if (pduel->game_field->core.current_chain.rbegin()->triggering_effect->get_speed() > 2) {
         return FALSE;
@@ -975,7 +975,7 @@ effect *effect::clone() {
   int32_t ref = ceffect->ref_handle;
   *ceffect = *this;
   ceffect->ref_handle = ref;
-  ceffect->handler = 0;
+  ceffect->handler = nullptr;
   if (condition) {
     ceffect->condition = pduel->lua->clone_function_ref(condition);
   }

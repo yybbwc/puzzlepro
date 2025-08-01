@@ -20,7 +20,8 @@ function c22610082.target(e, tp, eg, ep, ev, re, r, rp, chk)
       return false
     end
     e:SetLabel(0)
-    return e:GetHandler():IsAbleToDeck()
+    --~ return e:GetHandler():IsAbleToDeck()
+    return not Duel.IsPlayerAffectedByEffect(tp,4130270)
   end
   e:SetLabel(0)
   Duel.SetOperationInfo(0, CATEGORY_TODECK, e:GetHandler(), 1, 0, 0)

@@ -1062,94 +1062,7 @@ namespace ygo {
     }
     switch (mainGame->dInfo.curMsg) {
       case MSG_RETRY: {
-        if (last_successful_msg_length) {
-          auto *p = last_successful_msg;
-          auto last_msg = BufferIO::ReadUInt8(p);
-          int err_desc = 1421;
-          switch (last_msg) {
-            case MSG_ANNOUNCE_CARD:
-              err_desc = 1422;
-              break;
-            case MSG_ANNOUNCE_ATTRIB:
-              err_desc = 1423;
-              break;
-            case MSG_ANNOUNCE_RACE:
-              err_desc = 1424;
-              break;
-            case MSG_ANNOUNCE_NUMBER:
-              err_desc = 1425;
-              break;
-            case MSG_SELECT_EFFECTYN:
-            case MSG_SELECT_YESNO:
-            case MSG_SELECT_OPTION:
-              err_desc = 1426;
-              break;
-            case MSG_SELECT_CARD:
-            case MSG_SELECT_UNSELECT_CARD:
-            case MSG_SELECT_TRIBUTE:
-            case MSG_SELECT_SUM:
-            case MSG_SORT_CARD:
-              err_desc = 1427;
-              break;
-            case MSG_SELECT_CHAIN:
-              err_desc = 1428;
-              break;
-            case MSG_SELECT_PLACE:
-            case MSG_SELECT_DISFIELD:
-              err_desc = 1429;
-              break;
-            case MSG_SELECT_POSITION:
-              err_desc = 1430;
-              break;
-            case MSG_SELECT_COUNTER:
-              err_desc = 1431;
-              break;
-            default:
-              break;
-          }
-          mainGame->gMutex.lock();
-          mainGame->smMessage->setText_1(dataManager.GetDesc(err_desc), dataManager.GetSysString(1216));
-          mainGame->PopupElement(mainGame->smMessage);
-          mainGame->gMutex.unlock();
-          mainGame->actionSignal.Reset();
-          mainGame->actionSignal.Wait();
-          select_hint = last_select_hint;
-          return ClientAnalyze(last_successful_msg, last_successful_msg_length);
-        }
-        mainGame->gMutex.lock();
-        mainGame->stMessage->setText(L"Error occurs.");
-        mainGame->PopupElement(mainGame->wMessage);
-        mainGame->gMutex.unlock();
-        mainGame->actionSignal.Reset();
-        mainGame->actionSignal.Wait();
-        if (!mainGame->dInfo.isSingleMode) {
-          mainGame->closeDoneSignal.Reset();
-          mainGame->closeSignal.Set();
-          mainGame->closeDoneSignal.Wait();
-          mainGame->gMutex.lock();
-          mainGame->dInfo.isStarted = false;
-          mainGame->dInfo.isInDuel = false;
-          mainGame->dInfo.isFinished = false;
-          mainGame->btnCreateHost->setEnabled(true);
-          mainGame->btnJoinHost->setEnabled(true);
-          mainGame->btnJoinCancel->setEnabled(true);
-          mainGame->btnStartBot->setEnabled(true);
-          mainGame->btnBotCancel->setEnabled(true);
-          mainGame->stTip->setVisible(false);
-          mainGame->device->setEventReceiver(&mainGame->menuHandler);
-          if (bot_mode) {
-            mainGame->ShowElement(mainGame->wSinglePlay);
-          }
-          else {
-            mainGame->ShowElement(mainGame->wLanWindow);
-          }
-          mainGame->gMutex.unlock();
-          event_base_loopbreak(client_base);
-          if (exit_on_return) {
-            mainGame->device->closeDevice();
-          }
-        }
-        return false;
+        DuelClient::ClientAnalyze_MSG_RETRY();
       }
       case MSG_HINT: {
         int type = BufferIO::ReadUInt8(pbuf);
@@ -2833,12 +2746,14 @@ namespace ygo {
         mainGame->HideElement(mainGame->wSurrender);
         if (!mainGame->dInfo.isReplay && mainGame->dInfo.player_type < 7) {
           if (mainGame->gameConf.control_mode == 0) {
-            mainGame->chain_timing_combo_box->setVisible(true);
+            //~ mainGame->chain_timing_combo_box->setVisible(true);
+            mainGame->duel_sidebar_window->setVisible(true);
             mainGame->dField.UpdateChainButtons();
-            mainGame->duel_log_button->setVisible(true);
+            //~ mainGame->duel_log_button->setVisible(true);
           }
           else {
-            mainGame->chain_timing_combo_box->setVisible(false);
+            //~ mainGame->chain_timing_combo_box->setVisible(false);
+            mainGame->duel_sidebar_window->setVisible(false);
             mainGame->btnCancelOrFinish->setVisible(false);
           }
         }
@@ -3214,14 +3129,18 @@ namespace ygo {
         int cs = BufferIO::ReadUInt8(pbuf);
         unsigned int pp = BufferIO::ReadUInt8(pbuf);
         unsigned int cp = BufferIO::ReadUInt8(pbuf);
-        if (pp == POS_FACEUP_ATTACK or pp == POS_FACEUP_DEFENSE or pp == POS_FACEDOWN_DEFENSE) {
+        //~ if (pp == POS_FACEUP_ATTACK or pp == POS_FACEUP_DEFENSE or pp == POS_FACEDOWN_DEFENSE) {
           //~ fast_io::io::println(last_replay_txt, "* ",
           // fast_io::mnp::cond(cc == 0, "我方", "对方"), mainGame->get_location_string(cl,
           // cs), "「",
           // fast_io::mnp::code_cvt(fast_io::mnp::os_c_str(dataManager.GetName(code))),
           //"」从", mainGame->获取表示形式的名称(pp), "变成",
           // mainGame->获取表示形式的名称(cp));
-        }
+
+          if (gui_replay["MSG_POS_CHANGE"]) {
+            fast_io::io::print(last_replay_txt, gui_replay[101].tostring(), fast_io::mnp::cond(cc == 0, gui_replay[201].tostring(), gui_replay[202].tostring()), mainGame->get_location_string(cl, cs), gui_replay[401].tostring(), fast_io::mnp::code_cvt_os_c_str(dataManager.GetName(code)), gui_replay[402].tostring(), gui_replay[302].tostring(), gui_replay[900 + cp].tostring(), "\n");
+          }
+        //~ }
         ClientCard *pcard = mainGame->dField.GetCard(cc, cl, cs);
         if ((pp & POS_FACEUP) && (cp & POS_FACEDOWN)) {
           pcard->counters.clear();
@@ -3391,9 +3310,9 @@ namespace ygo {
         int subs = BufferIO::ReadUInt8(pbuf);
         int cc = mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
         int32_t cl = BufferIO::ReadUInt8(pbuf);
-        int cs = BufferIO::ReadUInt8(pbuf);
-        int desc = BufferIO::ReadInt32(pbuf);
-        int ct = BufferIO::ReadUInt8(pbuf);
+        int32_t cs = BufferIO::ReadUInt8(pbuf);
+        int32_t desc = BufferIO::ReadInt32(pbuf);
+        int32_t ct = BufferIO::ReadUInt8(pbuf);
         if (gui_replay["MSG_CHAINING"]) {
           string gui_replay_string_1 = gui_replay[101];
           string gui_replay_string_2 = gui_replay[201];
@@ -3401,7 +3320,7 @@ namespace ygo {
           string gui_replay_string_4 = gui_replay[301];
           string gui_replay_string_5 = gui_replay[401];
           string gui_replay_string_6 = gui_replay[402];
-          print(last_replay_txt, gui_replay_string_1, cond(pcc == cc, gui_replay_string_2, gui_replay_string_3), gui_replay_string_4, cond(cc == 0, gui_replay_string_2, gui_replay_string_3), mainGame->get_location_string(cl, cs), gui_replay_string_5, code_cvt_os_c_str(dataManager.GetName(code)), gui_replay_string_6, "\n");
+          print(last_replay_txt, gui_replay_string_1, cond(cc == 0, gui_replay_string_2, gui_replay_string_3), gui_replay_string_4, cond(pcc == 0, gui_replay_string_2, gui_replay_string_3), mainGame->get_location_string(cl, cs), gui_replay_string_5, code_cvt_os_c_str(dataManager.GetName(code)), gui_replay_string_6, "\n");
         }
         if (mainGame->dInfo.isReplay && mainGame->dInfo.isReplaySkiping) {
           return true;
@@ -3418,7 +3337,7 @@ namespace ygo {
         pcard->is_highlighting = true;
         if (pcard->location & 0x30) {
           float shift = -0.15f;
-          if (cc == 1) {
+          if (pcc == 1) {
             shift = 0.15f;
           }
           pcard->dPos = irr::core::vector3df(shift, 0, 0);
@@ -3435,21 +3354,21 @@ namespace ygo {
         mainGame->dField.current_chain.chain_card = pcard;
         mainGame->dField.current_chain.code = code;
         mainGame->dField.current_chain.desc = desc;
-        mainGame->dField.current_chain.controler = cc;
+        mainGame->dField.current_chain.controler = pcc;
         mainGame->dField.current_chain.location = cl;
         mainGame->dField.current_chain.sequence = cs;
-        mainGame->dField.GetChainLocation(cc, cl, cs, &mainGame->dField.current_chain.chain_pos);
+        mainGame->dField.GetChainLocation(pcc, cl, cs, &mainGame->dField.current_chain.chain_pos);
         mainGame->dField.current_chain.solved = false;
         mainGame->dField.current_chain.target.clear();
         int chc = 0;
         for (auto chit = mainGame->dField.chains.begin(); chit != mainGame->dField.chains.end(); ++chit) {
           if (cl == 0x10 || cl == 0x20) {
-            if (chit->controler == cc && chit->location == cl) {
+            if (chit->controler == pcc && chit->location == cl) {
               chc++;
             }
           }
           else {
-            if (chit->controler == cc && chit->location == cl && chit->sequence == cs) {
+            if (chit->controler == pcc && chit->location == cl && chit->sequence == cs) {
               chc++;
             }
           }
@@ -4040,9 +3959,7 @@ namespace ygo {
         myswprintf(event_string, dataManager.GetSysString(1621), dataManager.GetName(mainGame->dField.attacker->code));
         return true;
       }
-      case MSG_DAMAGE_STEP_START: {
-        return true;
-      }
+      case MSG_DAMAGE_STEP_START:
       case MSG_DAMAGE_STEP_END: {
         return true;
       }
@@ -4132,7 +4049,7 @@ namespace ygo {
         return false;
       }
       case MSG_ANNOUNCE_RACE: {
-        /*int player = */ mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
+        int player = mainGame->LocalPlayer(BufferIO::ReadUInt8(pbuf));
         mainGame->dField.announce_count = BufferIO::ReadUInt8(pbuf);
         int available = BufferIO::ReadInt32(pbuf);
         for (int i = 0, filter = 0x1; i < RACES_COUNT; ++i, filter <<= 1) {
@@ -4607,6 +4524,108 @@ namespace ygo {
     }
     //~ last_replay_txt.close();
     return true;
+  }
+  
+  bool DuelClient::ClientAnalyze_MSG_RETRY() {
+    if (last_successful_msg_length) {
+      auto *p = last_successful_msg;
+      auto last_msg = BufferIO::ReadUInt8(p);
+      int err_desc = 1421;
+      switch (last_msg) {
+        case MSG_ANNOUNCE_CARD: {
+          err_desc = 1422;
+          break;
+        }
+        case MSG_ANNOUNCE_ATTRIB: {
+          err_desc = 1423;
+          break;
+        }
+        case MSG_ANNOUNCE_RACE: {
+          err_desc = 1424;
+          break;
+        }
+        case MSG_ANNOUNCE_NUMBER: {
+          err_desc = 1425;
+          break;
+        }
+        case MSG_SELECT_EFFECTYN:
+        case MSG_SELECT_YESNO:
+        case MSG_SELECT_OPTION: {
+          err_desc = 1426;
+          break;
+        }
+        case MSG_SELECT_CARD:
+        case MSG_SELECT_UNSELECT_CARD:
+        case MSG_SELECT_TRIBUTE:
+        case MSG_SELECT_SUM:
+        case MSG_SORT_CARD: {
+          err_desc = 1427;
+          break;
+        }
+        case MSG_SELECT_CHAIN: {
+          err_desc = 1428;
+          break;
+        }
+        case MSG_SELECT_PLACE:
+        case MSG_SELECT_DISFIELD: {
+          err_desc = 1429;
+          break;
+        }
+        case MSG_SELECT_POSITION: {
+          err_desc = 1430;
+          break;
+        }
+        case MSG_SELECT_COUNTER: {
+          err_desc = 1431;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+      mainGame->gMutex.lock();
+      mainGame->smMessage->setText_1(dataManager.GetDesc(err_desc), dataManager.GetSysString(1216));
+      mainGame->PopupElement(mainGame->smMessage);
+      mainGame->gMutex.unlock();
+      mainGame->actionSignal.Reset();
+      mainGame->actionSignal.Wait();
+      select_hint = last_select_hint;
+      return ClientAnalyze(last_successful_msg, last_successful_msg_length);
+    }
+    mainGame->gMutex.lock();
+    mainGame->stMessage->setText(L"Error occurs.");
+    mainGame->PopupElement(mainGame->wMessage);
+    mainGame->gMutex.unlock();
+    mainGame->actionSignal.Reset();
+    mainGame->actionSignal.Wait();
+    if (!mainGame->dInfo.isSingleMode) {
+      mainGame->closeDoneSignal.Reset();
+      mainGame->closeSignal.Set();
+      mainGame->closeDoneSignal.Wait();
+      mainGame->gMutex.lock();
+      mainGame->dInfo.isStarted = false;
+      mainGame->dInfo.isInDuel = false;
+      mainGame->dInfo.isFinished = false;
+      mainGame->btnCreateHost->setEnabled(true);
+      mainGame->btnJoinHost->setEnabled(true);
+      mainGame->btnJoinCancel->setEnabled(true);
+      mainGame->btnStartBot->setEnabled(true);
+      mainGame->btnBotCancel->setEnabled(true);
+      mainGame->stTip->setVisible(false);
+      mainGame->device->setEventReceiver(&mainGame->menuHandler);
+      if (bot_mode) {
+        mainGame->ShowElement(mainGame->wSinglePlay);
+      }
+      else {
+        mainGame->ShowElement(mainGame->wLanWindow);
+      }
+      mainGame->gMutex.unlock();
+      event_base_loopbreak(client_base);
+      if (exit_on_return) {
+        mainGame->device->closeDevice();
+      }
+    }
+    return false;
   }
 
   void DuelClient::SwapField() {

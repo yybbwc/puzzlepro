@@ -40,9 +40,9 @@ namespace ygo {
       CardString cs;
       step = sqlite3_step(pStmt);
       if (step == SQLITE_ROW) {
-        cd.code = sqlite3_column_int(pStmt, datas_id);
-        cd.ot = sqlite3_column_int(pStmt, datas_ot);
-        cd.alias = sqlite3_column_int(pStmt, datas_alias);
+        cd.code = sqlite3_column_int64(pStmt, datas_id);
+        cd.ot = sqlite3_column_int64(pStmt, datas_ot);
+        cd.alias = sqlite3_column_int64(pStmt, datas_alias);
         auto setcode = sqlite3_column_int64(pStmt, datas_setcode);
         if (setcode) {
           auto it = extra_setcode.find(cd.code);
@@ -60,8 +60,8 @@ namespace ygo {
           }
         }
         cd.type = sqlite3_column_int64(pStmt, datas_type);
-        cd.attack = sqlite3_column_int(pStmt, datas_atk);
-        cd.defense = sqlite3_column_int(pStmt, datas_def);
+        cd.attack = sqlite3_column_int64(pStmt, datas_atk);
+        cd.defense = sqlite3_column_int64(pStmt, datas_def);
         if (cd.type & TYPE_LINK) {
           cd.link_marker = cd.defense;
           cd.defense = 0;
@@ -69,13 +69,13 @@ namespace ygo {
         else {
           cd.link_marker = 0;
         }
-        unsigned int level = sqlite3_column_int(pStmt, datas_level);
+        unsigned int level = sqlite3_column_int64(pStmt, datas_level);
         cd.level = level & 0xff;
         cd.lscale = (level >> 24) & 0xff;
         cd.rscale = (level >> 16) & 0xff;
-        cd.race = sqlite3_column_int(pStmt, datas_race);
-        cd.attribute = sqlite3_column_int(pStmt, datas_attribute);
-        cd.category = sqlite3_column_int(pStmt, datas_category);
+        cd.race = sqlite3_column_int64(pStmt, datas_race);
+        cd.attribute = sqlite3_column_int64(pStmt, datas_attribute);
+        cd.category = sqlite3_column_int64(pStmt, datas_category);
         _datas[cd.code] = cd;
         if (const char *text = (const char *)sqlite3_column_text(pStmt, text_name)) {
           BufferIO::DecodeUTF8(text, strBuffer);

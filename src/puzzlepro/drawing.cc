@@ -2,25 +2,25 @@
 namespace ygo {
 
   void Game::DrawSelectionLine(irr::video::S3DVertex *vec, bool strip, int width, float *cv) {
-    if (!gameConf.use_d3d) {
-      float origin[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-      glLineWidth(width);
-      glLineStipple(1, linePatternGL);
-      if (strip) {
-        glEnable(GL_LINE_STIPPLE);
-      }
-      glDisable(GL_TEXTURE_2D);
-      glMaterialfv(GL_FRONT, GL_AMBIENT, cv);
-      glBegin(GL_LINE_LOOP);
-      glVertex3fv(&vec[0].Pos.X);
-      glVertex3fv(&vec[1].Pos.X);
-      glVertex3fv(&vec[3].Pos.X);
-      glVertex3fv(&vec[2].Pos.X);
-      glEnd();
-      glMaterialfv(GL_FRONT, GL_AMBIENT, origin);
-      glDisable(GL_LINE_STIPPLE);
-      glEnable(GL_TEXTURE_2D);
+    //~ if (!gameConf.use_d3d) {
+    float origin[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glLineWidth(width);
+    glLineStipple(1, linePatternGL);
+    if (strip) {
+      glEnable(GL_LINE_STIPPLE);
     }
+    glDisable(GL_TEXTURE_2D);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, cv);
+    glBegin(GL_LINE_LOOP);
+    glVertex3fv(&vec[0].Pos.X);
+    glVertex3fv(&vec[1].Pos.X);
+    glVertex3fv(&vec[3].Pos.X);
+    glVertex3fv(&vec[2].Pos.X);
+    glEnd();
+    glMaterialfv(GL_FRONT, GL_AMBIENT, origin);
+    glDisable(GL_LINE_STIPPLE);
+    glEnable(GL_TEXTURE_2D);
+    //~ }
     //~ else {
     //~ driver->setMaterial(matManager.mOutLine);
     //~ if (strip) {
@@ -300,10 +300,11 @@ namespace ygo {
     for (auto cit = dField.overlay_cards.begin(); cit != dField.overlay_cards.end(); ++cit) {
       auto *pcard = (*cit);
       auto *olcard = pcard->overlayTarget;
-      if (pcard->aniFrame) {
-        DrawCard(pcard);
-      }
-      else if (olcard && olcard->location == LOCATION_MZONE) {
+      //~ if (pcard->aniFrame) {
+      //~ DrawCard(pcard);
+      //~ }
+      //~ else if (olcard && olcard->location == LOCATION_MZONE) {
+      if (olcard && olcard->location == LOCATION_MZONE) {
         if (pcard->sequence < MAX_LAYER_COUNT) {
           DrawCard(pcard);
         }
@@ -1045,8 +1046,8 @@ namespace ygo {
     frameSignal.Wait();
   }
 
-  void Game::DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList *lflist, bool drag) {
-    int code = cp->first;
+  void Game::DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList *lflist, select_struct select_struct_) {
+    auto code = cp->first;
     auto lcode = cp->second.alias;
     if (lcode == 0) {
       lcode = code;
@@ -1055,16 +1056,26 @@ namespace ygo {
     if (img == nullptr) {
       return; // nullptr->getSize() will cause a crash
     }
+    if (select_struct_.up) {
+      pos.Y -= 10 * mainGame->yScale;
+    }
     irr::core::dimension2d<irr::u32> size = img->getOriginalSize();
-    irr::core::recti dragloc = mainGame->Resize(pos.X, pos.Y, pos.X + CARD_THUMB_WIDTH, pos.Y + CARD_THUMB_HEIGHT);
-    irr::core::recti limitloc = mainGame->Resize(pos.X, pos.Y, pos.X + 20, pos.Y + 20);
-    irr::core::recti otloc = Resize(pos.X + 7, pos.Y + 50, pos.X + 37, pos.Y + 65);
-    if (drag) {
+    irr::core::recti dragloc = mainGame->ResizeWin(pos.X, pos.Y, pos.X + CARD_THUMB_WIDTH, pos.Y + CARD_THUMB_HEIGHT);
+    irr::core::recti limitloc = mainGame->ResizeWin(pos.X, pos.Y, pos.X + 20, pos.Y + 20);
+    irr::core::recti otloc = ResizeWin(pos.X + 7, pos.Y + 50, pos.X + 37, pos.Y + 65);
+    if (select_struct_.selected) {
       dragloc = irr::core::recti(pos.X, pos.Y, pos.X + CARD_THUMB_WIDTH * mainGame->xScale, pos.Y + CARD_THUMB_HEIGHT * mainGame->yScale);
       limitloc = irr::core::recti(pos.X, pos.Y, pos.X + 20 * mainGame->xScale, pos.Y + 20 * mainGame->yScale);
       otloc = irr::core::recti(pos.X + 7, pos.Y + 50 * mainGame->yScale, pos.X + 37 * mainGame->xScale, pos.Y + 65 * mainGame->yScale);
     }
+    //~ if (select_struct_.selecting) {
+    //~ this->Draw2DImageWithShader(driver, img, dragloc, this->irrlihct_shader_2);
+    //~ }
+    //~ else {
     driver->draw2DImage(img, dragloc, irr::core::rect<irr::s32>(0, 0, size.Width, size.Height));
+    //~ }
+    //~ this->Draw2DImageWithShader(driver, img, dragloc, irr::core::rect<irr::s32>(0, 0, size.Width, size.Height), this->irrlihct_shader_1);
+    //~ this->Draw2DImageWithShader(driver, img, irr::core::rect<irr::s32>(0, 0, 250, 500), irr::core::rect<irr::s32>(0, 0, size.Width, size.Height), this->irrlihct_shader_1);
     auto lfit = lflist->content.find(lcode);
     if (lfit != lflist->content.end()) {
       switch (lfit->second) {
@@ -1079,10 +1090,44 @@ namespace ygo {
           break;
       }
     }
-    bool showAvail = false;
-    bool showNotAvail = false;
-    int filter_lm = cbLimit->getSelected();
-    bool avail = !((filter_lm == 4 && !(cp->second.ot & AVAIL_OCG) || (filter_lm == 5 && !(cp->second.ot & AVAIL_TCG)) || (filter_lm == 6 && !(cp->second.ot & AVAIL_SC)) || (filter_lm == 7 && !(cp->second.ot & AVAIL_CUSTOM)) || (filter_lm == 8 && (cp->second.ot & AVAIL_OCGTCG) != AVAIL_OCGTCG)));
+    this->DrawThumb_otloc(cp, otloc);
+    //~ bool showAvail = false;
+    //~ bool showNotAvail = false;
+    //~ int filter_lm = cbLimit->getSelected();
+    //~ bool avail = !((filter_lm == 4 && !(cp->second.ot & AVAIL_OCG) || (filter_lm == 5 && !(cp->second.ot & AVAIL_TCG)) || (filter_lm == 6 && !(cp->second.ot & AVAIL_SC)) || (filter_lm == 7 && !(cp->second.ot & AVAIL_CUSTOM)) || (filter_lm == 8 && (cp->second.ot & AVAIL_OCGTCG) != AVAIL_OCGTCG)));
+    //~ if (filter_lm >= 4) {
+    //~ showAvail = avail;
+    //~ showNotAvail = !avail;
+    //~ }
+    //~ else if (!(cp->second.ot & gameConf.defaultOT)) {
+    //~ showNotAvail = true;
+    //~ }
+    //~ if (showAvail) {
+    //~ if ((cp->second.ot & AVAIL_OCG) && !(cp->second.ot & AVAIL_TCG)) {
+    //~ driver->draw2DImage(imageManager.tOT, otloc, irr::core::recti(0, 128, 128, 192), nullptr, nullptr, true);
+    //~ }
+    //~ else if ((cp->second.ot & AVAIL_TCG) && !(cp->second.ot & AVAIL_OCG)) {
+    //~ driver->draw2DImage(imageManager.tOT, otloc, irr::core::recti(0, 192, 128, 256), nullptr, nullptr, true);
+    //~ }
+    //~ }
+    //~ else if (showNotAvail) {
+    //~ if (cp->second.ot & AVAIL_OCG) {
+    //~ driver->draw2DImage(imageManager.tOT, otloc, irr::core::recti(0, 0, 128, 64), nullptr, nullptr, true);
+    //~ }
+    //~ else if (cp->second.ot & AVAIL_TCG) {
+    //~ driver->draw2DImage(imageManager.tOT, otloc, irr::core::recti(0, 64, 128, 128), nullptr, nullptr, true);
+    //~ }
+    //~ else if (!avail) {
+    //~ driver->draw2DImage(imageManager.tLim, otloc, irr::core::recti(0, 0, 64, 64), nullptr, nullptr, true);
+    //~ }
+    //~ }
+  }
+
+  void Game::DrawThumb_otloc(code_pointer cp, irr::core::rect<int32_t> otloc) {
+    auto showAvail = false;
+    auto showNotAvail = false;
+    auto filter_lm = cbLimit->getSelected();
+    auto avail = !((filter_lm == 4 && !(cp->second.ot & AVAIL_OCG) || (filter_lm == 5 && !(cp->second.ot & AVAIL_TCG)) || (filter_lm == 6 && !(cp->second.ot & AVAIL_SC)) || (filter_lm == 7 && !(cp->second.ot & AVAIL_CUSTOM)) || (filter_lm == 8 && (cp->second.ot & AVAIL_OCGTCG) != AVAIL_OCGTCG)));
     if (filter_lm >= 4) {
       showAvail = avail;
       showNotAvail = !avail;
@@ -1126,6 +1171,7 @@ namespace ygo {
   void Game::DrawDeckBd() {
     auto gui_color = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "color");
     auto gui_skin = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin");
+    auto gui_skin_code = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "skin_code");
     auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
     int64_t gui_color_gradient_left_up = gui_color["gradient"]["left_up"];
     int64_t gui_color_gradient_right_up = gui_color["gradient"]["right_up"];
@@ -1155,16 +1201,20 @@ namespace ygo {
     }
     int64_t EGDC_BUTTON_TEXT = irr::gui::EGDC_BUTTON_TEXT;
     int64_t gui_color_EGDC_BUTTON_TEXT = gui_skin[EGDC_BUTTON_TEXT];
+    //~ select_struct select_struct_{};
     for (int i = 0; i < (gui_xy["deck_edit_search_result_show_number"].cast<int64_t>().value() + 2) && i + scrFilter->getPos() < (int)deckBuilder.results.size(); ++i) {
       auto ptr = deckBuilder.results[i + scrFilter->getPos()];
       if (i >= gui_xy["deck_edit_search_result_show_number"].cast<int64_t>().value()) {
         imageManager.GetTextureThumb(ptr->second.code);
         break;
       }
+
       if (deckBuilder.hovered_pos == 4 && deckBuilder.hovered_seq == i) {
-        driver->draw2DRectangle(0x80000000, ResizeWin(gui_xy["gradient_background_search_result"]["x1"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["gradient_background_search_result"]["x2"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + (i + 1) * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value()));
+        driver->draw2DRectangle(gui_skin[gui_skin_code["EGDC_3D_HIGH_LIGHT"]].cast<int64_t>().value(), ResizeWin(gui_xy["gradient_background_search_result"]["x1"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["gradient_background_search_result"]["x2"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + (i + 1) * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value()));
       }
+
       DrawThumb(ptr, irr::core::vector2di(gui_xy["gradient_background_search_result"]["x1"], gui_xy["gradient_background_search_result"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value()), deckBuilder.filterList);
+
       const auto *availBuffer = get_avail_tag_text(ptr->second.ot);
       auto rp_text_row_1 = ResizeWin(gui_xy["deck_edit_search_result_text_row_1"]["x1"], gui_xy["deck_edit_search_result_text_row_1"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["deck_edit_search_result_text_row_1"]["x2"], gui_xy["deck_edit_search_result_text_row_1"]["y2"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value());
       auto rp_text_row_2 = ResizeWin(gui_xy["deck_edit_search_result_text_row_2"]["x1"], gui_xy["deck_edit_search_result_text_row_2"]["y1"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value(), gui_xy["deck_edit_search_result_text_row_2"]["x2"], gui_xy["deck_edit_search_result_text_row_2"]["y2"].cast<int64_t>().value() + i * gui_xy["deck_edit_search_result_image"]["height"].cast<int64_t>().value());
@@ -1219,7 +1269,9 @@ namespace ygo {
       }
     }
     if (deckBuilder.is_draging) {
-      DrawThumb(deckBuilder.draging_pointer, irr::core::vector2di(deckBuilder.dragx - CARD_THUMB_WIDTH / 2 * mainGame->xScale, deckBuilder.dragy - CARD_THUMB_HEIGHT / 2 * mainGame->yScale), deckBuilder.filterList, true);
+      select_struct select_struct_{};
+      select_struct_.selecting = true;
+      DrawThumb(deckBuilder.draging_pointer, irr::core::vector2di(deckBuilder.dragx - CARD_THUMB_WIDTH / 2 * mainGame->xScale, deckBuilder.dragy - CARD_THUMB_HEIGHT / 2 * mainGame->yScale), deckBuilder.filterList, select_struct_);
     }
   }
 
@@ -1236,13 +1288,8 @@ namespace ygo {
     int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
     int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
     int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
     int64_t gradient_background_side_deck_y1_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust"];
-    int64_t gradient_background_side_deck_y1_adjust_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust_adjust"];
-    int64_t gradient_background_side_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_side_deck"]["y1_adjust_adjust_adjust"];
     int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
-
     auto rp = draw_gradient_background_size_text(this->static_text_deck_edit_side_deck_size, "gradient_background_side_deck", 1331, dataManager.GetNumString(deckManager.current_deck.side.size()).c_str());
     driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
 
@@ -1253,14 +1300,14 @@ namespace ygo {
 
     for (size_t i = 0; i < deckManager.current_deck.side.size(); ++i) {
       auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_side_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
-      DrawThumb(deckManager.current_deck.side[i], vec, deckBuilder.filterList);
       if (deckBuilder.hovered_pos == 3 && deckBuilder.hovered_seq == i) {
-        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y1 = gradient_background_side_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y2 = gradient_background_side_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto r = this->ResizeWin(x1, y1, x2, y2);
-        driver->draw2DRectangleOutline(r, gui_skin[static_cast<int64_t>(irr::gui::EGDC_BUTTON_TEXT)].cast<int64_t>().value());
+        select_struct select_struct_{};
+        select_struct_.selecting = true;
+        select_struct_.up = true;
+        DrawThumb(deckManager.current_deck.side[i], vec, deckBuilder.filterList, select_struct_);
+      }
+      else {
+        DrawThumb(deckManager.current_deck.side[i], vec, deckBuilder.filterList);
       }
     }
   }
@@ -1278,13 +1325,8 @@ namespace ygo {
     int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
     int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
     int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
     int64_t gradient_background_extra_deck_y1_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust"];
-    int64_t gradient_background_extra_deck_y1_adjust_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust_adjust"];
-    int64_t gradient_background_extra_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_extra_deck"]["y1_adjust_adjust_adjust"];
     int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
-
     auto rp = draw_gradient_background_size_text(this->static_text_deck_edit_extra_deck_size, "gradient_background_extra_deck", 1331, dataManager.GetNumString(deckManager.current_deck.extra.size()).c_str());
     driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
 
@@ -1295,14 +1337,14 @@ namespace ygo {
 
     for (size_t i = 0; i < deckManager.current_deck.extra.size(); ++i) {
       auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + (i % per_row_max_card_capacity) * card_spacing_x, gradient_background_extra_deck_y1_adjust + (i / per_row_max_card_capacity) * card_spacing_y);
-      DrawThumb(deckManager.current_deck.extra[i], vec, deckBuilder.filterList);
       if (deckBuilder.hovered_pos == 2 && deckBuilder.hovered_seq == i) {
-        auto x1 = gradient_background_main_deck_x1_adjust_adjust + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y1 = gradient_background_extra_deck_y1_adjust_adjust + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + (i % per_row_max_card_capacity) * card_spacing_x;
-        auto y2 = gradient_background_extra_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + (i / per_row_max_card_capacity) * card_spacing_y;
-        auto r = this->ResizeWin(x1, y1, x2, y2);
-        driver->draw2DRectangleOutline(r, gui_skin[static_cast<int64_t>(irr::gui::EGDC_BUTTON_TEXT)].cast<int64_t>().value());
+        select_struct select_struct_{};
+        select_struct_.selecting = true;
+        select_struct_.up = true;
+        DrawThumb(deckManager.current_deck.extra[i], vec, deckBuilder.filterList, select_struct_);
+      }
+      else {
+        DrawThumb(deckManager.current_deck.extra[i], vec, deckBuilder.filterList);
       }
     }
   }
@@ -1320,14 +1362,11 @@ namespace ygo {
     int64_t gradient_background_main_deck_height = gui_xy["gradient_background_main_deck"]["height"];
     int64_t gradient_background_main_deck_width = gui_xy["gradient_background_main_deck"]["width"];
     int64_t gradient_background_main_deck_x1_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust"];
-    int64_t gradient_background_main_deck_x1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["x1_adjust_adjust_adjust"];
     int64_t gradient_background_main_deck_y1_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust"];
-    int64_t gradient_background_main_deck_y1_adjust_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust_adjust"];
-    int64_t gradient_background_main_deck_y1_adjust_adjust_adjust = gui_xy["gradient_background_main_deck"]["y1_adjust_adjust_adjust"];
     int64_t gradient_background_main_deck_height_adjust = gui_xy["gradient_background_main_deck"]["height_adjust"];
 
     int main_deck_card_count = deckManager.current_deck.main.size();
+
     auto rp = draw_gradient_background_size_text(static_text_deck_edit_main_deck_size, (deckBuilder.showing_pack ? "gradient_background_main_deck_pack" : "gradient_background_main_deck"), (deckBuilder.showing_pack ? 1477 : 1330), dataManager.GetNumString(main_deck_card_count).c_str());
     driver->draw2DRectangle(rp, gui_color_gradient_left_up, gui_color_gradient_right_up, gui_color_gradient_left_down, gui_color_gradient_right_down);
 
@@ -1340,14 +1379,14 @@ namespace ygo {
       auto x_offset = (i % per_row_max_card_capacity) * card_spacing_x;
       auto y_offset = (i / per_row_max_card_capacity) * card_spacing_y;
       auto vec = irr::core::vector2di(gradient_background_main_deck_x1_adjust + x_offset, gradient_background_main_deck_y1_adjust + y_offset);
-      DrawThumb(deckManager.current_deck.main[i], vec, deckBuilder.filterList);
       if (deckBuilder.hovered_pos == 1 && deckBuilder.hovered_seq == i) {
-        auto x1 = gradient_background_main_deck_x1_adjust_adjust + x_offset;
-        auto y1 = gradient_background_main_deck_y1_adjust_adjust + y_offset;
-        auto x2 = gradient_background_main_deck_x1_adjust_adjust_adjust + (gradient_background_main_deck_width / Game::per_row_min_card_capacity) + x_offset;
-        auto y2 = gradient_background_main_deck_y1_adjust_adjust_adjust + (gradient_background_main_deck_height / Game::main_deck_max_row_capacity) + y_offset;
-        auto r = this->ResizeWin(x1, y1, x2, y2);
-        this->driver->draw2DRectangleOutline(r, gui_skin[static_cast<int64_t>(irr::gui::EGDC_BUTTON_TEXT)].cast<int64_t>().value());
+        select_struct select_struct_{};
+        select_struct_.selecting = true;
+        select_struct_.up = true;
+        DrawThumb(deckManager.current_deck.main[i], vec, deckBuilder.filterList, select_struct_);
+      }
+      else {
+        DrawThumb(deckManager.current_deck.main[i], vec, deckBuilder.filterList);
       }
     }
   }

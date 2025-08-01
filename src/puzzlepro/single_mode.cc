@@ -310,15 +310,7 @@ namespace ygo {
           break;
         }
         case MSG_SELECT_PLACE:
-        case MSG_SELECT_DISFIELD: {
-          player = BufferIO::ReadUInt8(pbuf);
-          pbuf += 5;
-          if (!DuelClient::ClientAnalyze(offset, pbuf - offset)) {
-            mainGame->singleSignal.Reset();
-            mainGame->singleSignal.Wait();
-          }
-          break;
-        }
+        case MSG_SELECT_DISFIELD:
         case MSG_SELECT_POSITION: {
           player = BufferIO::ReadUInt8(pbuf);
           pbuf += 5;
@@ -363,20 +355,8 @@ namespace ygo {
           }
           break;
         }
-        case MSG_CONFIRM_DECKTOP: {
-          player = BufferIO::ReadUInt8(pbuf);
-          count = BufferIO::ReadUInt8(pbuf);
-          pbuf += count * 7;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_CONFIRM_EXTRATOP: {
-          player = BufferIO::ReadUInt8(pbuf);
-          count = BufferIO::ReadUInt8(pbuf);
-          pbuf += count * 7;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
+        case MSG_CONFIRM_DECKTOP:
+        case MSG_CONFIRM_EXTRATOP:
         case MSG_CONFIRM_CARDS: {
           player = BufferIO::ReadUInt8(pbuf);
           count = BufferIO::ReadUInt8(pbuf);
@@ -465,7 +445,8 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_SET: {
+        case MSG_SET:
+        case MSG_SUMMONING: {
           pbuf += 8;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
@@ -480,31 +461,18 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_SUMMONING: {
-          pbuf += 8;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
         case MSG_SUMMONED: {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           SinglePlayRefresh();
           break;
         }
-        case MSG_SPSUMMONING: {
-          pbuf += 8;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_SPSUMMONED: {
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          SinglePlayRefresh();
-          break;
-        }
+        case MSG_SPSUMMONING:
         case MSG_FLIPSUMMONING: {
           pbuf += 8;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
+        case MSG_SPSUMMONED:
         case MSG_FLIPSUMMONED: {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           SinglePlayRefresh();
@@ -515,7 +483,8 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_CHAINED: {
+        case MSG_CHAINED:
+        case MSG_CHAIN_SOLVED: {
           pbuf++;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           SinglePlayRefresh();
@@ -526,12 +495,6 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_CHAIN_SOLVED: {
-          pbuf++;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          SinglePlayRefresh();
-          break;
-        }
         case MSG_CHAIN_END: {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           SinglePlayRefresh();
@@ -539,18 +502,15 @@ namespace ygo {
           SinglePlayRefreshDeck(1);
           break;
         }
-        case MSG_CHAIN_NEGATED: {
-          pbuf++;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
+        case MSG_CHAIN_NEGATED:
         case MSG_CHAIN_DISABLED: {
           pbuf++;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
         case MSG_CARD_SELECTED:
-        case MSG_RANDOM_SELECTED: {
+        case MSG_RANDOM_SELECTED:
+        case MSG_DRAW: {
           player = BufferIO::ReadUInt8(pbuf);
           count = BufferIO::ReadUInt8(pbuf);
           pbuf += count * 4;
@@ -563,29 +523,10 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_DRAW: {
-          player = BufferIO::ReadUInt8(pbuf);
-          count = BufferIO::ReadUInt8(pbuf);
-          pbuf += count * 4;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_DAMAGE: {
-          pbuf += 5;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_RECOVER: {
-          pbuf += 5;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_EQUIP: {
-          pbuf += 8;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_LPUPDATE: {
+        case MSG_DAMAGE:
+        case MSG_RECOVER:
+        case MSG_LPUPDATE:
+        case MSG_PAY_LPCOST: {
           pbuf += 5;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
@@ -595,33 +536,18 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_CARD_TARGET: {
+        case MSG_EQUIP:
+        case MSG_CARD_TARGET:
+        case MSG_CANCEL_TARGET:
+        case MSG_ATTACK:
+        case MSG_MISSED_EFFECT: {
           pbuf += 8;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_CANCEL_TARGET: {
-          pbuf += 8;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_PAY_LPCOST: {
-          pbuf += 5;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_ADD_COUNTER: {
-          pbuf += 7;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
+        case MSG_ADD_COUNTER:
         case MSG_REMOVE_COUNTER: {
           pbuf += 7;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_ATTACK: {
-          pbuf += 8;
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
@@ -634,28 +560,13 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_DAMAGE_STEP_START: {
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          SinglePlayRefresh();
-          break;
-        }
+        case MSG_DAMAGE_STEP_START:
         case MSG_DAMAGE_STEP_END: {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           SinglePlayRefresh();
           break;
         }
-        case MSG_MISSED_EFFECT: {
-          pbuf += 8;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
-        case MSG_TOSS_COIN: {
-          player = BufferIO::ReadUInt8(pbuf);
-          count = BufferIO::ReadUInt8(pbuf);
-          pbuf += count;
-          DuelClient::ClientAnalyze(offset, pbuf - offset);
-          break;
-        }
+        case MSG_TOSS_COIN:
         case MSG_TOSS_DICE: {
           player = BufferIO::ReadUInt8(pbuf);
           count = BufferIO::ReadUInt8(pbuf);
@@ -676,15 +587,7 @@ namespace ygo {
           DuelClient::ClientAnalyze(offset, pbuf - offset);
           break;
         }
-        case MSG_ANNOUNCE_RACE: {
-          player = BufferIO::ReadUInt8(pbuf);
-          pbuf += 5;
-          if (!DuelClient::ClientAnalyze(offset, pbuf - offset)) {
-            mainGame->singleSignal.Reset();
-            mainGame->singleSignal.Wait();
-          }
-          break;
-        }
+        case MSG_ANNOUNCE_RACE:
         case MSG_ANNOUNCE_ATTRIB: {
           player = BufferIO::ReadUInt8(pbuf);
           pbuf += 5;

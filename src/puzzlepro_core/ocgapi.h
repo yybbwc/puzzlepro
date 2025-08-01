@@ -28,9 +28,9 @@ class group;
 class effect;
 class interpreter;
 
-typedef byte *(*script_reader)(const char *, int *);
-typedef uint32_t (*card_reader)(uint32_t, card_data *);
-typedef uint32_t (*message_handler)(intptr_t, uint32_t);
+using script_reader = byte *(*)(const char *, int *);
+using card_reader = uint32_t (*)(uint32_t, card_data *);
+using message_handler = uint32_t (*)(intptr_t, uint32_t);
 
 extern "C" DECL_DLLEXPORT void set_script_reader(script_reader f);
 extern "C" DECL_DLLEXPORT void set_card_reader(card_reader f);

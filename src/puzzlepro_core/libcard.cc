@@ -98,7 +98,7 @@ int32_t scriptlib::card_is_fusion_code(lua_State *L) {
   card *pcard = *(card **)lua_touserdata(L, 1);
   effect_set eset;
   pcard->filter_effect(EFFECT_ADD_FUSION_CODE, &eset);
-  if (!eset.size() || pcard->pduel->game_field->core.not_material) {
+  if (eset.empty() || pcard->pduel->game_field->core.not_material) {
     return card_is_code(L);
   }
   uint32_t code1 = pcard->get_code();
@@ -117,7 +117,7 @@ int32_t scriptlib::card_is_fusion_code(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t tcode = (uint32_t)lua_tointeger(L, i + 2);
+    auto tcode = (uint32_t)lua_tointeger(L, i + 2);
     if (fcode.find(tcode) != fcode.end()) {
       result = TRUE;
       break;
@@ -133,7 +133,7 @@ int32_t scriptlib::card_is_link_code(lua_State *L) {
   card *pcard = *(card **)lua_touserdata(L, 1);
   effect_set eset;
   pcard->filter_effect(EFFECT_ADD_LINK_CODE, &eset);
-  if (!eset.size()) {
+  if (eset.empty()) {
     return card_is_code(L);
   }
   uint32_t code1 = pcard->get_code();
@@ -152,7 +152,7 @@ int32_t scriptlib::card_is_link_code(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t tcode = (uint32_t)lua_tointeger(L, i + 2);
+    auto tcode = (uint32_t)lua_tointeger(L, i + 2);
     if (fcode.find(tcode) != fcode.end()) {
       result = TRUE;
       break;
@@ -172,7 +172,7 @@ int32_t scriptlib::card_is_set_card(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t set_code = (uint32_t)lua_tointeger(L, i + 2);
+    auto set_code = (uint32_t)lua_tointeger(L, i + 2);
     if (pcard->is_set_card(set_code)) {
       result = TRUE;
       break;
@@ -192,7 +192,7 @@ int32_t scriptlib::card_is_origin_set_card(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t set_code = (uint32_t)lua_tointeger(L, i + 2);
+    auto set_code = (uint32_t)lua_tointeger(L, i + 2);
     if (pcard->is_origin_set_card(set_code)) {
       result = TRUE;
       break;
@@ -212,7 +212,7 @@ int32_t scriptlib::card_is_pre_set_card(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t set_code = (uint32_t)lua_tointeger(L, i + 2);
+    auto set_code = (uint32_t)lua_tointeger(L, i + 2);
     if (pcard->is_pre_set_card(set_code)) {
       result = TRUE;
       break;
@@ -232,7 +232,7 @@ int32_t scriptlib::card_is_fusion_set_card(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t set_code = (uint32_t)lua_tointeger(L, i + 2);
+    auto set_code = (uint32_t)lua_tointeger(L, i + 2);
     if (pcard->is_fusion_set_card(set_code)) {
       result = TRUE;
       break;
@@ -252,7 +252,7 @@ int32_t scriptlib::card_is_link_set_card(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t set_code = (uint32_t)lua_tointeger(L, i + 2);
+    auto set_code = (uint32_t)lua_tointeger(L, i + 2);
     if (pcard->is_link_set_card(set_code)) {
       result = TRUE;
       break;
@@ -272,7 +272,7 @@ int32_t scriptlib::card_is_special_summon_set_card(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t set_code = (uint32_t)lua_tointeger(L, i + 2);
+    auto set_code = (uint32_t)lua_tointeger(L, i + 2);
     if (pcard->is_special_summon_set_card(set_code)) {
       result = TRUE;
       break;
@@ -404,7 +404,7 @@ int32_t scriptlib::card_is_xyz_level(lua_State *L) {
   check_param(L, PARAM_TYPE_CARD, 2);
   card *pcard = *(card **)lua_touserdata(L, 1);
   card *xyzcard = *(card **)lua_touserdata(L, 2);
-  uint32_t lv = (uint32_t)lua_tointeger(L, 3);
+  auto lv = (uint32_t)lua_tointeger(L, 3);
   lua_pushboolean(L, pcard->check_xyz_level(xyzcard, lv));
   return 1;
 }
@@ -463,7 +463,7 @@ int32_t scriptlib::card_is_link_marker(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t dir = (uint32_t)lua_tointeger(L, 2);
+  auto dir = (uint32_t)lua_tointeger(L, 2);
   lua_pushboolean(L, pcard->is_link_marker(dir));
   return 1;
 }
@@ -587,7 +587,7 @@ int32_t scriptlib::card_get_column_zone(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t loc = (int32_t)lua_tointeger(L, 2);
+  auto loc = (int32_t)lua_tointeger(L, 2);
   int32_t cp = pcard->current.controler;
   if (lua_gettop(L) >= 3 && !lua_isnil(L, 3)) {
     cp = (int32_t)lua_tointeger(L, 3);
@@ -905,7 +905,7 @@ int32_t scriptlib::card_set_reason(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t reason = (uint32_t)lua_tointeger(L, 2);
+  auto reason = (uint32_t)lua_tointeger(L, 2);
   pcard->current.reason = reason;
   return 0;
 }
@@ -1033,7 +1033,7 @@ int32_t scriptlib::card_get_special_summon_info(lua_State *L) {
   card *pcard = *(card **)lua_touserdata(L, 1);
   uint32_t args = lua_gettop(L) - 1;
   for (uint32_t i = 0; i < args; ++i) {
-    uint32_t flag = (uint32_t)lua_tointeger(L, 2 + i);
+    auto flag = (uint32_t)lua_tointeger(L, 2 + i);
     switch (flag) {
       case SUMMON_INFO_CODE:
         lua_pushinteger(L, pcard->spsummon.code);
@@ -1130,7 +1130,7 @@ int32_t scriptlib::card_is_origin_code_rule(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t tcode = (uint32_t)lua_tointeger(L, i + 2);
+    auto tcode = (uint32_t)lua_tointeger(L, i + 2);
     if (code1 == tcode || (code2 && code2 == tcode)) {
       result = TRUE;
       break;
@@ -1152,7 +1152,7 @@ int32_t scriptlib::card_is_code(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t tcode = (uint32_t)lua_tointeger(L, i + 2);
+    auto tcode = (uint32_t)lua_tointeger(L, i + 2);
     if (code1 == tcode || (code2 && code2 == tcode)) {
       result = TRUE;
       break;
@@ -1166,7 +1166,7 @@ int32_t scriptlib::card_is_type(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_type() & ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1180,7 +1180,7 @@ int32_t scriptlib::card_is_all_types(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if ((pcard->get_type() & ttype) == ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1194,7 +1194,7 @@ int32_t scriptlib::card_is_fusion_type(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_fusion_type() & ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1208,7 +1208,7 @@ int32_t scriptlib::card_is_synchro_type(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_synchro_type() & ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1222,7 +1222,7 @@ int32_t scriptlib::card_is_xyz_type(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_xyz_type() & ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1236,7 +1236,7 @@ int32_t scriptlib::card_is_link_type(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_link_type() & ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1257,7 +1257,7 @@ int32_t scriptlib::card_is_level(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t tlevel = (uint32_t)lua_tointeger(L, i + 2);
+    auto tlevel = (uint32_t)lua_tointeger(L, i + 2);
     if (level == tlevel) {
       result = TRUE;
       break;
@@ -1278,7 +1278,7 @@ int32_t scriptlib::card_is_rank(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t trank = (uint32_t)lua_tointeger(L, i + 2);
+    auto trank = (uint32_t)lua_tointeger(L, i + 2);
     if (rank == trank) {
       result = TRUE;
       break;
@@ -1299,7 +1299,7 @@ int32_t scriptlib::card_is_link(lua_State *L) {
     if (lua_isnil(L, i + 2)) {
       continue;
     }
-    uint32_t tlink = (uint32_t)lua_tointeger(L, i + 2);
+    auto tlink = (uint32_t)lua_tointeger(L, i + 2);
     if (link == tlink) {
       result = TRUE;
       break;
@@ -1324,7 +1324,7 @@ int32_t scriptlib::card_is_attack(lua_State *L) {
       if (lua_isnil(L, i + 2)) {
         continue;
       }
-      uint32_t tatk = (uint32_t)lua_tointeger(L, i + 2);
+      auto tatk = (uint32_t)lua_tointeger(L, i + 2);
       if (atk == tatk) {
         result = TRUE;
         break;
@@ -1350,7 +1350,7 @@ int32_t scriptlib::card_is_defense(lua_State *L) {
       if (lua_isnil(L, i + 2)) {
         continue;
       }
-      uint32_t tdef = (uint32_t)lua_tointeger(L, i + 2);
+      auto tdef = (uint32_t)lua_tointeger(L, i + 2);
       if (def == tdef) {
         result = TRUE;
         break;
@@ -1365,7 +1365,7 @@ int32_t scriptlib::card_is_race(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t trace = (uint32_t)lua_tointeger(L, 2);
+  auto trace = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_race() & trace) {
     lua_pushboolean(L, 1);
   }
@@ -1379,7 +1379,7 @@ int32_t scriptlib::card_is_link_race(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t trace = (uint32_t)lua_tointeger(L, 2);
+  auto trace = (uint32_t)lua_tointeger(L, 2);
   int32_t playerid = PLAYER_NONE;
   if (lua_gettop(L) > 2 && !lua_isnil(L, 3)) {
     playerid = (int32_t)lua_tointeger(L, 3);
@@ -1400,7 +1400,7 @@ int32_t scriptlib::card_is_attribute(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
+  auto tattrib = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_attribute() & tattrib) {
     lua_pushboolean(L, 1);
   }
@@ -1414,7 +1414,7 @@ int32_t scriptlib::card_is_fusion_attribute(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
+  auto tattrib = (uint32_t)lua_tointeger(L, 2);
   int32_t playerid = PLAYER_NONE;
   if (lua_gettop(L) > 2 && !lua_isnil(L, 3)) {
     playerid = (int32_t)lua_tointeger(L, 3);
@@ -1435,7 +1435,7 @@ int32_t scriptlib::card_is_link_attribute(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
+  auto tattrib = (uint32_t)lua_tointeger(L, 2);
   int32_t playerid = PLAYER_NONE;
   if (lua_gettop(L) > 2 && !lua_isnil(L, 3)) {
     playerid = (int32_t)lua_tointeger(L, 3);
@@ -1456,7 +1456,7 @@ int32_t scriptlib::card_is_non_attribute(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t tattrib = (uint32_t)lua_tointeger(L, 2);
+  auto tattrib = (uint32_t)lua_tointeger(L, 2);
   if (pcard->get_attribute() & (ATTRIBUTE_ALL & ~tattrib)) {
     lua_pushboolean(L, 1);
   }
@@ -1493,7 +1493,7 @@ int32_t scriptlib::card_is_all_reasons(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t treason = (uint32_t)lua_tointeger(L, 2);
+  auto treason = (uint32_t)lua_tointeger(L, 2);
   if ((pcard->current.reason & treason) == treason) {
     lua_pushboolean(L, 1);
   }
@@ -1507,7 +1507,7 @@ int32_t scriptlib::card_is_summon_type(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t ttype = (uint32_t)lua_tointeger(L, 2);
+  auto ttype = (uint32_t)lua_tointeger(L, 2);
   if (((pcard->summon_info & DEFAULT_SUMMON_TYPE) & ttype) == ttype) {
     lua_pushboolean(L, 1);
   }
@@ -1521,7 +1521,7 @@ int32_t scriptlib::card_is_summon_location(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t tloc = (uint32_t)lua_tointeger(L, 2);
+  auto tloc = (uint32_t)lua_tointeger(L, 2);
   if (((pcard->summon_info >> 16) & 0xff) & tloc) {
     lua_pushboolean(L, 1);
   }
@@ -1535,7 +1535,7 @@ int32_t scriptlib::card_is_summon_player(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t con = (uint32_t)lua_tointeger(L, 2);
+  auto con = (uint32_t)lua_tointeger(L, 2);
   if (pcard->summon_player == con) {
     lua_pushboolean(L, 1);
   }
@@ -1549,7 +1549,7 @@ int32_t scriptlib::card_is_status(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t tstatus = (uint32_t)lua_tointeger(L, 2);
+  auto tstatus = (uint32_t)lua_tointeger(L, 2);
   if (pcard->status & tstatus) {
     lua_pushboolean(L, 1);
   }
@@ -1606,7 +1606,7 @@ int32_t scriptlib::card_set_status(lua_State *L) {
   if (pcard->status & STATUS_COPYING_EFFECT) {
     return 0;
   }
-  uint32_t tstatus = (uint32_t)lua_tointeger(L, 2);
+  auto tstatus = (uint32_t)lua_tointeger(L, 2);
   int32_t enable = lua_toboolean(L, 3);
   pcard->set_status(tstatus, enable);
   return 0;
@@ -1647,7 +1647,7 @@ int32_t scriptlib::card_set_turn_counter(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t ct = (int32_t)lua_tointeger(L, 2);
+  auto ct = (int32_t)lua_tointeger(L, 2);
   pcard->count_turn(ct);
   return 0;
 }
@@ -1670,7 +1670,7 @@ int32_t scriptlib::card_set_material(lua_State *L) {
     pcard->set_material(&pgroup->container);
   }
   else {
-    pcard->set_material(0);
+    pcard->set_material(nullptr);
   }
   return 0;
 }
@@ -1725,19 +1725,43 @@ int32_t scriptlib::card_get_pre_equip_target(lua_State *L) {
   return 1;
 }
 
-int32_t scriptlib::card_check_equip_target(lua_State *L) {
-  check_param_count(L, 1);
-  check_param(L, PARAM_TYPE_CARD, 1);
-  check_param(L, PARAM_TYPE_CARD, 2);
-  card *pcard = *(card **)lua_touserdata(L, 1);
-  card *target = *(card **)lua_touserdata(L, 2);
-  if (pcard->is_affected_by_effect(EFFECT_EQUIP_LIMIT, target) && ((!pcard->is_affected_by_effect(EFFECT_OLDUNION_STATUS) || target->get_union_count() == 0) && (!pcard->is_affected_by_effect(EFFECT_UNION_STATUS) || target->get_old_union_count() == 0))) {
-    lua_pushboolean(L, 1);
-  }
-  else {
-    lua_pushboolean(L, 0);
-  }
-  return 1;
+//~ int32_t scriptlib::card_check_equip_target(lua_State *L) {
+  //~ check_param_count(L, 1);
+  //~ check_param(L, PARAM_TYPE_CARD, 1);
+  //~ check_param(L, PARAM_TYPE_CARD, 2);
+  //~ card *pcard = *(card **)lua_touserdata(L, 1);
+  //~ card *target = *(card **)lua_touserdata(L, 2);
+  //~ if ((pcard->is_affected_by_effect(EFFECT_EQUIP_LIMIT, target) && ((!pcard->is_affected_by_effect(EFFECT_OLDUNION_STATUS) || target->get_union_count() == 0) && (!pcard->is_affected_by_effect(EFFECT_UNION_STATUS) || target->get_old_union_count() == 0))))) {
+    //~ lua_pushboolean(L, 1);
+  //~ }
+  //~ else {
+    //~ lua_pushboolean(L, 0);
+  //~ }
+  //~ return 1;
+//~ }
+
+int32_t scriptlib::card_check_equip_target(lua_State *L) {  
+  check_param_count(L, 2);  
+  check_param(L, PARAM_TYPE_CARD, 1);  
+  check_param(L, PARAM_TYPE_CARD, 2);  
+  card *pcard = *(card **)lua_touserdata(L, 1);  
+  card *target = *(card **)lua_touserdata(L, 2);  
+    
+  // 添加唯一性检查  
+  if (pcard->pduel->game_field->check_unique_onfield(pcard, target->current.controler, LOCATION_SZONE, target)) {  
+    lua_pushboolean(L, 0);  
+    return 1;  
+  }  
+    
+  if (pcard->is_affected_by_effect(EFFECT_EQUIP_LIMIT, target) &&   
+      ((!pcard->is_affected_by_effect(EFFECT_OLDUNION_STATUS) || target->get_union_count() == 0) &&   
+       (!pcard->is_affected_by_effect(EFFECT_UNION_STATUS) || target->get_old_union_count() == 0))) {  
+    lua_pushboolean(L, 1);  
+  }  
+  else {  
+    lua_pushboolean(L, 0);  
+  }  
+  return 1;  
 }
 
 int32_t scriptlib::card_check_union_target(lua_State *L) {
@@ -1794,12 +1818,12 @@ int32_t scriptlib::card_check_remove_overlay_card(lua_State *L) {
   check_param_count(L, 4);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t playerid = (int32_t)lua_tointeger(L, 2);
+  auto playerid = (int32_t)lua_tointeger(L, 2);
   if (playerid != 0 && playerid != 1) {
     return 0;
   }
-  int32_t count = (int32_t)lua_tointeger(L, 3);
-  int32_t reason = (int32_t)lua_tointeger(L, 4);
+  auto count = (int32_t)lua_tointeger(L, 3);
+  auto reason = (int32_t)lua_tointeger(L, 4);
   duel *pduel = pcard->pduel;
   lua_pushboolean(L, pduel->game_field->is_player_can_remove_overlay_card(playerid, pcard, 0, 0, count, reason));
   return 1;
@@ -1810,13 +1834,13 @@ int32_t scriptlib::card_remove_overlay_card(lua_State *L) {
   check_param_count(L, 5);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t playerid = (int32_t)lua_tointeger(L, 2);
+  auto playerid = (int32_t)lua_tointeger(L, 2);
   if (playerid != 0 && playerid != 1) {
     return 0;
   }
-  int32_t min = (int32_t)lua_tointeger(L, 3);
-  int32_t max = (int32_t)lua_tointeger(L, 4);
-  int32_t reason = (int32_t)lua_tointeger(L, 5);
+  auto min = (int32_t)lua_tointeger(L, 3);
+  auto max = (int32_t)lua_tointeger(L, 4);
+  auto reason = (int32_t)lua_tointeger(L, 5);
   duel *pduel = pcard->pduel;
   pduel->game_field->remove_overlay_card(reason, pcard, playerid, 0, 0, min, max);
   return lua_yieldk(L, 0, (lua_KContext)pduel, [](lua_State *L, int32_t status, lua_KContext ctx) {
@@ -1890,7 +1914,7 @@ int32_t scriptlib::card_is_direct_attacked(lua_State *L) {
   check_param_count(L, 1);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  if (pcard->attacked_cards.findcard(0)) {
+  if (pcard->attacked_cards.findcard(nullptr)) {
     lua_pushboolean(L, 1);
   }
   else {
@@ -1922,7 +1946,7 @@ int32_t scriptlib::card_get_first_card_target(lua_State *L) {
   check_param_count(L, 1);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  if (pcard->effect_target_cards.size()) {
+  if (!pcard->effect_target_cards.empty()) {
     interpreter::card2value(L, *pcard->effect_target_cards.begin());
   }
   else {
@@ -2129,7 +2153,7 @@ int32_t scriptlib::card_register_effect(lua_State *L) {
     pduel->game_field->core.reseted_effects.insert(peffect);
     return 0;
   }
-  for (auto &entry : category_checklist) {
+  for (const auto &entry : category_checklist) {
     if (peffect->category & entry.first) {
       peffect->flag[0] |= entry.second;
     }
@@ -2149,7 +2173,7 @@ int32_t scriptlib::card_is_has_effect(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t code = (uint32_t)lua_tointeger(L, 2);
+  auto code = (uint32_t)lua_tointeger(L, 2);
   if (!pcard) {
     lua_pushnil(L);
     return 1;
@@ -2181,8 +2205,8 @@ int32_t scriptlib::card_reset_effect(lua_State *L) {
   check_param_count(L, 3);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t code = (uint32_t)lua_tointeger(L, 2);
-  uint32_t type = (uint32_t)lua_tointeger(L, 3);
+  auto code = (uint32_t)lua_tointeger(L, 2);
+  auto type = (uint32_t)lua_tointeger(L, 3);
   pcard->reset(code, type);
   return 0;
 }
@@ -2191,7 +2215,7 @@ int32_t scriptlib::card_get_effect_count(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t code = (uint32_t)lua_tointeger(L, 2);
+  auto code = (uint32_t)lua_tointeger(L, 2);
   effect_set eset;
   pcard->filter_effect(code, &eset);
   lua_pushinteger(L, eset.size());
@@ -2203,9 +2227,9 @@ int32_t scriptlib::card_register_flag_effect(lua_State *L) {
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
   int32_t code = (lua_tointeger(L, 2) & MAX_CARD_ID) | EFFECT_FLAG_EFFECT;
-  int32_t reset = (int32_t)lua_tointeger(L, 3);
+  auto reset = (int32_t)lua_tointeger(L, 3);
   uint64_t flag = lua_tointeger(L, 4);
-  int32_t count = (int32_t)lua_tointeger(L, 5);
+  auto count = (int32_t)lua_tointeger(L, 5);
   lua_Integer lab = 0;
   int32_t desc = 0;
   if (lua_gettop(L) >= 6) {
@@ -2224,7 +2248,7 @@ int32_t scriptlib::card_register_flag_effect(lua_State *L) {
   effect *peffect = pduel->new_effect();
   peffect->effect_owner = pduel->game_field->core.reason_player;
   peffect->owner = pcard;
-  peffect->handler = 0;
+  peffect->handler = nullptr;
   peffect->type = EFFECT_TYPE_SINGLE;
   peffect->code = code;
   peffect->reset_flag = reset;
@@ -2281,7 +2305,7 @@ int32_t scriptlib::card_get_flag_effect_label(lua_State *L) {
   auto rg = pcard->single_effect.equal_range(code);
   int32_t count = 0;
   for (; rg.first != rg.second; ++rg.first, ++count) {
-    lua_pushinteger(L, rg.first->second->label.size() ? rg.first->second->label[0] : 0);
+    lua_pushinteger(L, !rg.first->second->label.empty() ? rg.first->second->label[0] : 0);
   }
   if (!count) {
     lua_pushnil(L);
@@ -2296,7 +2320,7 @@ int32_t scriptlib::card_create_relation(lua_State *L) {
   check_param(L, PARAM_TYPE_CARD, 2);
   card *pcard = *(card **)lua_touserdata(L, 1);
   card *rcard = *(card **)lua_touserdata(L, 2);
-  uint32_t reset = (uint32_t)lua_tointeger(L, 3);
+  auto reset = (uint32_t)lua_tointeger(L, 3);
   pcard->create_relation(rcard, reset);
   return 0;
 }
@@ -2408,9 +2432,9 @@ int32_t scriptlib::card_copy_effect(lua_State *L) {
   check_param_count(L, 3);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t code = (uint32_t)lua_tointeger(L, 2);
-  uint32_t reset = (uint32_t)lua_tointeger(L, 3);
-  int32_t count = (int32_t)lua_tointeger(L, 4);
+  auto code = (uint32_t)lua_tointeger(L, 2);
+  auto reset = (uint32_t)lua_tointeger(L, 3);
+  auto count = (int32_t)lua_tointeger(L, 4);
   if (count == 0) {
     count = 1;
   }
@@ -2425,9 +2449,9 @@ int32_t scriptlib::card_replace_effect(lua_State *L) {
   check_param_count(L, 3);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t code = (uint32_t)lua_tointeger(L, 2);
-  uint32_t reset = (uint32_t)lua_tointeger(L, 3);
-  int32_t count = (int32_t)lua_tointeger(L, 4);
+  auto code = (uint32_t)lua_tointeger(L, 2);
+  auto reset = (uint32_t)lua_tointeger(L, 3);
+  auto count = (int32_t)lua_tointeger(L, 4);
   if (count == 0) {
     count = 1;
   }
@@ -2711,8 +2735,8 @@ int32_t scriptlib::card_is_can_be_special_summoned(lua_State *L) {
   check_param(L, PARAM_TYPE_EFFECT, 2);
   card *pcard = *(card **)lua_touserdata(L, 1);
   effect *peffect = *(effect **)lua_touserdata(L, 2);
-  uint32_t sumtype = (uint32_t)lua_tointeger(L, 3);
-  uint32_t sumplayer = (uint32_t)lua_tointeger(L, 4);
+  auto sumtype = (uint32_t)lua_tointeger(L, 3);
+  auto sumplayer = (uint32_t)lua_tointeger(L, 4);
   uint32_t nocheck = lua_toboolean(L, 5);
   uint32_t nolimit = lua_toboolean(L, 6);
   uint32_t sumpos = POS_FACEUP;
@@ -3015,7 +3039,7 @@ int32_t scriptlib::card_is_chain_attackable(lua_State *L) {
   }
   card_vector cv;
   pduel->game_field->get_attack_target(attacker, &cv, TRUE);
-  if (cv.size() == 0 && (monsteronly || attacker->direct_attackable == 0)) {
+  if (cv.empty() && (monsteronly || attacker->direct_attackable == 0)) {
     lua_pushboolean(L, 0);
   }
   else {
@@ -3068,7 +3092,7 @@ int32_t scriptlib::card_is_position(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t pos = (uint32_t)lua_tointeger(L, 2);
+  auto pos = (uint32_t)lua_tointeger(L, 2);
   lua_pushboolean(L, pcard->is_position(pos));
   return 1;
 }
@@ -3077,7 +3101,7 @@ int32_t scriptlib::card_is_pre_position(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t pos = (uint32_t)lua_tointeger(L, 2);
+  auto pos = (uint32_t)lua_tointeger(L, 2);
   lua_pushboolean(L, pcard->previous.position & pos);
   return 1;
 }
@@ -3086,7 +3110,7 @@ int32_t scriptlib::card_is_controler(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t con = (uint32_t)lua_tointeger(L, 2);
+  auto con = (uint32_t)lua_tointeger(L, 2);
   if (pcard->current.controler == con) {
     lua_pushboolean(L, 1);
   }
@@ -3100,7 +3124,7 @@ int32_t scriptlib::card_is_pre_controler(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t con = (uint32_t)lua_tointeger(L, 2);
+  auto con = (uint32_t)lua_tointeger(L, 2);
   if (pcard->previous.controler == con) {
     lua_pushboolean(L, 1);
   }
@@ -3127,7 +3151,7 @@ int32_t scriptlib::card_is_location(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t loc = (uint32_t)lua_tointeger(L, 2);
+  auto loc = (uint32_t)lua_tointeger(L, 2);
   if (pcard->is_treated_as_not_on_field()) {
     lua_pushboolean(L, 0);
   }
@@ -3157,7 +3181,7 @@ int32_t scriptlib::card_is_pre_location(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t loc = (uint32_t)lua_tointeger(L, 2);
+  auto loc = (uint32_t)lua_tointeger(L, 2);
   lua_pushboolean(L, pcard->previous.is_location(loc));
   return 1;
 }
@@ -3166,7 +3190,7 @@ int32_t scriptlib::card_is_level_below(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t lvl = (uint32_t)lua_tointeger(L, 2);
+  auto lvl = (uint32_t)lua_tointeger(L, 2);
   uint32_t plvl = pcard->get_level();
   if (plvl == 0) {
     lua_pushboolean(L, 0);
@@ -3181,7 +3205,7 @@ int32_t scriptlib::card_is_level_above(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t lvl = (uint32_t)lua_tointeger(L, 2);
+  auto lvl = (uint32_t)lua_tointeger(L, 2);
   uint32_t plvl = pcard->get_level();
   if (plvl == 0) {
     lua_pushboolean(L, 0);
@@ -3196,7 +3220,7 @@ int32_t scriptlib::card_is_rank_below(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t rnk = (uint32_t)lua_tointeger(L, 2);
+  auto rnk = (uint32_t)lua_tointeger(L, 2);
   uint32_t prnk = pcard->get_rank();
   if (prnk == 0) {
     lua_pushboolean(L, 0);
@@ -3211,7 +3235,7 @@ int32_t scriptlib::card_is_rank_above(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t rnk = (uint32_t)lua_tointeger(L, 2);
+  auto rnk = (uint32_t)lua_tointeger(L, 2);
   uint32_t prnk = pcard->get_rank();
   if (prnk == 0) {
     lua_pushboolean(L, 0);
@@ -3226,7 +3250,7 @@ int32_t scriptlib::card_is_link_below(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t lnk = (uint32_t)lua_tointeger(L, 2);
+  auto lnk = (uint32_t)lua_tointeger(L, 2);
   uint32_t plnk = pcard->get_link();
   if (plnk == 0) {
     lua_pushboolean(L, 0);
@@ -3241,7 +3265,7 @@ int32_t scriptlib::card_is_link_above(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t lnk = (uint32_t)lua_tointeger(L, 2);
+  auto lnk = (uint32_t)lua_tointeger(L, 2);
   uint32_t plnk = pcard->get_link();
   if (plnk == 0) {
     lua_pushboolean(L, 0);
@@ -3256,7 +3280,7 @@ int32_t scriptlib::card_is_attack_below(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t atk = (int32_t)lua_tointeger(L, 2);
+  auto atk = (int32_t)lua_tointeger(L, 2);
   if (!(pcard->data.type & TYPE_MONSTER) && !(pcard->get_type() & TYPE_MONSTER) && !pcard->is_affected_by_effect(EFFECT_PRE_MONSTER)) {
     lua_pushboolean(L, 0);
   }
@@ -3271,7 +3295,7 @@ int32_t scriptlib::card_is_attack_above(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t atk = (int32_t)lua_tointeger(L, 2);
+  auto atk = (int32_t)lua_tointeger(L, 2);
   if (!(pcard->data.type & TYPE_MONSTER) && !(pcard->get_type() & TYPE_MONSTER) && !pcard->is_affected_by_effect(EFFECT_PRE_MONSTER)) {
     lua_pushboolean(L, 0);
   }
@@ -3286,7 +3310,7 @@ int32_t scriptlib::card_is_defense_below(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t def = (int32_t)lua_tointeger(L, 2);
+  auto def = (int32_t)lua_tointeger(L, 2);
   if ((pcard->data.type & TYPE_LINK) || (!(pcard->data.type & TYPE_MONSTER) && !(pcard->get_type() & TYPE_MONSTER) && !pcard->is_affected_by_effect(EFFECT_PRE_MONSTER))) {
     lua_pushboolean(L, 0);
   }
@@ -3301,7 +3325,7 @@ int32_t scriptlib::card_is_defense_above(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t def = (int32_t)lua_tointeger(L, 2);
+  auto def = (int32_t)lua_tointeger(L, 2);
   if ((pcard->data.type & TYPE_LINK) || (!(pcard->data.type & TYPE_MONSTER) && !(pcard->get_type() & TYPE_MONSTER) && !pcard->is_affected_by_effect(EFFECT_PRE_MONSTER))) {
     lua_pushboolean(L, 0);
   }
@@ -3397,8 +3421,8 @@ int32_t scriptlib::card_add_counter(lua_State *L) {
   check_param_count(L, 3);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t countertype = (uint32_t)lua_tointeger(L, 2);
-  uint32_t count = (uint32_t)lua_tointeger(L, 3);
+  auto countertype = (uint32_t)lua_tointeger(L, 2);
+  auto count = (uint32_t)lua_tointeger(L, 3);
   uint8_t singly = FALSE;
   if (lua_gettop(L) > 3) {
     singly = lua_toboolean(L, 4);
@@ -3417,10 +3441,10 @@ int32_t scriptlib::card_remove_counter(lua_State *L) {
   check_param_count(L, 5);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t rplayer = (uint32_t)lua_tointeger(L, 2);
-  uint32_t countertype = (uint32_t)lua_tointeger(L, 3);
-  uint32_t count = (uint32_t)lua_tointeger(L, 4);
-  uint32_t reason = (uint32_t)lua_tointeger(L, 5);
+  auto rplayer = (uint32_t)lua_tointeger(L, 2);
+  auto countertype = (uint32_t)lua_tointeger(L, 3);
+  auto count = (uint32_t)lua_tointeger(L, 4);
+  auto reason = (uint32_t)lua_tointeger(L, 5);
   duel *pduel = pcard->pduel;
   if (countertype == 0) {
     // c38834303: remove all counters
@@ -3449,7 +3473,7 @@ int32_t scriptlib::card_get_counter(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t countertype = (uint32_t)lua_tointeger(L, 2);
+  auto countertype = (uint32_t)lua_tointeger(L, 2);
   if (countertype == 0) {
     lua_pushinteger(L, pcard->counters.size());
   }
@@ -3462,7 +3486,7 @@ int32_t scriptlib::card_get_counter(lua_State *L) {
 int32_t scriptlib::card_enable_counter_permit(lua_State *L) {
   check_param_count(L, 2);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t countertype = (int32_t)lua_tointeger(L, 2);
+  auto countertype = (int32_t)lua_tointeger(L, 2);
   uint32_t prange;
   if (lua_gettop(L) > 2) {
     prange = (uint32_t)lua_tointeger(L, 3);
@@ -3489,8 +3513,8 @@ int32_t scriptlib::card_enable_counter_permit(lua_State *L) {
 int32_t scriptlib::card_set_counter_limit(lua_State *L) {
   check_param_count(L, 3);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t countertype = (int32_t)lua_tointeger(L, 2);
-  int32_t limit = (int32_t)lua_tointeger(L, 3);
+  auto countertype = (int32_t)lua_tointeger(L, 2);
+  auto limit = (int32_t)lua_tointeger(L, 3);
   effect *peffect = pcard->pduel->new_effect();
   peffect->owner = pcard;
   peffect->type = EFFECT_TYPE_SINGLE;
@@ -3520,8 +3544,8 @@ int32_t scriptlib::card_is_can_add_counter(lua_State *L) {
   check_param_count(L, 3);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t countertype = (uint32_t)lua_tointeger(L, 2);
-  uint32_t count = (uint32_t)lua_tointeger(L, 3);
+  auto countertype = (uint32_t)lua_tointeger(L, 2);
+  auto count = (uint32_t)lua_tointeger(L, 3);
   uint8_t singly = FALSE;
   if (lua_gettop(L) > 3) {
     singly = lua_toboolean(L, 4);
@@ -3538,13 +3562,13 @@ int32_t scriptlib::card_is_can_remove_counter(lua_State *L) {
   check_param_count(L, 5);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  int32_t playerid = (int32_t)lua_tointeger(L, 2);
+  auto playerid = (int32_t)lua_tointeger(L, 2);
   if (playerid != 0 && playerid != 1) {
     return 0;
   }
-  uint32_t countertype = (uint32_t)lua_tointeger(L, 3);
-  uint32_t count = (uint32_t)lua_tointeger(L, 4);
-  uint32_t reason = (uint32_t)lua_tointeger(L, 5);
+  auto countertype = (uint32_t)lua_tointeger(L, 3);
+  auto count = (uint32_t)lua_tointeger(L, 4);
+  auto reason = (uint32_t)lua_tointeger(L, 5);
   lua_pushboolean(L, pcard->pduel->game_field->is_player_can_remove_counter(playerid, pcard, 0, 0, countertype, count, reason));
   return 1;
 }
@@ -3553,7 +3577,7 @@ int32_t scriptlib::card_is_can_have_counter(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t countertype = (uint32_t)lua_tointeger(L, 2);
+  auto countertype = (uint32_t)lua_tointeger(L, 2);
   lua_pushboolean(L, pcard->is_can_have_counter(countertype));
   return 1;
 }
@@ -3731,12 +3755,12 @@ int32_t scriptlib::card_is_can_be_battle_target(lua_State *L) {
 int32_t scriptlib::card_add_monster_attribute(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
-  int32_t type = (int32_t)lua_tointeger(L, 2);
-  int32_t attribute = (int32_t)lua_tointeger(L, 3);
-  int32_t race = (int32_t)lua_tointeger(L, 4);
-  int32_t level = (int32_t)lua_tointeger(L, 5);
-  int32_t atk = (int32_t)lua_tointeger(L, 6);
-  int32_t def = (int32_t)lua_tointeger(L, 7);
+  auto type = (int32_t)lua_tointeger(L, 2);
+  auto attribute = (int32_t)lua_tointeger(L, 3);
+  auto race = (int32_t)lua_tointeger(L, 4);
+  auto level = (int32_t)lua_tointeger(L, 5);
+  auto atk = (int32_t)lua_tointeger(L, 6);
+  auto def = (int32_t)lua_tointeger(L, 7);
   card *pcard = *(card **)lua_touserdata(L, 1);
   duel *pduel = pcard->pduel;
   pcard->set_status(STATUS_NO_LEVEL, FALSE);
@@ -3875,8 +3899,8 @@ int32_t scriptlib::card_set_hint(lua_State *L) {
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
   duel *pduel = pcard->pduel;
-  uint32_t type = (uint32_t)lua_tointeger(L, 2);
-  uint32_t value = (uint32_t)lua_tointeger(L, 3);
+  auto type = (uint32_t)lua_tointeger(L, 2);
+  auto value = (uint32_t)lua_tointeger(L, 3);
   if (type >= CHINT_DESC_ADD) {
     return 0;
   }
@@ -3939,7 +3963,7 @@ int32_t scriptlib::card_check_unique_onfield(lua_State *L) {
   check_param_count(L, 2);
   check_param(L, PARAM_TYPE_CARD, 1);
   card *pcard = *(card **)lua_touserdata(L, 1);
-  uint32_t check_player = (uint32_t)lua_tointeger(L, 2);
+  auto check_player = (uint32_t)lua_tointeger(L, 2);
   uint32_t check_location = LOCATION_ONFIELD;
   if (lua_gettop(L) > 2) {
     check_location = lua_tointeger(L, 3) & LOCATION_ONFIELD;

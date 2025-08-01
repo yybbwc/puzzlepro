@@ -30,24 +30,35 @@ function c56535497.condition(e, tp, eg, ep, ev, re, r, rp)
     return ph >= PHASE_BATTLE_START and ph <= PHASE_BATTLE and aux.dscon(e, tp, eg, ep, ev, re, r, rp)
   end
 end
+function c56535497.fselect(g)
+  return g:GetSum(Card.GetAttack) > 0
+end
 function c56535497.target(e, tp, eg, ep, ev, re, r, rp, chk, chkc)
   if chkc then
     return false
   end
+  local g = Duel.GetMatchingGroup(c56535497.filter, tp, LOCATION_MZONE, LOCATION_MZONE, nil)
+  g = g:Filter(Card.IsCanBeEffectTarget, nil, e)
   if chk == 0 then
-    return Duel.IsExistingTarget(c56535497.filter, tp, LOCATION_MZONE, LOCATION_MZONE, 2, nil)
+    return g:GetSum(Card.GetAttack) > 0
   end
-  Duel.Hint(HINT_SELECTMSG, tp, aux.Stringid(56535497, 2))
-  local rg = Duel.SelectTarget(tp, c56535497.filter, tp, LOCATION_MZONE, LOCATION_MZONE, 1, 1, nil)
-  e:SetLabelObject(rg:GetFirst())
-  Duel.Hint(HINT_SELECTMSG, tp, aux.Stringid(56535497, 3))
-  Duel.SelectTarget(tp, c56535497.filter, tp, LOCATION_MZONE, LOCATION_MZONE, 1, 1, rg:GetFirst())
+  Duel.Hint(HINT_SELECTMSG, tp, HINTMSG_TARGET)
+  Duel.SetTargetCard(g:SelectSubGroup(tp, c56535497.fselect, false, 2, 2))
 end
 function c56535497.operation(e, tp, eg, ep, ev, re, r, rp)
-  local g = Duel.GetChainInfo(0, CHAININFO_TARGET_CARDS)
-  local tc1 = e:GetLabelObject()
-  if not tc1 then
+  local g = Duel.GetTargetsRelateToChain()
+  if #g < 2 then
     return
+  end
+  local tc1
+  local count = g:FilterCount(Card.IsAttackAbove, nil, 1)
+  if count > 1 or count == 0 then
+    Duel.Hint(HINT_SELECTMSG, tp, HINTMSG_SELECT)
+    tc1 = g:Select(tp, 1, 1, nil):GetFirst()
+    aux.DebugHint(1)
+  else
+    tc1 = g:Filter(Card.IsAttackAbove, nil, 1):GetFirst()
+    aux.DebugHint(2)
   end
   local tc2 = g:GetFirst()
   if tc1 == tc2 then

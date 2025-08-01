@@ -32,15 +32,18 @@ function c16708652.target(e, tp, eg, ep, ev, re, r, rp, chk, chkc)
   if chk == 0 then
     return Duel.IsExistingTarget(c16708652.chkfilter, tp, LOCATION_MZONE, LOCATION_MZONE, 1, nil, tp)
   end
-  Duel.Hint(HINT_SELECTMSG, tp, aux.Stringid(16708652, 0))
-  local g1 = Duel.SelectTarget(tp, c16708652.filter1, tp, LOCATION_MZONE, LOCATION_MZONE, 1, 1, nil)
-  Duel.Hint(HINT_SELECTMSG, tp, aux.Stringid(16708652, 1))
-  local g2 = Duel.SelectTarget(tp, c16708652.filter2, tp, LOCATION_MZONE, LOCATION_MZONE, 1, 1, g1:GetFirst())
-  e:SetLabelObject(g1:GetFirst())
+  local g = Duel.GetMatchingGroup(c16708652.chkfilter, tp, LOCATION_MZONE, LOCATION_MZONE, nil, tp)
+  g = g:Filter(Card.IsCanBeEffectTarget, nil, e)
+  Duel.Hint(HINT_SELECTMSG, tp, HINTMSG_TARGET)
+  Duel.SetTargetCard(g:SelectSubGroup(tp, aux.TRUE, false, 2, 2))
 end
 function c16708652.activate(e, tp, eg, ep, ev, re, r, rp)
-  local tc1 = e:GetLabelObject()
-  local g = Duel.GetChainInfo(0, CHAININFO_TARGET_CARDS)
+  local g = Duel.GetTargetsRelateToChain()
+  if #g < 2 then
+    return
+  end
+  Duel.Hint(HINT_SELECTMSG, tp, aux.Stringid(16708652, 0))
+  local tc1 = g:Select(tp, 1, 1, nil):GetFirst()
   local tc2 = g:GetFirst()
   if tc1 == tc2 then
     tc2 = g:GetNext()

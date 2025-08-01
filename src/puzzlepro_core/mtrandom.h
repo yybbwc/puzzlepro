@@ -26,7 +26,7 @@ public:
 
   // uniform_int_distribution
   int32_t get_random_integer(int32_t l, int32_t h) {
-    uint_fast32_t range = (uint_fast32_t)(h - l + 1);
+    auto range = (uint_fast32_t)(h - l + 1);
     uint_fast32_t secureMax = rng.max() - rng.max() % range;
     uint_fast32_t x = 0;
     do {

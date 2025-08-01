@@ -27,13 +27,13 @@ duel::duel() {
 }
 
 duel::~duel() {
-  for (auto &pcard : cards) {
+  for (const auto &pcard : cards) {
     delete pcard;
   }
-  for (auto &pgroup : groups) {
+  for (const auto &pgroup : groups) {
     delete pgroup;
   }
-  for (auto &peffect : effects) {
+  for (const auto &peffect : effects) {
     delete peffect;
   }
   delete lua;
@@ -42,13 +42,13 @@ duel::~duel() {
 }
 
 void duel::clear() {
-  for (auto &pcard : cards) {
+  for (const auto &pcard : cards) {
     delete pcard;
   }
-  for (auto &pgroup : groups) {
+  for (const auto &pgroup : groups) {
     delete pgroup;
   }
-  for (auto &peffect : effects) {
+  for (const auto &peffect : effects) {
     delete peffect;
   }
   delete game_field;
@@ -83,22 +83,22 @@ group *duel::register_group(group *pgroup) {
 }
 
 group *duel::new_group() {
-  group *pgroup = new group(this);
+  auto *pgroup = new group(this);
   return register_group(pgroup);
 }
 
 group *duel::new_group(card *pcard) {
-  group *pgroup = new group(this, pcard);
+  auto *pgroup = new group(this, pcard);
   return register_group(pgroup);
 }
 
 group *duel::new_group(const card_set &cset) {
-  group *pgroup = new group(this, cset);
+  auto *pgroup = new group(this, cset);
   return register_group(pgroup);
 }
 
 effect *duel::new_effect() {
-  effect *peffect = new effect(this);
+  auto *peffect = new effect(this);
   effects.insert(peffect);
   lua->register_effect(peffect);
   return peffect;
@@ -131,7 +131,7 @@ int32_t duel::read_buffer(byte *buf) {
 }
 
 void duel::release_script_group() {
-  for (auto &pgroup : sgroups) {
+  for (const auto &pgroup : sgroups) {
     if (pgroup->is_readonly == GTYPE_DEFAULT) {
       lua->unregister_group(pgroup);
       groups.erase(pgroup);
@@ -142,7 +142,7 @@ void duel::release_script_group() {
 }
 
 void duel::restore_assumes() {
-  for (auto &pcard : assumes) {
+  for (const auto &pcard : assumes) {
     pcard->assume_type = 0;
   }
   assumes.clear();

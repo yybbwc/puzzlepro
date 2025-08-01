@@ -1396,15 +1396,7 @@ namespace ygo {
               } break;
             }
           }
-          case irr::gui::EGET_EDITBOX_CHANGED: {
-            switch (id) {
-              case EDITBOX_ANCARD: {
-                UpdateDeclarableList();
-                break;
-              }
-            }
-            break;
-          }
+          case irr::gui::EGET_EDITBOX_CHANGED:
           case irr::gui::EGET_EDITBOX_ENTER: {
             switch (id) {
               case EDITBOX_ANCARD: {
@@ -2902,12 +2894,13 @@ namespace ygo {
         }
         else if (boardy >= matManager.vFieldMzone[0][5][0].Pos.Y && boardy <= matManager.vFieldMzone[0][5][2].Pos.Y) {
           if (sequence == 1) {
-            if (mzone[0][5]) {
-              hovered_controler = 0;
-              hovered_location = LOCATION_MZONE;
-              hovered_sequence = 5;
-            }
-            else if (mzone[1][6]) {
+            //~ if (mzone[0][5]) {
+            //~ hovered_controler = 0;
+            //~ hovered_location = LOCATION_MZONE;
+            //~ hovered_sequence = 5;
+            //~ }
+            //~ else if (mzone[1][6]) {
+            if (mzone[1][6]) {
               hovered_controler = 1;
               hovered_location = LOCATION_MZONE;
               hovered_sequence = 6;
@@ -2931,12 +2924,13 @@ namespace ygo {
             }
           }
           else if (sequence == 3) {
-            if (mzone[0][6]) {
-              hovered_controler = 0;
-              hovered_location = LOCATION_MZONE;
-              hovered_sequence = 6;
-            }
-            else if (mzone[1][5]) {
+            //~ if (mzone[0][6]) {
+            //~ hovered_controler = 0;
+            //~ hovered_location = LOCATION_MZONE;
+            //~ hovered_sequence = 6;
+            //~ }
+            //~ else if (mzone[1][5]) {
+            if (mzone[1][5]) {
               hovered_controler = 1;
               hovered_location = LOCATION_MZONE;
               hovered_sequence = 5;
@@ -3173,17 +3167,7 @@ namespace ygo {
         }
         break;
       }
-      case MSG_SELECT_BATTLECMD: {
-        if (mainGame->wCardSelect->isVisible()) {
-          mainGame->HideElement(mainGame->wCardSelect);
-          ShowCancelOrFinishButton(0);
-        }
-        if (mainGame->wOptions->isVisible()) {
-          mainGame->HideElement(mainGame->wOptions);
-          ShowCancelOrFinishButton(0);
-        }
-        break;
-      }
+      case MSG_SELECT_BATTLECMD:
       case MSG_SELECT_IDLECMD: {
         if (mainGame->wCardSelect->isVisible()) {
           mainGame->HideElement(mainGame->wCardSelect);

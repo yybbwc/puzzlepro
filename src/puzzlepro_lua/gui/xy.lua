@@ -112,21 +112,21 @@ d.new_xy("btnEP", 320, 0, 370, 20)
 
 d.new_xy("stHintMsg", 500, 60, 820, 90)
 
-d.new_xy("btnLeaveGame", 205, 5, 295, 80)
+d.new_xy("btnLeaveGame", 205, 5, 300, 80)
+d.new_xy("duel_sidebar_window", nil, 100, nil, 280)
+d.new_xy("duel_sidebar", 0, 0, d.width, d.height)
+--~ d.new_xy("chain_timing_combo_box", d.gap, d.gap, d.width - d.gap, 40)
+d.new_xy("chain_timing_combo_box", 0, 0, d.width - d.gap, 35)
+d.new_xy("duel_log_button", nil, d.y1_next, nil, d.y2_next)
+d.new_xy("btnCancelOrFinish", nil, d.y1_next, nil, d.y2_next)
+d.new_xy("btnShuffle", nil, d.y1_next, nil, d.y2_next)
+
+d.new_xy("duel_log_window", d.center_x - 100, d.center_y - 210, d.center_x + 200, d.center_y + 100)
+d.new_xy("lstLog", d.gap, 30, d.width - d.gap, d.height - 40)
+d.new_xy("btnClearLog", d.x2 - 80, d.y1_next, nil, d.y1_next + 20)
 
 
-d.new_xy("chain_timing_combo_box", 205, 100, 295, 135)
-
-do
-  d.new_xy("duel_log_button", nil, d.y1_next, nil, d.y2_next)
-  d.new_xy("duel_log_window", d.center_x - 100, d.center_y - 210, d.center_x + 200, d.center_y + 100)
-  d.new_xy("lstLog", d.gap, 30, d.width - d.gap, d.height - 40)
-  d.new_xy("btnClearLog", d.x2 - 80, d.y1_next, nil, d.y1_next + 20)
-end
-
-
-d.new_xy("btnShuffle", 205, 230, 295, 265)
-d.new_xy("btnCancelOrFinish", 205, 230, 295, 265)
+--~ d.new_xy("btnShuffle", 205, 230, 295, 265)
 --~ cc.gc w a
 
 d.new_xy("wReplayControl", 205, 118, 295, 273)
@@ -300,23 +300,15 @@ d.new_xy("deck_edit_search_result_text_row_3", nil, d.y1_next, nil, d.y2_next)
 --~ cc.gc /[^\(",\)]+/ a
 
 d.gradient_background_main_deck.x1_adjust = d.gradient_background_main_deck.x1 + 3
-d.gradient_background_main_deck.x1_adjust_adjust = d.gradient_background_main_deck.x1_adjust - 1
-d.gradient_background_main_deck.x1_adjust_adjust_adjust = d.gradient_background_main_deck.x1_adjust_adjust - 4
 d.gradient_background_main_deck.y1_adjust = d.gradient_background_main_deck.y1 + 4
-d.gradient_background_main_deck.y1_adjust_adjust = d.gradient_background_main_deck.y1_adjust - 2
-d.gradient_background_main_deck.y1_adjust_adjust_adjust = d.gradient_background_main_deck.y1_adjust_adjust - 1
 d.gradient_background_main_deck.width_adjust = d.gradient_background_main_deck.width - 3
 d.gradient_background_main_deck.height_adjust = d.gradient_background_main_deck.height - 7
 
 d.gradient_background_extra_deck.x1_adjust = d.gradient_background_extra_deck.x1 + 3
 d.gradient_background_extra_deck.y1_adjust = d.gradient_background_extra_deck.y1 + 3
-d.gradient_background_extra_deck.y1_adjust_adjust = d.gradient_background_extra_deck.y1_adjust - 2
-d.gradient_background_extra_deck.y1_adjust_adjust_adjust = d.gradient_background_extra_deck.y1_adjust_adjust - 1
 
 d.gradient_background_side_deck.x1_adjust = d.gradient_background_side_deck.x1 + 3
 d.gradient_background_side_deck.y1_adjust = d.gradient_background_side_deck.y1 + 4
-d.gradient_background_side_deck.y1_adjust_adjust = d.gradient_background_side_deck.y1_adjust - 2
-d.gradient_background_side_deck.y1_adjust_adjust_adjust = d.gradient_background_side_deck.y1_adjust_adjust - 1
 
 d.new_xy("wOptions", 490, 200, 840, 310)
 d.new_xy("wOptions_combo_box_option", 10, 30, d.wOptions.width - 10, 60)

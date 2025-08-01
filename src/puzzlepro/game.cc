@@ -123,6 +123,7 @@ namespace ygo {
       ErrorLog("Failed to create Irrlicht Engine device!");
       return false;
     }
+
 #ifndef _DEBUG
     device->getLogger()->setLogLevel(irr::ELOG_LEVEL::ELL_ERROR);
 #endif
@@ -133,6 +134,12 @@ namespace ygo {
     driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
     driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
     driver->setTextureCreationFlag(irr::video::ETCF_ALWAYS_32_BIT, true); // 避免色带
+    //~ this->gpu = driver->getGPUProgrammingServices();
+    //~ this->irrlihct_shader_1 = this->init_irrlicht_shader_1(this->gpu, this->device);
+    //~ this->irrlihct_shader_2 = this->init_irrlicht_shader_2(this->gpu, this->device);
+    //~ this->irrlihct_shader_3 = this->init_irrlicht_shader_3(this->gpu, this->device);
+    //~ this->irrlihct_shader_4 = this->init_irrlicht_shader_4(this->gpu, this->device);
+    //~ this->irrlihct_shader_5 = this->init_irrlicht_shader_5(this->gpu, this->device);
     imageManager.SetDevice(device);
     if (!imageManager.Initial()) {
       ErrorLog("Failed to load textures!");
@@ -389,10 +396,10 @@ namespace ygo {
     //~ imgCard->setRelativePositionProportional(irr::core::rect<float>(0,0,1,1));
     //~ 避免背面卡图的宽高不对
     //~ imgCard->setScaleImage(true);
-    
+
     imgCard = irr::gui::CGUIImageButton::addImageButton(guiEnv, get_origin_rect<int32_t>("imgCard"), nullptr, -1);
-    
-imgCard->setVisible(false);
+
+    imgCard->setVisible(false);
     //~ imgCard->setUseAlphaChannel(true);
 
     //~ should_resize_element_unordered_map_int.insert_or_assign(wCardImg, "wCardImg");
@@ -427,16 +434,16 @@ imgCard->setVisible(false);
 
     //~ should_resize_element_unordered_map_int.insert_or_assign(stDataInfo, "stDataInfo");
     //~ should_resize_element_unordered_map_int.insert_or_assign(stText, "stText");
-    
+
     //~ wLanWindow = guiEnv->addWindow(irr::core::rect<irr::s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
-    
-    this->init_duel_log();
+
+    this->init_duel_sidebar();
 
     // log
     //~ irr::gui::IGUITab *tabLog = wInfos->addTab(dataManager.GetSysString(1271));
     //~ lstLog = guiEnv->addListBox(get_origin_rect<int32_t>("lstLog"), tabLog, LISTBOX_LOG, false);
     //~ btnClearLog = guiEnv->addButton(get_origin_rect<int32_t>("btnClearLog"), tabLog, BUTTON_CLEAR_LOG, dataManager.GetSysString(1272));
-    
+
     // helper
     irr::gui::IGUITab *_tabHelper = wInfos->addTab(dataManager.GetSysString(1298));
     _tabHelper->setRelativePosition(irr::core::recti(16, 49, 299, 362));
@@ -730,12 +737,11 @@ imgCard->setVisible(false);
     wANRace = guiEnv->addWindow(get_origin_rect<int32_t>("wANRace"), false, dataManager.GetSysString(563));
     wANRace->getCloseButton()->setVisible(false);
     wANRace->setVisible(false);
+    this->should_resize_element_unordered_map_int.insert_or_assign(wANRace, "wANRace");
     for (int filter = 0x1, i = 0; i < RACES_COUNT; filter <<= 1, ++i) {
       //~ gui_xy["chkRace"]["y2"].cast<double>().value()
-      chkRace[i] = guiEnv->addCheckBox(false,
-                                       irr::core::rect<irr::s32>(gui_xy["chkRace"]["x1"].cast<double>().value() + (i % 4) * (gui_xy["chkRace"]["x2"].cast<double>().value() - gui_xy["chkRace"]["x1"].cast<double>().value()), gui_xy["chkRace"]["y1"].cast<double>().value() + (i / 4) * (gui_xy["chkRace"]["y2"].cast<double>().value() - gui_xy["chkRace"]["y1"].cast<double>().value()), gui_xy["chkRace"]["x2"].cast<double>().value() + (i % 4) * (gui_xy["chkRace"]["x2"].cast<double>().value() - gui_xy["chkRace"]["x1"].cast<double>().value()),
-                                                                 gui_xy["chkRace"]["y2"].cast<double>().value() + (i / 4) * (gui_xy["chkRace"]["y2"].cast<double>().value() - gui_xy["chkRace"]["y1"].cast<double>().value())),
-                                       wANRace, CHECK_RACE, dataManager.FormatRace(filter).c_str());
+      chkRace[i] = guiEnv->addCheckBox(false, irr::core::rect<irr::s32>(gui_xy["chkRace"]["x1"].cast<int64_t>().value() + (i % 4) * gui_xy["chkRace"]["width_offset"].cast<int64_t>().value(), gui_xy["chkRace"]["y1"].cast<double>().value() + (i / 4) * gui_xy["chkRace"]["height_offset"].cast<int64_t>().value(), gui_xy["chkRace"]["x2"].cast<double>().value() + (i % 4) * gui_xy["chkRace"]["width_offset"].cast<int64_t>().value(), gui_xy["chkRace"]["y2"].cast<double>().value() + (i / 4) * gui_xy["chkRace"]["height_offset"].cast<int64_t>().value()), wANRace, CHECK_RACE, dataManager.FormatRace(filter).c_str());
+      //~ this->should_resize_element_unordered_map_int.insert_or_assign(chkRace[i], "wANRace");
     }
     stHintMsg = guiEnv->addStaticText(L"", get_origin_rect<int32_t>("stHintMsg"), true, false, nullptr, -1, true);
     stHintMsg->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -947,7 +953,7 @@ imgCard->setVisible(false);
     replay_file_select_panel = new irr::gui::CGUIFileSelectPanel(guiEnv, wReplay, get_origin_rect<int32_t>("replay_file_select_panel"), replay_file_select_panel_id);
     //~ lstReplayList->setItemHeight(18);
 
-    replay_panel = addCGUIPanel(guiEnv, wReplay, -1, get_origin_rect<int32_t>("replay_panel"), false, irr::gui::ESBM_AUTOMATIC, irr::gui::ESBM_AUTOMATIC);
+    replay_panel = this->addCGUIPanel(guiEnv, wReplay, -1, "replay_panel", false, irr::gui::ESBM_AUTOMATIC, irr::gui::ESBM_AUTOMATIC);
 
     btnLoadReplay = guiEnv->addButton(get_origin_rect<int32_t>("btnLoadReplay"), replay_panel, BUTTON_LOAD_REPLAY, dataManager.GetSysString(1348));
     //~ btnDeleteReplay = guiEnv->addButton(get_origin_rect<int32_t>("btnDeleteReplay"), replay_panel, BUTTON_DELETE_REPLAY, dataManager.GetSysString(1361));
@@ -1078,13 +1084,6 @@ imgCard->setVisible(false);
     btnSpectatorSwap = guiEnv->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), nullptr, BUTTON_REPLAY_SWAP, dataManager.GetSysString(1346));
     btnSpectatorSwap->setVisible(false);
 
-    chain_timing_combo_box = guiEnv->addComboBox(get_origin_rect<int32_t>("chain_timing_combo_box"), 0, chain_timing_combo_box_id);
-    chain_timing_combo_box->addItem(dataManager.GetSysString(1310));
-    chain_timing_combo_box->addItem(dataManager.GetSysString(1292));
-    chain_timing_combo_box->addItem(dataManager.GetSysString(1293));
-    chain_timing_combo_box->addItem(dataManager.GetSysString(1294));
-    chain_timing_combo_box->setVisible(false);
-
     // chain buttons
     btnChainIgnore = guiEnv->addButton(irr::core::rect<irr::s32>(205, 100, 295, 135), nullptr, BUTTON_CHAIN_IGNORE, dataManager.GetSysString(1292));
     btnChainAlways = guiEnv->addButton(irr::core::rect<irr::s32>(205, 140, 295, 175), nullptr, BUTTON_CHAIN_ALWAYS, dataManager.GetSysString(1293));
@@ -1096,11 +1095,9 @@ imgCard->setVisible(false);
     btnChainAlways->setVisible(false);
     btnChainWhenAvail->setVisible(false);
     // shuffle
-    btnShuffle = guiEnv->addButton(irr::core::rect<irr::s32>(205, 230, 295, 265), nullptr, BUTTON_CMD_SHUFFLE, dataManager.GetSysString(1297));
-    btnShuffle->setVisible(false);
+
     // cancel or finish
-    btnCancelOrFinish = guiEnv->addButton(irr::core::rect<irr::s32>(205, 230, 295, 265), nullptr, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
-    btnCancelOrFinish->setVisible(false);
+
     // big picture
     wBigCard = guiEnv->addWindow(irr::core::rect<irr::s32>(0, 0, 0, 0), false, L"");
     wBigCard->getCloseButton()->setVisible(false);
@@ -1148,32 +1145,59 @@ imgCard->setVisible(false);
       yScale = window_size.Height / 640.0;
       OnResize();
     }
-    
-//~ // 使用新的流光图像类  
-//~ irr::gui::CGUIImageWithShimmer* imgCard_ = new irr::gui::CGUIImageWithShimmer(  
-    //~ guiEnvironment, parent, -1,   
+
+    //~ // 使用新的流光图像类
+    //~ irr::gui::CGUIImageWithShimmer* imgCard_ = new irr::gui::CGUIImageWithShimmer(
+    //~ guiEnvironment, parent, -1,
     //~ get_origin_rect<int32_t>("imgCard")
-//~ );  
-  
-//~ // 设置图像  
-//~ imgCard_->setImage(imageManager.GetBigPicture(code, gui_xy["imgCard"]["width_reduce"].cast<double>().value() * xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * yScale));
-  
-//~ // 启用流光特效  
-//~ imgCard_->setShimmerEnabled(true);  
-//~ imgCard_->setShimmerColor(video::SColor(100, 255, 255, 255)); // 半透明白色  
-//~ imgCard_->setShimmerSpeed(1.5f); // 流光速度  
-//~ imgCard_->setShimmerWidth(0.2f); // 流光宽度（相对于图像宽度）  
-//~ imgCard_->setShimmerAngle(45.0f); // 流光角度
+    //~ );
+
+    //~ // 设置图像
+    //~ imgCard_->setImage(imageManager.GetBigPicture(code, gui_xy["imgCard"]["width_reduce"].cast<double>().value() * xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * yScale));
+
+    //~ // 启用流光特效
+    //~ imgCard_->setShimmerEnabled(true);
+    //~ imgCard_->setShimmerColor(video::SColor(100, 255, 255, 255)); // 半透明白色
+    //~ imgCard_->setShimmerSpeed(1.5f); // 流光速度
+    //~ imgCard_->setShimmerWidth(0.2f); // 流光宽度（相对于图像宽度）
+    //~ imgCard_->setShimmerAngle(45.0f); // 流光角度
 
     return true;
   }
-  
+
   void Game::init_duel_log() {
-    duel_log_button = this->addButton("duel_log_button", 0, duel_log_button_id, dataManager.GetSysString(1271));
+    duel_log_button = this->addButton("duel_log_button", this->duel_sidebar, duel_log_button_id, dataManager.GetSysString(1271));
     duel_log_window = this->addWindow("duel_log_window", false, dataManager.GetSysString(1271));
     lstLog = guiEnv->addListBox(get_origin_rect<int32_t>("lstLog"), duel_log_window, LISTBOX_LOG, false);
     btnClearLog = this->addButton("btnClearLog", duel_log_window, BUTTON_CLEAR_LOG, dataManager.GetSysString(1272));
-    this->btnClearLog->setVisible(true);
+    //~ this->btnClearLog->setVisible(true);
+  }
+
+  void Game::init_chain_timing() {
+    this->chain_timing_combo_box = this->guiEnv->addComboBox(this->get_origin_rect<int32_t>("chain_timing_combo_box"), this->duel_sidebar, chain_timing_combo_box_id);
+    this->chain_timing_combo_box->addItem(dataManager.GetSysString(1310));
+    this->chain_timing_combo_box->addItem(dataManager.GetSysString(1292));
+    this->chain_timing_combo_box->addItem(dataManager.GetSysString(1293));
+    this->chain_timing_combo_box->addItem(dataManager.GetSysString(1294));
+    //~ this->chain_timing_combo_box->setVisible(false);
+  }
+
+  void Game::init_duel_sidebar() {
+    this->duel_sidebar_window = this->addStaticText(L"", "duel_sidebar_window");
+    this->duel_sidebar_window->setVisible(false);
+    //~ this->should_resize_element_unordered_map_int.insert_or_assign(this->duel_sidebar_window, "duel_sidebar_window");
+    this->duel_sidebar = this->addCGUIPanel(this->guiEnv, this->duel_sidebar_window, -1, "duel_sidebar", true, irr::gui::ESBM_AUTOMATIC, irr::gui::ESBM_AUTOMATIC);
+    //~ this->should_resize_element_unordered_map_int.insert_or_assign(this->duel_sidebar, "duel_sidebar");
+    this->init_chain_timing();
+    this->btnCancelOrFinish = this->addButton("btnCancelOrFinish", this->duel_sidebar, BUTTON_CANCEL_OR_FINISH, dataManager.GetSysString(1295));
+    btnCancelOrFinish->setVisible(false);
+    this->init_duel_log();
+    this->btnShuffle = this->addButton("btnShuffle", this->duel_sidebar, BUTTON_CMD_SHUFFLE, dataManager.GetSysString(1297));
+    //~ this->btnShuffle->setVisible(false);
+    this->duel_sidebar->addChild(this->chain_timing_combo_box);
+    this->duel_sidebar->addChild(this->btnCancelOrFinish);
+    this->duel_sidebar->addChild(this->duel_log_button);
+    this->duel_sidebar->addChild(this->btnShuffle);
   }
 
   void Game::resize_skin() {
@@ -1202,11 +1226,12 @@ imgCard->setVisible(false);
     camera->setViewMatrixAffector(mProjection);
     smgr->setAmbientLight(irr::video::SColorf(1.0f, 1.0f, 1.0f));
     float atkframe = 0.1f;
-    irr::ITimer *timer = device->getTimer();
-    timer->setTime(0);
+    //~ irr::ITimer *timer = device->getTimer();
+    //~ timer->setTime(0);
     int fps = 0;
-    int cur_time = 0;
+    double cur_time = 0;
     while (device->run()) {
+      auto time_0 = fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw);
       irr::core::dimension2du size = driver->getScreenSize();
       if (window_size != size) {
         last_x_scale = window_size.Width / 1024.0;
@@ -1282,10 +1307,13 @@ imgCard->setVisible(false);
       }
       fps++;
       //~ fast_io::perrln(wDeckManage->getCloseButton()->isVisible());
-      cur_time = timer->getTime();
+      auto time_1 = fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw);
+      cur_time += static_cast<double>(time_1 - time_0) * 1000;
       if (cur_time < fps * 17 - 20) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
       }
+      auto time_2 = fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw);
+      cur_time += static_cast<double>(time_2 - time_1) * 1000;
       if (cur_time >= 1000) {
         myswprintf(cap, L"EDOPro FPS: %d", fps);
         //~ auto t0(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw));
@@ -1293,7 +1321,7 @@ imgCard->setVisible(false);
         //~ fast_io::perr(fast_io::posix_clock_gettime(fast_io::posix_clock_id::monotonic_raw) - t0);
         fps = 0;
         cur_time -= 1000;
-        timer->setTime(0);
+        //~ timer->setTime(0);
         if (dInfo.time_player == 0 || dInfo.time_player == 1) {
           if (dInfo.time_left[dInfo.time_player]) {
             dInfo.time_left[dInfo.time_player]--;
@@ -1332,21 +1360,26 @@ imgCard->setVisible(false);
     auto *k1 = this->guiEnv->addWindow(this->get_origin_rect<int32_t>(name), modal, text, parent, id);
     k1->getCloseButton()->setVisible(false);
     k1->setVisible(false);
-    should_resize_element_unordered_map_int.insert_or_assign(k1, name);
-    return k1;
-  }
-  
-  irr::gui::IGUIButton *Game::addButton(const char *name, irr::gui::IGUIElement* parent, irr::s32 id, const wchar_t* text, const wchar_t* tooltiptext) {
-    auto *k1 = this->guiEnv->addButton(this->get_origin_rect<int32_t>(name), parent, id, text, tooltiptext);
-    k1->setVisible(false);
-    should_resize_element_unordered_map_int.insert_or_assign(k1, name);
+    this->should_resize_element_unordered_map_int.insert_or_assign(k1, name);
     return k1;
   }
 
-  irr::gui::CGUIPanel *Game::addCGUIPanel(irr::gui::IGUIEnvironment *environment, irr::gui::IGUIElement *parent, irr::s32 id, const irr::core::rect<irr::s32> &rectangle, bool border, irr::gui::E_SCROLL_BAR_MODE vMode, irr::gui::E_SCROLL_BAR_MODE hMode) {
-    auto *k1 = new irr::gui::CGUIPanel(environment, parent, id, rectangle, border, vMode, hMode);
-    no_scale_elements.insert(k1->getVScrollBar());
-    no_scale_elements.insert(k1->getHScrollBar());
+  irr::gui::IGUIButton *Game::addButton(const char *name, irr::gui::IGUIElement *parent, irr::s32 id, const wchar_t *text, const wchar_t *tooltiptext) {
+    auto *k1 = this->guiEnv->addButton(this->get_origin_rect<int32_t>(name), parent, id, text, tooltiptext);
+    //~ k1->setVisible(false);
+    this->should_resize_element_unordered_map_int.insert_or_assign(k1, name);
+    return k1;
+  }
+
+  irr::gui::CGUIPanel *Game::addCGUIPanel(irr::gui::IGUIEnvironment *environment, irr::gui::IGUIElement *parent, irr::s32 id, const char *name, bool border, irr::gui::E_SCROLL_BAR_MODE vMode, irr::gui::E_SCROLL_BAR_MODE hMode) {
+    auto *k1 = new irr::gui::CGUIPanel(environment, parent, id, this->get_origin_rect<int32_t>(name), border, vMode, hMode);
+    this->should_resize_element_unordered_map_int.insert_or_assign(k1, name);
+    return k1;
+  }
+
+  irr::gui::IGUIStaticText *Game::addStaticText(const wchar_t *text, const char *name, bool border, bool wordWrap, irr::gui::IGUIElement *parent, irr::s32 id, bool fillBackground) {
+    auto *k1 = this->guiEnv->addStaticText(text, this->get_origin_rect<int32_t>(name), border, wordWrap, parent, id, fillBackground);
+    this->should_resize_element_unordered_map_int.insert_or_assign(k1, name);
     return k1;
   }
 
@@ -1879,6 +1912,7 @@ imgCard->setVisible(false);
     }
     auto cit = dataManager.GetCodePointer(code);
     bool is_valid = (cit != dataManager.datas_end());
+    this->imgCard->setImageSize(irr::core::dimension2di(gui_xy["imgCard"]["width_reduce"].cast<double>().value() * mainGame->xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * mainGame->yScale));
     imgCard->setImage(imageManager.GetBigPicture(code, gui_xy["imgCard"]["width_reduce"].cast<double>().value() * xScale, gui_xy["imgCard"]["height_reduce"].cast<double>().value() * yScale));
     //~ imgCard->setRotation(90.0f);
     if (is_valid) {
@@ -2104,8 +2138,9 @@ imgCard->setVisible(false);
     btnSpectatorSwap->setVisible(false);
     btnShuffle->setVisible(false);
     wSurrender->setVisible(false);
-    chain_timing_combo_box->setVisible(false);
-    this->duel_log_button->setVisible(false);
+    //~ chain_timing_combo_box->setVisible(false);
+    //~ this->duel_log_button->setVisible(false);
+    //~ this->duel_log_button->setVisible(false);
     this->duel_log_window->setVisible(false);
   }
 
@@ -2136,6 +2171,7 @@ imgCard->setVisible(false);
     wReplaySave->setVisible(false);
     stHintMsg->setVisible(false);
     stTip->setVisible(false);
+    this->duel_sidebar_window->setVisible(false);
   }
 
   void Game::CloseDuelWindow() {
@@ -2297,6 +2333,10 @@ imgCard->setVisible(false);
       int64_t gui_xy_chkAttribute_width_offset = gui_xy["chkAttribute"]["width_offset"];
       int64_t gui_xy_chkAttribute_height_offset = gui_xy["chkAttribute"]["height_offset"];
       chkAttribute[i]->setRelativePosition(ResizeWin(gui_xy_chkAttribute_x1 + (i % 4) * gui_xy_chkAttribute_width_offset, gui_xy_chkAttribute_y1 + (i / 4) * gui_xy_chkAttribute_height_offset, gui_xy_chkAttribute_x2 + (i % 4) * gui_xy_chkAttribute_width_offset, gui_xy_chkAttribute_y2 + (i / 4) * gui_xy_chkAttribute_height_offset));
+    }
+
+    for (int filter = 0x1, i = 0; i < RACES_COUNT; filter <<= 1, ++i) {
+      this->chkRace[i]->setRelativePosition(ResizeWin(gui_xy["chkRace"]["x1"].cast<int64_t>().value() + (i % 4) * gui_xy["chkRace"]["width_offset"].cast<int64_t>().value(), gui_xy["chkRace"]["y1"].cast<double>().value() + (i / 4) * gui_xy["chkRace"]["height_offset"].cast<int64_t>().value(), gui_xy["chkRace"]["x2"].cast<double>().value() + (i % 4) * gui_xy["chkRace"]["width_offset"].cast<int64_t>().value(), gui_xy["chkRace"]["y2"].cast<double>().value() + (i / 4) * gui_xy["chkRace"]["height_offset"].cast<int64_t>().value()));
     }
 
     for (const auto &i : should_resize_element_unordered_map_int) {
@@ -2571,17 +2611,25 @@ imgCard->setVisible(false);
     }
   }
 
-  fast_io::string Game::获取表示形式的名称(int32_t o1) { // 表示形式
-    if (o1 == POS_FACEUP_ATTACK) {
-      return fast_io::concat_fast_io("表侧攻击表示");
-    }
-    else if (o1 == POS_FACEUP_DEFENSE) {
-      return fast_io::concat_fast_io("表侧守备表示");
-    }
-    else if (o1 == POS_FACEDOWN_DEFENSE) {
-      return fast_io::concat_fast_io("里侧守备表示");
-    }
-  }
+  //~ std::string Game::get_pos_string(int64_t o1) {
+    //~ static std::unordered_map<int64_t, std::string> position_map = {
+      //~ {POS_FACEUP_ATTACK,    "表侧攻击表示"},
+      //~ {POS_FACEUP_DEFENSE,   "表侧守备表示"},
+      //~ {POS_FACEDOWN_DEFENSE, "里侧守备表示"},
+      //~ {POS_FACEUP, "表侧表示"},
+      //~ {POS_FACEDOWN, "里侧表示"},
+    //~ };
+
+    //~ // 使用表查找替代 if-else
+    //~ auto it = position_map.find(o1);
+    //~ if (it != position_map.end()) {
+    //~ return it->second;
+    //~ }
+    //~ else {
+    //~ return fast_io::concat_std("未知表示");
+    //~ }
+    //~ return position_map[o1];
+  //~ }
 
   //~ void Game::write_all_bytes(fast_io::obuf_file& o1, uint8_t* o2, uint8_t* o3) {
   //~ using fast_io::operations::write_all_bytes;

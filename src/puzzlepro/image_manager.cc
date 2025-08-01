@@ -42,6 +42,7 @@ namespace ygo {
     tFieldTransparent[0] = driver->getTexture("textures/field-transparent2.png");
     tField[1] = driver->getTexture("textures/field3.png");
     tFieldTransparent[1] = driver->getTexture("textures/field-transparent3.png");
+    transparent_texture = driver->getTexture("PuzzlePro_texture/transparent.png");
     ResizeTexture();
     return true;
   }
@@ -219,26 +220,26 @@ namespace ygo {
 
   irr::video::ITexture *ImageManager::GetTextureFromFile(const char *file, irr::s32 width, irr::s32 height) {
     //~ if (mainGame->gameConf.use_image_scale) {
-      irr::video::ITexture *texture = nullptr;
-      irr::video::IImage *srcimg = driver->createImageFromFile(file);
-      if (srcimg == nullptr) {
-        return nullptr;
-      }
-      if (srcimg->getDimension() == irr::core::dimension2d<irr::u32>(width, height)) {
-        texture = driver->addTexture(file, srcimg);
-      }
-      else {
-        irr::video::IImage *destimg = driver->createImage(srcimg->getColorFormat(), irr::core::dimension2d<irr::u32>(width, height));
-        imageScaleNNAA(srcimg, destimg);
-        //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
-        texture = driver->addTexture(file, destimg);
-        destimg->drop();
-      }
-      srcimg->drop();
-      return texture;
+    irr::video::ITexture *texture = nullptr;
+    irr::video::IImage *srcimg = driver->createImageFromFile(file);
+    if (srcimg == nullptr) {
+      return nullptr;
+    }
+    if (srcimg->getDimension() == irr::core::dimension2d<irr::u32>(width, height)) {
+      texture = driver->addTexture(file, srcimg);
+    }
+    else {
+      irr::video::IImage *destimg = driver->createImage(srcimg->getColorFormat(), irr::core::dimension2d<irr::u32>(width, height));
+      imageScaleNNAA(srcimg, destimg);
+      //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+      texture = driver->addTexture(file, destimg);
+      destimg->drop();
+    }
+    srcimg->drop();
+    return texture;
     //~ }
     //~ else {
-      //~ return driver->getTexture(file);
+    //~ return driver->getTexture(file);
     //~ }
   }
 
@@ -300,18 +301,18 @@ namespace ygo {
       return tUnknown;
     }
     //~ if (zoom == 1) {
-      //~ texture = driver->addTexture(file, srcimg);
+    //~ texture = driver->addTexture(file, srcimg);
     //~ }
     //~ else {
-      auto origsize = srcimg->getDimension();
-      irr::video::IImage *destimg = driver->createImage(srcimg->getColorFormat(), irr::core::dimension2d<irr::u32>(origsize.Width * zoom, origsize.Height * zoom));
-      if (!destimg) {
-    srcimg->drop();
-    return tUnknown;
-}
-      imageScaleNNAA(srcimg, destimg);
-      texture = driver->addTexture(file, destimg);
-      destimg->drop();
+    auto origsize = srcimg->getDimension();
+    irr::video::IImage *destimg = driver->createImage(srcimg->getColorFormat(), irr::core::dimension2d<irr::u32>(origsize.Width * zoom, origsize.Height * zoom));
+    if (!destimg) {
+      srcimg->drop();
+      return tUnknown;
+    }
+    imageScaleNNAA(srcimg, destimg);
+    texture = driver->addTexture(file, destimg);
+    destimg->drop();
     //~ }
     srcimg->drop();
     tBigPicture = texture;
@@ -367,23 +368,23 @@ namespace ygo {
         int width = CARD_THUMB_WIDTH * mainGame->xScale;
         int height = CARD_THUMB_HEIGHT * mainGame->yScale;
         //~ if (img->getDimension() == irr::core::dimension2d<irr::u32>(width, height)) {
-          //~ img->grab();
-          //~ imageManager.tThumbLoadingMutex.lock();
-          //~ if (imageManager.tThumbLoadingThreadRunning) {
-            //~ imageManager.tThumbLoading[code] = img;
-          //~ }
-          //~ imageManager.tThumbLoadingMutex.unlock();
+        //~ img->grab();
+        //~ imageManager.tThumbLoadingMutex.lock();
+        //~ if (imageManager.tThumbLoadingThreadRunning) {
+        //~ imageManager.tThumbLoading[code] = img;
+        //~ }
+        //~ imageManager.tThumbLoadingMutex.unlock();
         //~ }
         //~ else {
-          irr::video::IImage *destimg = imageManager.driver->createImage(img->getColorFormat(), irr::core::dimension2d<irr::u32>(width, height));
-          imageScaleNNAA(img, destimg);
-          img->drop();
-          destimg->grab();
-          imageManager.tThumbLoadingMutex.lock();
-          if (imageManager.tThumbLoadingThreadRunning) {
-            imageManager.tThumbLoading[code] = destimg;
-          }
-          imageManager.tThumbLoadingMutex.unlock();
+        irr::video::IImage *destimg = imageManager.driver->createImage(img->getColorFormat(), irr::core::dimension2d<irr::u32>(width, height));
+        imageScaleNNAA(img, destimg);
+        img->drop();
+        destimg->grab();
+        imageManager.tThumbLoadingMutex.lock();
+        if (imageManager.tThumbLoadingThreadRunning) {
+          imageManager.tThumbLoading[code] = destimg;
+        }
+        imageManager.tThumbLoadingMutex.unlock();
         //~ }
       }
       else {
@@ -412,11 +413,6 @@ namespace ygo {
     auto lit = tThumbLoading.find(code);
     if (lit != tThumbLoading.end()) {
       if (lit->second != nullptr) {
-        //~ char file[256];
-        //~ std::snprintf(file, sizeof file, "pics/thumbnail/%d.jpg", code);
-        //~ std::snprintf(file, sizeof file, "pics/%d.jpg", code);
-        //~ std::snprintf(file, sizeof file, "pics/%d.jp", code);
-        //~ irr::video::ITexture *texture = driver->addTexture(file, lit->second); // textures must be added in the main thread due to OpenGL
         irr::video::ITexture *texture = driver->addTexture("ok", lit->second); // textures must be added in the main thread due to OpenGL
         lit->second->drop();
         tThumb[code] = texture;
@@ -446,6 +442,15 @@ namespace ygo {
       return tUnknownThumb;
     }
   }
+
+  //~ irr::video::ITexture *ImageManager::GetTextureThumb(code_pointer cp) {
+  //~ auto code = cp->first;
+  //~ auto lcode = cp->second.alias;
+  //~ if (lcode == 0) {
+  //~ lcode = code;
+  //~ }
+  //~ return this->GetTextureThumb(code);
+  //~ }
 
   irr::video::ITexture *ImageManager::GetTextureField(int code) {
     if (code == 0) {

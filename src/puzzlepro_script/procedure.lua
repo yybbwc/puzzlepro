@@ -1325,7 +1325,7 @@ function Auxiliary.FConditionMixRep(insf, sub, fun1, minc, maxc, ...)
     local hexsealed = chkfnf & 0x100 > 0
     local notfusion = chkfnf & 0x200 > 0
     local sub2 = (sub or hexsealed) and not notfusion
-    Debug.ShowHint(debug.traceback())
+    --~ Debug.ShowHint(debug.traceback())
     local mg = g:Filter(Auxiliary.FConditionFilterMix, c, c, sub2, notfusion, fun1, table.unpack(funs))
     if gc then
       if not mg:IsContains(gc) then

@@ -219,7 +219,7 @@ int32_t field::select_option(uint16_t step, uint8_t playerid) {
   if (step == 0) {
     //~ fast_io::io::print(fast_io::win32_box_t(), __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
     returns.ivalue[0] = -1;
-    if (core.select_options.size() == 0) {
+    if (core.select_options.empty()) {
       return TRUE;
     }
     if ((playerid == 1) && (core.duel_options & DUEL_SIMPLE_AI)) {
@@ -375,7 +375,7 @@ int32_t field::select_chain(uint16_t step, uint8_t playerid, uint8_t spe_count, 
       }
     }
     if ((playerid == 1) && (core.duel_options & DUEL_SIMPLE_AI)) {
-      if (core.select_chains.size() == 0) {
+      if (core.select_chains.empty()) {
         returns.ivalue[0] = -1;
       }
       else if (forced) {
@@ -858,7 +858,7 @@ int32_t field::select_with_sum_limit(int16_t step, uint8_t playerid, int32_t acc
   }
   else {
     std::set<int32_t> c;
-    int32_t mcount = (int32_t)core.must_select_cards.size();
+    auto mcount = (int32_t)core.must_select_cards.size();
     if (mcount > UINT8_MAX) {
       mcount = UINT8_MAX;
     }
@@ -871,7 +871,7 @@ int32_t field::select_with_sum_limit(int16_t step, uint8_t playerid, int32_t acc
       for (int32_t i = 0; i < mcount; ++i) {
         oparam[i] = core.must_select_cards[i]->sum_param;
       }
-      int32_t m = (int32_t)core.select_cards.size();
+      auto m = (int32_t)core.select_cards.size();
       //~ for (int32_t i = 0; i < returns.bvalue[0]; ++i) {
       //~ fast_io::io::print(fast_io::win32_box_t(), returns.bvalue[i], "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
       //~ }
@@ -903,7 +903,7 @@ int32_t field::select_with_sum_limit(int16_t step, uint8_t playerid, int32_t acc
           mn = ms;
         }
       }
-      int32_t m = (int32_t)core.select_cards.size();
+      auto m = (int32_t)core.select_cards.size();
       for (int32_t i = mcount; i < returns.bvalue[0]; ++i) {
         int32_t v = returns.bvalue[i + 1];
         if (v < 0 || v >= m || c.count(v)) {
@@ -1096,7 +1096,7 @@ int32_t field::sort_card(int16_t step, uint8_t playerid) {
       return TRUE;
     }
     std::set<uint8_t> c;
-    int32_t m = (int32_t)core.select_cards.size();
+    auto m = (int32_t)core.select_cards.size();
     for (int32_t i = 0; i < m; ++i) {
       uint8_t v = returns.bvalue[i];
       if (v >= m || c.count(v)) {
@@ -1229,7 +1229,7 @@ int32_t field::announce_attribute(int16_t step, uint8_t playerid, int32_t count,
 
 static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &opcode) {
   std::stack<int32_t> stack;
-  for (auto &it : opcode) {
+  for (const auto &it : opcode) {
     switch (it) {
       case OPCODE_ADD: {
         if (stack.size() >= 2) {
@@ -1292,7 +1292,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_NEG: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t val = stack.top();
           stack.pop();
           stack.push(-val);
@@ -1300,7 +1300,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_NOT: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t val = stack.top();
           stack.pop();
           stack.push(static_cast<int32_t>(!val));
@@ -1308,7 +1308,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_ISCODE: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t code = stack.top();
           stack.pop();
           stack.push(cd.code == code);
@@ -1316,7 +1316,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_ISSETCARD: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t set_code = stack.top();
           stack.pop();
           bool res = cd.is_setcode(set_code);
@@ -1325,7 +1325,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_ISTYPE: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t val = stack.top();
           stack.pop();
           stack.push(cd.type & val);
@@ -1333,7 +1333,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_ISRACE: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t race = stack.top();
           stack.pop();
           stack.push(cd.race & race);
@@ -1341,7 +1341,7 @@ static int32_t is_declarable(card_data const &cd, const std::vector<uint32_t> &o
         break;
       }
       case OPCODE_ISATTRIBUTE: {
-        if (stack.size() >= 1) {
+        if (!stack.empty()) {
           int32_t attribute = stack.top();
           stack.pop();
           stack.push(cd.attribute & attribute);

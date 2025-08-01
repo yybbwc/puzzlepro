@@ -101,6 +101,7 @@ function c11493868.activate(e, tp, eg, ep, ev, re, r, rp)
     if sg2 then
       sg:Merge(sg2)
     end
+    ::cancel::
     Duel.Hint(HINT_SELECTMSG, tp, HINTMSG_SPSUMMON)
     local tg = sg:Select(tp, 1, 1, nil)
     local tc = tg:GetFirst()

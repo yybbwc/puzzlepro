@@ -273,12 +273,27 @@ namespace ygo {
                 StartFilter();
                 //~ if (mainGame->ebCardName->getText() != L"") {
                 auto str = fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->ebCardName->getText()));
-                if (str != L"" and none_of_equal(mainGame->circular_buffer_search_record, str)) {
-                  mainGame->circular_buffer_search_record.push_back(fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->ebCardName->getText())));
+                //~ if (str != L"" and none_of_equal(mainGame->circular_buffer_search_record, str)) {
+                //~ mainGame->circular_buffer_search_record.push_back(fast_io::wconcat_std(fast_io::mnp::os_c_str(mainGame->ebCardName->getText())));
+                //~ mainGame->combo_box_search_record->clear();
+                //~ mainGame->combo_box_search_record->addItem(dataManager.GetSysString(1310));
+                //~ for (const auto &str : mainGame->circular_buffer_search_record | reversed) {
+                //~ mainGame->combo_box_search_record->addItem(str.c_str());
+                //~ }
+                //~ }
+                if (str == L"") {
+                }
+                else {
+                  if (mainGame->circular_buffer_search_record.contains(str)) {
+                    mainGame->circular_buffer_search_record.get(str);
+                  }
+                  else {
+                    mainGame->circular_buffer_search_record.put(str, true);
+                  }
                   mainGame->combo_box_search_record->clear();
                   mainGame->combo_box_search_record->addItem(dataManager.GetSysString(1310));
-                  for (const auto &str : mainGame->circular_buffer_search_record | reversed) {
-                    mainGame->combo_box_search_record->addItem(str.c_str());
+                  for (auto it = mainGame->circular_buffer_search_record.begin(); it != mainGame->circular_buffer_search_record.end(); ++it) {
+                    mainGame->combo_box_search_record->addItem(it->key.c_str());
                   }
                 }
                 //~ }
@@ -1216,13 +1231,14 @@ namespace ygo {
             }
             else {
               soundManager.PlaySoundEffect(SOUND_CARD_PICK);
-              if (click_pos == 1) {
-                push_side(draging_pointer);
-              }
-              else if (click_pos == 2) {
-                push_side(draging_pointer);
-              }
-              else if (click_pos == 3) {
+              //~ if (click_pos == 1 or click_pos == 2) {
+              //~ push_side(draging_pointer);
+              //~ }
+              //~ else if (click_pos == 2) {
+              //~ push_side(draging_pointer);
+              //~ }
+              //~ else if (click_pos == 3) {
+              if (click_pos == 3) {
                 if (!push_extra(draging_pointer)) {
                   push_main(draging_pointer);
                 }
@@ -1364,12 +1380,12 @@ namespace ygo {
     int64_t gradient_background_side_deck_y1 = gui_xy["gradient_background_side_deck"]["y1"];
     int64_t gradient_background_side_deck_y2 = gui_xy["gradient_background_side_deck"]["y2"];
     if (x >= gradient_background_main_deck_x1 && x <= gradient_background_main_deck_x2) {
-      if (showing_pack) {
+      if (showing_pack or (y >= gradient_background_main_deck_y1 && y <= gradient_background_main_deck_y2)) {
         GetHoveredCard_main_deck(x, y);
       }
-      else if (y >= gradient_background_main_deck_y1 && y <= gradient_background_main_deck_y2) {
-        GetHoveredCard_main_deck(x, y);
-      }
+      //~ else if (y >= gradient_background_main_deck_y1 && y <= gradient_background_main_deck_y2) {
+      //~ GetHoveredCard_main_deck(x, y);
+      //~ }
       else if (y >= gradient_background_extra_deck_y1 && y <= gradient_background_extra_deck_y2) {
         GetHoveredCard_extra_deck(x, y);
       }

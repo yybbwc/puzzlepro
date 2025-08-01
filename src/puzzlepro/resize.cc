@@ -145,8 +145,8 @@ namespace ygo {
 
     should_resize_element_unordered_map_int.insert_or_assign(btnLeaveGame, "btnLeaveGame");
     should_resize_element_unordered_map_int.insert_or_assign(chain_timing_combo_box, "chain_timing_combo_box");
-    should_resize_element_unordered_map_int.insert_or_assign(btnShuffle, "btnShuffle");
-    should_resize_element_unordered_map_int.insert_or_assign(btnCancelOrFinish, "btnCancelOrFinish");
+    //~ should_resize_element_unordered_map_int.insert_or_assign(btnShuffle, "btnShuffle");
+    //~ should_resize_element_unordered_map_int.insert_or_assign(btnCancelOrFinish, "btnCancelOrFinish");
 
     should_resize_element_unordered_map_int.insert_or_assign(wOptions, "wOptions");
     should_resize_element_unordered_map_int.insert_or_assign(btnOptionOK, "btnOptionOK");

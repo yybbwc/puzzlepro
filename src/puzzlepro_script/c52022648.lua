@@ -38,6 +38,7 @@ function c52022648.eqcost(e, tp, eg, ep, ev, re, r, rp, chk)
   Duel.DiscardHand(tp, c52022648.costfilter, 1, 1, REASON_COST + REASON_DISCARD, nil, e:GetHandler(), tp)
 end
 function c52022648.eqfilter(c, ec)
+  --~ aux.DebugHint(c:GetCode())
   return c:IsType(TYPE_EQUIP) and c:CheckEquipTarget(ec)
 end
 function c52022648.eqtg(e, tp, eg, ep, ev, re, r, rp, chk)

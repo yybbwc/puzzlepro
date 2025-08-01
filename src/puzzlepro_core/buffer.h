@@ -37,8 +37,8 @@ template <typename T> inline void vector_write(std::vector<unsigned char> &buffe
 
 inline void vector_fread(std::vector<unsigned char> &buffer, FILE *fp) {
   unsigned char temp[4096]{};
-  while (size_t len = std::fread(temp, 1, sizeof temp, fp)) {
-    vector_write_block(buffer, temp, len);
+  while (size_t len = std::fread(static_cast<void*>(temp), 1, sizeof temp, fp)) {
+    vector_write_block(buffer, static_cast<void*>(temp), len);
   }
   std::fclose(fp);
 }

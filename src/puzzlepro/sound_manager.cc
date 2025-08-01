@@ -54,33 +54,33 @@ namespace ygo {
     if (element == mainGame->wMessage) {
       PlaySoundEffect(SOUND_INFO);
     }
-    else if (element == mainGame->wQuery) {
+    else if (element == mainGame->wQuery or element == mainGame->wSurrender or element == mainGame->wOptions or element == mainGame->wANAttribute or element == mainGame->wANCard or element == mainGame->wANNumber or element == mainGame->wANRace or element == mainGame->wReplaySave or element == mainGame->wFTSelect) {
       PlaySoundEffect(SOUND_QUESTION);
     }
-    else if (element == mainGame->wSurrender) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wOptions) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wANAttribute) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wANCard) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wANNumber) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wANRace) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wReplaySave) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
-    else if (element == mainGame->wFTSelect) {
-      PlaySoundEffect(SOUND_QUESTION);
-    }
+    //~ else if (element == mainGame->wSurrender) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wOptions) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wANAttribute) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wANCard) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wANNumber) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wANRace) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wReplaySave) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
+    //~ else if (element == mainGame->wFTSelect) {
+    //~ PlaySoundEffect(SOUND_QUESTION);
+    //~ }
   }
 
   void SoundManager::PlayMusic(char *song, bool loop) {

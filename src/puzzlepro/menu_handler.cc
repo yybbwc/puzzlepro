@@ -151,99 +151,99 @@ namespace ygo {
             mainGame->ShowElement(mainGame->wCreateHost);
             return false;
           }
-          case BUTTON_HOST_CONFIRM: {
-            //~ bot_mode = false;
-            //~ BufferIO::CopyWideString(mainGame->ebServerName->getText(), mainGame->gameConf.gamename);
-            //~ if (!NetServer::StartServer(mainGame->gameConf.serverport)) {
-            //~ soundManager.PlaySoundEffect(SOUND_INFO);
-            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
-            //~ return false;
-            //~ }
-            //~ if (!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
-            //~ NetServer::StopServer();
-            //~ soundManager.PlaySoundEffect(SOUND_INFO);
-            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
-            //~ return false;
-            //~ }
-            //~ mainGame->btnHostConfirm->setEnabled(false);
-            //~ mainGame->btnHostCancel->setEnabled(false);
-            //~ return false;
-          }
-          case BUTTON_HOST_CANCEL: {
-            //~ mainGame->btnCreateHost->setEnabled(true);
-            //~ mainGame->btnJoinHost->setEnabled(true);
-            //~ mainGame->btnJoinCancel->setEnabled(true);
-            //~ mainGame->HideElement(mainGame->wCreateHost);
-            //~ mainGame->ShowElement(mainGame->wLanWindow);
-            //~ return false;
-          }
-          case BUTTON_HP_DUELIST: {
-            //~ mainGame->cbCategorySelect->setEnabled(true);
-            //~ mainGame->cbDeckSelect->setEnabled(true);
-            //~ DuelClient::SendPacketToServer(CTOS_HS_TODUELIST);
-            //~ return false;
-          }
-          case BUTTON_HP_OBSERVER: {
-            //~ DuelClient::SendPacketToServer(CTOS_HS_TOOBSERVER);
-            //~ return false;
-          }
-          case BUTTON_HP_KICK: {
-            //~ int index = 0;
-            //~ while (index < 4) {
-            //~ if (mainGame->btnHostPrepKick[index] == caller) {
-            //~ return false;
-            //~ }
-            //~ ++index;
-            //~ }
-            //~ CTOS_Kick csk;
-            //~ csk.pos = index;
-            //~ DuelClient::SendPacketToServer(CTOS_HS_KICK, csk);
-            //~ return false;
-          }
-          case BUTTON_HP_READY: {
-            //~ if (mainGame->cbCategorySelect->getSelected() == -1 || mainGame->cbDeckSelect->getSelected() == -1 || !deckManager.LoadCurrentDeck(mainGame->cbCategorySelect->getSelected(), mainGame->cbCategorySelect->getText(), mainGame->cbDeckSelect->getText())) {
-            //~ mainGame->gMutex.lock();
-            //~ soundManager.PlaySoundEffect(SOUND_INFO);
-            //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1406));
-            //~ mainGame->gMutex.unlock();
-            //~ return false;
-            //~ }
-            //~ UpdateDeck();
-            //~ DuelClient::SendPacketToServer(CTOS_HS_READY);
-            //~ mainGame->cbCategorySelect->setEnabled(false);
-            //~ mainGame->cbDeckSelect->setEnabled(false);
-            //~ return false;
-          }
-          case BUTTON_HP_NOTREADY: {
-            //~ DuelClient::SendPacketToServer(CTOS_HS_NOTREADY);
-            //~ mainGame->cbCategorySelect->setEnabled(true);
-            //~ mainGame->cbDeckSelect->setEnabled(true);
-            //~ return false;
-          }
-          case BUTTON_HP_START: {
-            //~ DuelClient::SendPacketToServer(CTOS_HS_START);
-            //~ return false;
-          }
-          case BUTTON_HP_CANCEL: {
-            //~ DuelClient::StopClient();
-            //~ mainGame->btnCreateHost->setEnabled(true);
-            //~ mainGame->btnJoinHost->setEnabled(true);
-            //~ mainGame->btnJoinCancel->setEnabled(true);
-            //~ mainGame->btnStartBot->setEnabled(true);
-            //~ mainGame->btnBotCancel->setEnabled(true);
-            //~ mainGame->HideElement(mainGame->wHostPrepare);
-            //~ if (bot_mode) {
-            //~ mainGame->ShowElement(mainGame->wSinglePlay);
-            //~ }
-            //~ else {
-            //~ mainGame->ShowElement(mainGame->wLanWindow);
-            //~ }
-            //~ mainGame->wChat->setVisible(false);
-            //~ if (exit_on_return) {
-            //~ mainGame->device->closeDevice();
-            //~ }
-            //~ return false;
-          }
+          //~ case BUTTON_HOST_CONFIRM: {
+          //~ bot_mode = false;
+          //~ BufferIO::CopyWideString(mainGame->ebServerName->getText(), mainGame->gameConf.gamename);
+          //~ if (!NetServer::StartServer(mainGame->gameConf.serverport)) {
+          //~ soundManager.PlaySoundEffect(SOUND_INFO);
+          //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
+          //~ return false;
+          //~ }
+          //~ if (!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
+          //~ NetServer::StopServer();
+          //~ soundManager.PlaySoundEffect(SOUND_INFO);
+          //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1402));
+          //~ return false;
+          //~ }
+          //~ mainGame->btnHostConfirm->setEnabled(false);
+          //~ mainGame->btnHostCancel->setEnabled(false);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HOST_CANCEL: {
+          //~ mainGame->btnCreateHost->setEnabled(true);
+          //~ mainGame->btnJoinHost->setEnabled(true);
+          //~ mainGame->btnJoinCancel->setEnabled(true);
+          //~ mainGame->HideElement(mainGame->wCreateHost);
+          //~ mainGame->ShowElement(mainGame->wLanWindow);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_DUELIST: {
+          //~ mainGame->cbCategorySelect->setEnabled(true);
+          //~ mainGame->cbDeckSelect->setEnabled(true);
+          //~ DuelClient::SendPacketToServer(CTOS_HS_TODUELIST);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_OBSERVER: {
+          //~ DuelClient::SendPacketToServer(CTOS_HS_TOOBSERVER);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_KICK: {
+          //~ int index = 0;
+          //~ while (index < 4) {
+          //~ if (mainGame->btnHostPrepKick[index] == caller) {
+          //~ return false;
+          //~ }
+          //~ ++index;
+          //~ }
+          //~ CTOS_Kick csk;
+          //~ csk.pos = index;
+          //~ DuelClient::SendPacketToServer(CTOS_HS_KICK, csk);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_READY: {
+          //~ if (mainGame->cbCategorySelect->getSelected() == -1 || mainGame->cbDeckSelect->getSelected() == -1 || !deckManager.LoadCurrentDeck(mainGame->cbCategorySelect->getSelected(), mainGame->cbCategorySelect->getText(), mainGame->cbDeckSelect->getText())) {
+          //~ mainGame->gMutex.lock();
+          //~ soundManager.PlaySoundEffect(SOUND_INFO);
+          //~ mainGame->guiEnv->addMessageBox(L"", dataManager.GetSysString(1406));
+          //~ mainGame->gMutex.unlock();
+          //~ return false;
+          //~ }
+          //~ UpdateDeck();
+          //~ DuelClient::SendPacketToServer(CTOS_HS_READY);
+          //~ mainGame->cbCategorySelect->setEnabled(false);
+          //~ mainGame->cbDeckSelect->setEnabled(false);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_NOTREADY: {
+          //~ DuelClient::SendPacketToServer(CTOS_HS_NOTREADY);
+          //~ mainGame->cbCategorySelect->setEnabled(true);
+          //~ mainGame->cbDeckSelect->setEnabled(true);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_START: {
+          //~ DuelClient::SendPacketToServer(CTOS_HS_START);
+          //~ return false;
+          //~ }
+          //~ case BUTTON_HP_CANCEL: {
+          //~ DuelClient::StopClient();
+          //~ mainGame->btnCreateHost->setEnabled(true);
+          //~ mainGame->btnJoinHost->setEnabled(true);
+          //~ mainGame->btnJoinCancel->setEnabled(true);
+          //~ mainGame->btnStartBot->setEnabled(true);
+          //~ mainGame->btnBotCancel->setEnabled(true);
+          //~ mainGame->HideElement(mainGame->wHostPrepare);
+          //~ if (bot_mode) {
+          //~ mainGame->ShowElement(mainGame->wSinglePlay);
+          //~ }
+          //~ else {
+          //~ mainGame->ShowElement(mainGame->wLanWindow);
+          //~ }
+          //~ mainGame->wChat->setVisible(false);
+          //~ if (exit_on_return) {
+          //~ mainGame->device->closeDevice();
+          //~ }
+          //~ return false;
+          //~ }
           case BUTTON_REPLAY_MODE: {
             mainGame->HideElement(mainGame->wMainMenu);
             mainGame->ShowElement(mainGame->wReplay);
@@ -337,9 +337,11 @@ namespace ygo {
             auto dir = canonical(path(mainGame->replay_file_select_panel->getCurrentWorkingDirectory().c_str()));
             if (exists(dir) and is_directory(dir)) {
               for (auto &file : recursive_directory_iterator(dir)) {
-                auto str = file.path().string();
-                if (file.is_regular_file() and str.ends_with(replay_file_suffix)) {
-                  mainGame->check_replay_path_vector.push_back(wconcat_std(code_cvt(str)));
+                //~ auto str = file.path().string();
+                if (file.is_regular_file() and file.path().string().ends_with(replay_file_suffix)) {
+                  mainGame->check_replay_path_vector.push_back(file.path().wstring());
+                  //~ fast_io::io::print(fast_io::win32_box_t(), file.path().string(), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
+                  //~ fast_io::io::print(fast_io::win32_box_t(), fast_io::mnp::code_cvt(file.path().wstring()), "\n", __FILE__, "\n", __LINE__, "\n", __PRETTY_FUNCTION__);
                 }
               }
             }
@@ -535,12 +537,7 @@ namespace ygo {
             mainGame->deckBuilder.Initialize();
             return false;
           }
-          case BUTTON_YES: {
-            mainGame->HideElement(mainGame->wQuery);
-            prev_operation = 0;
-            prev_sel = -1;
-            return false;
-          }
+          case BUTTON_YES:
           case BUTTON_NO: {
             mainGame->HideElement(mainGame->wQuery);
             prev_operation = 0;
@@ -556,12 +553,7 @@ namespace ygo {
         }
         return false;
       }
-      case irr::gui::EGET_MESSAGEBOX_OK: {
-        soundManager.PlaySoundEffect(SOUND_BUTTON);
-        mainGame->HideElement(mainGame->smMessage);
-        mainGame->actionSignal.Set();
-        return false;
-      }
+      case irr::gui::EGET_MESSAGEBOX_OK:
       case irr::gui::EGET_MESSAGEBOX_CANCEL: {
         soundManager.PlaySoundEffect(SOUND_BUTTON);
         mainGame->HideElement(mainGame->smMessage);

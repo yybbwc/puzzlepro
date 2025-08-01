@@ -16,6 +16,7 @@ namespace ygo {
     irr::video::ITexture *GetTexture(int code, bool fit = true);
     irr::video::ITexture *GetBigPicture(int code, float zoom);
     irr::video::ITexture *GetTextureThumb(int code);
+    //~ irr::video::ITexture *GetTextureThumb(code_pointer cp);
     irr::video::ITexture *GetTextureField(int code);
     static int LoadThumbThread();
 
@@ -57,6 +58,7 @@ namespace ygo {
     irr::video::ITexture *tBackGround_deck;
     irr::video::ITexture *tField[2];
     irr::video::ITexture *tFieldTransparent[2];
+    irr::video::ITexture *transparent_texture;
   };
 
   extern ImageManager imageManager;

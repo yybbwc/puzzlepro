@@ -3,7 +3,7 @@ static int my_lua_panic(lua_State *L) {
   fprintf(stderr, "PuzzlePro_core Lua PANIC: %s\n", errmsg);
 
   // 生成调用栈
-  luaL_traceback(L, L, NULL, 1); // 将调用栈推入栈顶
+  luaL_traceback(L, L, nullptr, 1); // 将调用栈推入栈顶
   const char *traceback = lua_tostring(L, -1);
   fprintf(stderr, "Stack traceback:\n%s\n", traceback);
 
@@ -66,7 +66,7 @@ void interpreter::register_effect(effect *peffect) {
   }
   // create a effect in userdata
   luaL_checkstack(lua_state, 3, nullptr);
-  effect **ppeffect = (effect **)lua_newuserdata(lua_state, sizeof(effect *));
+  auto **ppeffect = (effect **)lua_newuserdata(lua_state, sizeof(effect *));
   *ppeffect = peffect;
   peffect->ref_handle = luaL_ref(lua_state, LUA_REGISTRYINDEX);
   // set metatable of pointer to base script
@@ -105,7 +105,7 @@ void interpreter::register_group(group *pgroup) {
   }
   // create a group in by userdata
   luaL_checkstack(lua_state, 3, nullptr);
-  group **ppgroup = (group **)lua_newuserdata(lua_state, sizeof(group *));
+  auto **ppgroup = (group **)lua_newuserdata(lua_state, sizeof(group *));
   *ppgroup = pgroup;
   pgroup->ref_handle = luaL_ref(lua_state, LUA_REGISTRYINDEX);
   // set metatable of pointer to base script
@@ -631,7 +631,7 @@ int32_t interpreter::call_coroutine(int32_t f, uint32_t param_count, int32_t *yi
   push_param(rthread, true);
   int32_t result = 0, nresults = 0;
   {
-    auto prev_state = current_state;
+    auto *prev_state = current_state;
     current_state = rthread;
 #if (LUA_VERSION_NUM >= 504)
     result = lua_resume(rthread, prev_state, param_count, &nresults);

@@ -2,6 +2,7 @@
 
 //~ #include "./my_lua/lua.cc"
 #include "using.cc"
+#include "irrlicht_shader_solve.cc"
 //~ #include "lua_creater.cc"
 #include "gframe.cc"
 #include "menu_handler.cc"

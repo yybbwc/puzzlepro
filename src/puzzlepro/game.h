@@ -139,6 +139,17 @@ namespace ygo {
     //~ Game(lua_State* L);
     //~ ~Game();
 
+    struct select_struct {
+      bool up;
+      bool selecting;
+      bool selected;
+
+      //~ select_struct() {
+      //~ }
+    };
+
+    //~ irr::video::ITexture *transparent_texture;
+
     bool Initialize();
     void MainLoop();
     void BuildProjectionMatrix(irr::core::matrix4 &mProjection, irr::f32 left, irr::f32 right, irr::f32 bottom, irr::f32 top, irr::f32 znear, irr::f32 zfar);
@@ -168,7 +179,8 @@ namespace ygo {
     void PopupElement(irr::gui::IGUIElement *element, int hideframe = 0);
     void WaitFrameSignal(int frame);
     //~ void DrawThumb(code_pointer cp, irr::core::vector2di pos, const boost::unordered::unordered_flat_map<int, int>* lflist, bool drag = false);
-    void DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList *lflist, bool drag = false);
+    void DrawThumb(code_pointer cp, irr::core::vector2di pos, const LFList *lflist, select_struct select_struct_ = select_struct());
+    void DrawThumb_otloc(code_pointer cp, irr::core::rect<int32_t> otloc);
     void DrawDeckBd();
     void DrawDeckBd_main_deck();
     void DrawDeckBd_side_deck();
@@ -229,8 +241,6 @@ namespace ygo {
     void resize_element_int(irr::gui::IGUIElement *o1, const char *o2);
     void resize_element_float(irr::gui::IGUIElement *o1, const char *o2);
 
-
-
     boost::container::flat_map<int64_t, int64_t> code_btnPS;
 
     bool check_replay_success;
@@ -262,26 +272,26 @@ namespace ygo {
     //~ lua_State *gui_xy_4;
     //~ lua_State *gui_xy_5;
     //~ lua_State *gui_xy_6;
-    
+
     static constexpr int64_t main_deck_max_row_capacity = 4;
     static constexpr int64_t main_deck_pack_max_row_capacity = 7;
     static constexpr int64_t per_row_min_card_capacity = 10;
     static constexpr int64_t main_deck_pack_min_capacity = main_deck_pack_max_row_capacity * per_row_min_card_capacity;
     static constexpr double main_deck_width_adjust_radio = (per_row_min_card_capacity - 1) / static_cast<double>(per_row_min_card_capacity);
     static constexpr double main_deck_height_adjust_radio = (main_deck_max_row_capacity - 1) / static_cast<double>(main_deck_max_row_capacity);
-    
+
     int64_t get_main_deck_per_row_max_card_capacity();
     int64_t get_extra_deck_per_row_max_card_capacity();
     int64_t get_side_deck_per_row_max_card_capacity();
 
     void update_lua();
-    
+
     //~ boost::unordered::unordered_flat_map<boost::thread::id, lua_State *> new_lua_sup1;
     //~ boost::container::flat_map<boost::thread::id, lua_State *> new_lua_sup1;
     //~ mru_cache<HANDLE, lua_State *> new_lua_sup1{128};
     boost::unordered::unordered_flat_map<DWORD, lua_State *> new_lua_sup1;
     //~ boost::container::flat_map<DWORD, lua_State *> new_lua_sup1;
-    
+
     boost::container::deque<lua_State *> old_lua_sup1;
     boost::mutex lua_mutex;
     inline static boost::thread::id dead_thread_id;
@@ -292,11 +302,13 @@ namespace ygo {
 
     void resize_skin();
     void resize_font();
-    
+
     void init_duel_log();
-    
+    void init_chain_timing();
+    void init_duel_sidebar();
+
     bool is_thread_alive(DWORD id);
-    
+
     static int32_t my_lua_panic(lua_State *L);
 
     void load_replay();
@@ -304,9 +316,8 @@ namespace ygo {
     std::vector<lua_State *> new_lua_state;
     boost::unordered::unordered_flat_map<const char *, fast_io::unix_timestamp> lua_file_registry;
 
-
     fast_io::string get_location_string(int32_t o1, int32_t o2);
-    fast_io::string 获取表示形式的名称(int32_t o1);
+    //~ std::string get_pos_string(int64_t o1);
 
     std::unordered_set<irr::gui::IGUIElement *> no_scale_elements;
 
@@ -451,8 +462,9 @@ namespace ygo {
     irr::scene::ICameraSceneNode *camera;
 
     fast_io::string currentCardName;
-    
-    boost::circular_buffer<std::wstring> circular_buffer_search_record{32};
+
+    //~ boost::<std::wstring> circular_buffer_search_record{32};
+    mru_cache<std::wstring, bool> circular_buffer_search_record{32};
 
     //~ #ifdef _WIN32
     HWND hWnd;
@@ -464,9 +476,11 @@ namespace ygo {
     irr::gui::IGUIElement *focus_element;
 
     irr::gui::IGUIWindow *addWindow(const char *name, bool modal = false, const wchar_t *text = 0, irr::gui::IGUIElement *parent = 0, irr::s32 id = -1);
-    irr::gui::IGUIButton* addButton(const char *name, irr::gui::IGUIElement* parent=0, irr::s32 id=-1, const wchar_t* text=0, const wchar_t* tooltiptext = 0);
+    irr::gui::IGUIButton *addButton(const char *name, irr::gui::IGUIElement *parent = 0, irr::s32 id = -1, const wchar_t *text = 0, const wchar_t *tooltiptext = 0);
 
-    irr::gui::CGUIPanel *addCGUIPanel(irr::gui::IGUIEnvironment *environment, irr::gui::IGUIElement *parent, irr::s32 id = -1, const irr::core::rect<irr::s32> &rectangle = irr::core::rect<irr::s32>(0, 0, 100, 100), bool border = false, irr::gui::E_SCROLL_BAR_MODE vMode = irr::gui::ESBM_AUTOMATIC, irr::gui::E_SCROLL_BAR_MODE hMode = irr::gui::ESBM_ALWAYS_INVISIBLE);
+    irr::gui::CGUIPanel *addCGUIPanel(irr::gui::IGUIEnvironment *environment, irr::gui::IGUIElement *parent, irr::s32 id, const char *name, bool border = false, irr::gui::E_SCROLL_BAR_MODE vMode = irr::gui::ESBM_AUTOMATIC, irr::gui::E_SCROLL_BAR_MODE hMode = irr::gui::ESBM_ALWAYS_INVISIBLE);
+
+    irr::gui::IGUIStaticText *addStaticText(const wchar_t *text, const char *name, bool border = false, bool wordWrap = true, irr::gui::IGUIElement *parent = 0, irr::s32 id = -1, bool fillBackground = false);
 
     irr::gui::IGUIStaticText *static_text_deck_edit_main_deck_size;
     irr::gui::IGUIStaticText *static_text_deck_edit_extra_deck_size;
@@ -476,7 +490,7 @@ namespace ygo {
     irr::gui::IGUIWindow *check_replay_window;
     irr::gui::IGUITable *check_replay_table;
     irr::gui::IGUIStaticText *check_replay_static_text;
-    
+
     bool can_button;
 
     //~ irr::gui::IGUIWindow *solve_puzzle_window;
@@ -496,11 +510,11 @@ namespace ygo {
     //~ boost::unordered::unordered_flat_map<irr::gui::IGUIElement *, const char *> should_resize_element_unordered_map_float;
 
     void init_resize_element_unordered_map();
-    
-    const wchar_t * get_avail_tag_text(int64_t o1);
+
+    const wchar_t *get_avail_tag_text(int64_t o1);
 
     //~ void write_all_bytes(fast_io::obuf_file& o1, uint8_t* o2, uint8_t* o3);
-    
+
     int64_t btnOption_count = 16;
 
     // GUI
@@ -519,7 +533,7 @@ namespace ygo {
     irr::gui::IGUIStaticText *stHintMsg;
     irr::gui::IGUIStaticText *stTip;
     irr::gui::IGUIStaticText *stCardListTip;
-    
+
     irr::gui::IGUIWindow *duel_log_window;
     irr::gui::IGUIButton *duel_log_button;
     // infos
@@ -568,6 +582,8 @@ namespace ygo {
     irr::gui::IGUIButton *btnWinResizeXL;
 
     irr::gui::CGUIPanel *system_setting_tab;
+    irr::gui::CGUIPanel *duel_sidebar;
+    irr::gui::IGUIStaticText *duel_sidebar_window;
 
     // main menu
     irr::gui::IGUIWindow *wMainMenu;
@@ -733,7 +749,7 @@ namespace ygo {
     irr::gui::IGUIWindow *wANRace;
     irr::gui::IGUICheckBox *chkRace[RACES_COUNT];
     irr::gui::IGUIContextMenu *cmMenu;
-    
+
     void update_check_replay_window(int64_t id, int64_t i);
     //~ std::string replay_relate_single_script_path;
 
@@ -825,10 +841,10 @@ namespace ygo {
     //~ irr::gui::IGUIButton *btnEffectFilter;
     irr::gui::IGUIButton *btnStartFilter;
     irr::gui::IGUIButton *btnClearFilter;
-    
+
     irr::gui::IGUIStaticText *static_text_search_record;
     irr::gui::IGUIComboBox *combo_box_search_record;
-    
+
     irr::gui::IGUIWindow *wCategories;
     irr::gui::IGUICheckBox *chkCategory[32];
     irr::gui::IGUIButton *btnCategoryOK;
@@ -867,72 +883,87 @@ namespace ygo {
     // big picture
     irr::gui::IGUIWindow *wBigCard;
     irr::gui::IGUIImage *imgBigCard;
-    
+
     template <typename T> irr::core::rect<T> get_origin_rect(const char *o1) {
       auto gui_xy = luabridge::getGlobal(luabridge::main_thread(this->get_lua()), "xy");
       return irr::core::rect<T>(gui_xy[o1]["x1"], gui_xy[o1]["y1"], gui_xy[o1]["x2"], gui_xy[o1]["y2"]);
     }
-    
-    random_xoshiro256pp random_xoshiro256pp_1;
-    
-    //~ struct solve_puzzle_node {
-      //~ double reward;
-      //~ int64_t reward;
-      //~ int64_t reward_count;
-      //~ int64_t visit_count;
-      //~ solve_puzzle_node *parent;
-      //~ boost::ptr_vector<solve_puzzle_node> children;
-      //~ std::string action;
-      //~ bool is_end;
-      //~ int64_t punish;
-      
-      //~ int64_t your_lp_decrease_reward;
-      //~ int64_t your_lp_decrease_reward_count;
-      //my_deck_decrease_reward
-      //my_deck_decrease_reward_count
-      //~ bool bool_mp2;
-      //~ int64_t ep_reward_count;
-      //~ int64_t your_card_decrease_reward;
-      //~ int64_t your_card_decrease_reward_count;
-      //reward_count_last
-      //~ int64_t depth;
-      //~ int64_t hash;
-      //~ std::string hash;
 
-      //~ solve_puzzle_node() = default;
-      
-      //~ template<class Archive>
-      //~ void serialize(Archive& ar, const unsigned int version) {
-        //~ ar & BOOST_SERIALIZATION_NVP(reward);
-        //~ ar & BOOST_SERIALIZATION_NVP(reward_count);
-        //~ ar & BOOST_SERIALIZATION_NVP(your_lp_decrease_reward);
-        //~ ar & BOOST_SERIALIZATION_NVP(your_lp_decrease_reward_count);
-        //~ ar & BOOST_SERIALIZATION_NVP(visit_count);
-        //~ ar & BOOST_SERIALIZATION_NVP(parent);
-        //~ ar & BOOST_SERIALIZATION_NVP(children);
-        //~ ar & BOOST_SERIALIZATION_NVP(action);
-        //~ ar & BOOST_SERIALIZATION_NVP(is_end);
-        //~ ar & BOOST_SERIALIZATION_NVP(depth);
-        //~ ar & BOOST_SERIALIZATION_NVP(hash);
-        //~ ar & BOOST_SERIALIZATION_NVP(punish);
-        //~ ar & BOOST_SERIALIZATION_NVP(bool_mp2);
-        //~ ar & BOOST_SERIALIZATION_NVP(your_card_decrease_reward);
-        //~ ar & BOOST_SERIALIZATION_NVP(your_card_decrease_reward_count);
-        //~ ar & BOOST_SERIALIZATION_NVP(ep_reward_count);
-      //~ }
-    //~ };
-    
+    random_xoshiro256pp random_xoshiro256pp_1;
+
+    void Draw2DImageWithShader(irr::video::IVideoDriver *driver, irr::video::ITexture *texture, irr::core::rect<irr::s32> destRect, irr::core::rect<irr::s32> sourceRect, irr::s32 materialType, irr::video::SColor color = irr::video::SColor(255, 255, 255, 255));
+    //~ void Draw2DImageWithShader(irr::video::IVideoDriver *driver, irr::video::ITexture *texture, irr::core::rect<irr::s32> destRect, irr::s32 materialType, irr::video::SColor color = irr::video::SColor(255, 255, 255, 255));
+    void Draw2DImageWithShader(irr::video::IVideoDriver *driver, irr::video::ITexture *texture, irr::core::rect<irr::s32> destRect, irr::s32 materialType);
+    irr::video::IGPUProgrammingServices *gpu;
+    irr::s32 init_irrlicht_shader_1(irr::video::IGPUProgrammingServices *gpu_, irr::IrrlichtDevice *device_);
+    irr::s32 init_irrlicht_shader_2(irr::video::IGPUProgrammingServices *gpu_, irr::IrrlichtDevice *device_);
+    irr::s32 init_irrlicht_shader_3(irr::video::IGPUProgrammingServices *gpu_, irr::IrrlichtDevice *device_);
+    irr::s32 init_irrlicht_shader_4(irr::video::IGPUProgrammingServices *gpu_, irr::IrrlichtDevice *device_);
+    irr::s32 init_irrlicht_shader_5(irr::video::IGPUProgrammingServices *gpu_, irr::IrrlichtDevice *device_);
+    int32_t irrlihct_shader_1;
+    int32_t irrlihct_shader_2;
+    int32_t irrlihct_shader_3;
+    int32_t irrlihct_shader_4;
+    int32_t irrlihct_shader_5;
+
     //~ struct solve_puzzle_node {
-      
+    //~ double reward;
+    //~ int64_t reward;
+    //~ int64_t reward_count;
+    //~ int64_t visit_count;
+    //~ solve_puzzle_node *parent;
+    //~ boost::ptr_vector<solve_puzzle_node> children;
+    //~ std::string action;
+    //~ bool is_end;
+    //~ int64_t punish;
+
+    //~ int64_t your_lp_decrease_reward;
+    //~ int64_t your_lp_decrease_reward_count;
+    // my_deck_decrease_reward
+    // my_deck_decrease_reward_count
+    //~ bool bool_mp2;
+    //~ int64_t ep_reward_count;
+    //~ int64_t your_card_decrease_reward;
+    //~ int64_t your_card_decrease_reward_count;
+    // reward_count_last
+    //~ int64_t depth;
+    //~ int64_t hash;
+    //~ std::string hash;
+
+    //~ solve_puzzle_node() = default;
+
+    //~ template<class Archive>
+    //~ void serialize(Archive& ar, const unsigned int version) {
+    //~ ar & BOOST_SERIALIZATION_NVP(reward);
+    //~ ar & BOOST_SERIALIZATION_NVP(reward_count);
+    //~ ar & BOOST_SERIALIZATION_NVP(your_lp_decrease_reward);
+    //~ ar & BOOST_SERIALIZATION_NVP(your_lp_decrease_reward_count);
+    //~ ar & BOOST_SERIALIZATION_NVP(visit_count);
+    //~ ar & BOOST_SERIALIZATION_NVP(parent);
+    //~ ar & BOOST_SERIALIZATION_NVP(children);
+    //~ ar & BOOST_SERIALIZATION_NVP(action);
+    //~ ar & BOOST_SERIALIZATION_NVP(is_end);
+    //~ ar & BOOST_SERIALIZATION_NVP(depth);
+    //~ ar & BOOST_SERIALIZATION_NVP(hash);
+    //~ ar & BOOST_SERIALIZATION_NVP(punish);
+    //~ ar & BOOST_SERIALIZATION_NVP(bool_mp2);
+    //~ ar & BOOST_SERIALIZATION_NVP(your_card_decrease_reward);
+    //~ ar & BOOST_SERIALIZATION_NVP(your_card_decrease_reward_count);
+    //~ ar & BOOST_SERIALIZATION_NVP(ep_reward_count);
+    //~ }
     //~ };
-    
+
+    //~ struct solve_puzzle_node {
+
+    //~ };
+
     //~ solve_puzzle_node *solve_puzzle_root_node;
     //~ solve_puzzle_node *solve_puzzle_current_node;
-    
+
     //~ boost::unordered_flat_map<int64_t, int64_t> solve_puzzle_history;
     //~ boost::unordered_flat_set<int64_t> solve_puzzle_history;
     //~ boost::unordered_flat_set<std::string> solve_puzzle_history;
-    
+
     //~ void solve_puzzle_select_node();
     //~ bool solve_puzzle_select_node_reward_count();
     //~ bool solve_puzzle_select_node_your_lp_decrease_reward();
@@ -979,19 +1010,17 @@ namespace ygo {
     //~ boost::filesystem::path solve_puzzle_lua_path;
     //~ boost::filesystem::path solve_puzzle_replay_path;
     //~ boost::filesystem::path solve_puzzle_mcst_path;
-    
+
     //~ bool solve_puzzle_is_success;
-    
+
     //~ static constexpr int64_t phase_main1 = 0;
     //~ static constexpr int64_t phase_battle = 1;
     //~ static constexpr int64_t phase_main2 = 2;
     //~ static constexpr int64_t phase_ep = 3;
-    
+
     //~ int64_t current_phase;
   };
-  
 
-  
   //~ BOOST_CLASS_EXPORT(solve_puzzle_node)
 
   extern Game *mainGame;

@@ -10,8 +10,10 @@
 --~ error(debug.traceback())
 require("rewrite")
 
+--~ require("PuzzlePro_replay")
 _G.sound = require("sound/path")
 _G.skin = require("gui/skin/main")
+_G.skin_code = require("gui/skin/code")
 _G.color = require("gui/color/main")
 _G.config = require("gui/config")
 _G.message = require("gui/message/main")

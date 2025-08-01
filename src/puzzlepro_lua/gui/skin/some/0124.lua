@@ -20,7 +20,7 @@ d[code.EGDC_HIGH_LIGHT_TEXT] = 0xFF151515    -- 重墨高亮文字
 -- 交互元素（使用朱砂红作为点缀）
 d[code.EGDC_HIGH_LIGHT] = 0xAA8B3426         -- 半透明朱砂红
 d[code.EGDC_ACTIVE_BORDER] = 0xFF8B3426      -- 活跃边框（朱砂红）
-d[code.EGDC_ACTIVE_CAPTION] = 0xFF2A2A2A     -- 浓墨标题
+d[code.EGDC_ACTIVE_CAPTION] = d[code.EGDC_3D_FACE]
 d[code.EGDC_INACTIVE_BORDER] = 0x805A4A3A    -- 半透明非活跃边框
 d[code.EGDC_INACTIVE_CAPTION] = 0xFF6A6A6A   -- 淡墨非活跃标题
 

@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <assert.h>
-typedef unsigned char byte;
+using byte = unsigned char;
 
 inline bool check_playerid(int32_t playerid) {
   return playerid >= 0 && playerid <= 1;

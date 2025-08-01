@@ -30,7 +30,7 @@ extern "C" {
 //~ #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/math/constants/constants.hpp>
-#include <boost/spirit/home/x3.hpp>
+//~ #include <boost/spirit/home/x3.hpp>
 #include <boost/thread.hpp>
 #include <boost/circular_buffer.hpp>
 #include <boost/range/adaptors.hpp>
@@ -39,13 +39,13 @@ extern "C" {
 
 //~ #include <CGUIImageWithShimmer.h>
 
-//~ #include <boost/multi_index_container.hpp>
-//~ #include <boost/multi_index/hashed_index.hpp>
-//~ #include <boost/multi_index/sequenced_index.hpp>
-//~ #include <boost/multi_index/member.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/member.hpp>
 
 //~ #include <winternl.h> //GetRealCurrentThreadHandle
-//~ #include "mru_cache.h"
+#include "mru_cache.h"
 
 //~ #include <boost/serialization/serialization.hpp>
 //~ #include <boost/serialization/nvp.hpp>
@@ -109,6 +109,7 @@ extern "C" {
 #include <CGUIEnvironment.h>
 #include "config.h"
 
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "CGUIImageButton.h"
@@ -143,6 +144,11 @@ extern "C" {
 #include "CGUIPanel.h"
 
 #include "game.h"
+#include "irrlicht_shader_1.h"
+#include "irrlicht_shader_2.h"
+#include "irrlicht_shader_3.h"
+#include "irrlicht_shader_4.h"
+#include "irrlicht_shader_5.h"
 
 #include <event2/thread.h>
 #include <locale.h>

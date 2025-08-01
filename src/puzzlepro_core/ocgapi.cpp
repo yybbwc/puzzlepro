@@ -100,13 +100,13 @@ extern "C" DECL_DLLEXPORT void start_duel(intptr_t pduel, uint32_t options) {
   pd->game_field->core.shuffle_deck_check[0] = FALSE;
   pd->game_field->core.shuffle_deck_check[1] = FALSE;
   if (pd->game_field->player[0].start_count > 0) {
-    pd->game_field->draw(0, REASON_RULE, PLAYER_NONE, 0, pd->game_field->player[0].start_count);
+    pd->game_field->draw(nullptr, REASON_RULE, PLAYER_NONE, 0, pd->game_field->player[0].start_count);
   }
   if (pd->game_field->player[1].start_count > 0) {
-    pd->game_field->draw(0, REASON_RULE, PLAYER_NONE, 1, pd->game_field->player[1].start_count);
+    pd->game_field->draw(nullptr, REASON_RULE, PLAYER_NONE, 1, pd->game_field->player[1].start_count);
   }
   if (options & DUEL_TAG_MODE) {
-    for (int i = 0; i < pd->game_field->player[0].start_count && pd->game_field->player[0].tag_list_main.size(); ++i) {
+    for (int i = 0; i < pd->game_field->player[0].start_count && !pd->game_field->player[0].tag_list_main.empty(); ++i) {
       card* pcard = pd->game_field->player[0].tag_list_main.back();
       pd->game_field->player[0].tag_list_main.pop_back();
       pd->game_field->player[0].tag_list_hand.push_back(pcard);
@@ -115,7 +115,7 @@ extern "C" DECL_DLLEXPORT void start_duel(intptr_t pduel, uint32_t options) {
       pcard->current.sequence = (uint8_t)pd->game_field->player[0].tag_list_hand.size() - 1;
       pcard->current.position = POS_FACEDOWN;
     }
-    for (int i = 0; i < pd->game_field->player[1].start_count && pd->game_field->player[1].tag_list_main.size(); ++i) {
+    for (int i = 0; i < pd->game_field->player[1].start_count && !pd->game_field->player[1].tag_list_main.empty(); ++i) {
       card* pcard = pd->game_field->player[1].tag_list_main.back();
       pd->game_field->player[1].tag_list_main.pop_back();
       pd->game_field->player[1].tag_list_hand.push_back(pcard);
@@ -125,7 +125,7 @@ extern "C" DECL_DLLEXPORT void start_duel(intptr_t pduel, uint32_t options) {
       pcard->current.position = POS_FACEDOWN;
     }
   }
-  pd->game_field->add_process(PROCESSOR_TURN, 0, 0, 0, 0, 0);
+  pd->game_field->add_process(PROCESSOR_TURN, 0, nullptr, nullptr, 0, 0);
 }
 
 extern "C" DECL_DLLEXPORT void end_duel(intptr_t pduel) {
